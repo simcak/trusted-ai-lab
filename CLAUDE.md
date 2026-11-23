@@ -57,7 +57,7 @@ agent i trenér **používají knihovnu `pii-cz`** — sdílená vrstva, ne kopi
 
 ## 3. Technický stack
 
-- **pnpm workspaces** monorepo, Node 22 LTS, TypeScript `strict`.
+- **pnpm workspaces** monorepo, Node 24 LTS, TypeScript `strict` (viz „Změny").
 - **apps/web**: Vite + React + TypeScript, `HashRouter` (GitHub Pages nemá SPA rewrite),
   Vite `base` = `/<název-repa>/`. Čisté CSS (CSS modules nebo jeden design-tokens soubor),
   žádný UI framework ani komponentová knihovna navíc.
@@ -278,3 +278,17 @@ udělal jinak"** 9) disclaimer, licence.
 ## Změny
 
 (zde zapisuj změny rozhodnutí s datem)
+
+### 2026-11-23 — fáze 0
+
+- **Node 24 LTS místo 22.** Node 22 má EOL 04/2027, Node 24 má podporu do 04/2028. Platí pro `.nvmrc`, CI i devcontainer.
+- **TypeScript 6.0, ne 7.0.** `typescript-eslint` 8.x podporuje jen TS `<6.1.0`. Sleduje se v `docs/OPEN_QUESTIONS.md` (OQ-01).
+- **pnpm 12 + `minimumReleaseAge: 4320`** (3 dny) v `pnpm-workspace.yaml`. Verze mladší než 3 dny se neinstalují. Dependabot má stejný `cooldown`.
+- **Workspace balíčky exportují zdrojové `.ts`** (`exports: ./src/index.ts`) bez build kroku. Importy používají příponu `.ts` a jen „erasable" syntaxi (`erasableSyntaxOnly`), aby je šlo spustit i přímo přes Node type stripping (`scripts/*.ts`). Build pro npm přibude s `pii-cz`.
+- **Deploy jen po zeleném CI.** `ci.yml` je zároveň reusable workflow (`workflow_call`) a `deploy.yml` ho volá před buildem. `ci.yml` proto na `push` běží jen mimo `main`, aby se CI nespouštělo dvakrát.
+- **Gitleaks jako CLI binárka s ověřením SHA256** místo `gitleaks-action` (bez licenčního klíče a bez tokenu). Všechny GitHub Actions jsou pinnuté na commit SHA.
+- **Smoke testy (Playwright) jsou v CI už od fáze 0** (každá route, náhled trace, 404, žádné chyby v konzoli).
+- **Rozpočet úvodního JS hlídá `scripts/check-bundle-size.ts`** (entry + modulepreload, gzip, limit 300 kB) jako krok CI.
+- **`TraceLog` je samostatná vrstva:** `withTracing(provider, log)` obalí libovolný `LlmProvider`, takže tracing není odpovědnost providerů. Nahrávka (`RecordingSchema`) nese `kind: 'recorded' | 'fixture'`, `model`, `recordedAt` a `promptVersion`.
+- **Náhled `TracePanel` na `#/agent`** používá ručně psanou fixture (`kind: 'fixture'`, `model: 'fixture'`) s viditelným štítkem „ne výstup modelu". Ve fázi 3 ji nahradí skutečné nahrávky.
+- Budoucí balíčky (`pii-cz`, `intake-rules`, `agent-runtime`) a složky `data/`, `evals/`, `docs/adr/` mají zatím jen `README.md`, bez `package.json` a bez kódu.
