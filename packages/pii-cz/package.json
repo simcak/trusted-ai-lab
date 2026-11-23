@@ -1,0 +1,37 @@
+{
+  "name": "@trusted-ai-lab/pii-cz",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Detection and pseudonymisation of Czech personal data (rodné číslo, IČO, DIČ, bank accounts, IBAN, phone, e-mail, address, names) with checksum validation. Zero runtime dependencies.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./eval": "./src/eval.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./eval": {
+        "types": "./dist/eval.d.ts",
+        "default": "./dist/eval.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "5.1.1"
+  }
+}
