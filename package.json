@@ -1,0 +1,34 @@
+{
+  "name": "trusted-ai-lab",
+  "private": true,
+  "description": "Bezpečná AI v praxi — statické portfolio demo: Intake, ochrana dat, agent pod kontrolou, lokální model.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@12.23.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @trusted-ai-lab/web dev",
+    "build": "pnpm --filter @trusted-ai-lab/web build",
+    "preview": "pnpm --filter @trusted-ai-lab/web preview",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "tsc -p tsconfig.json && pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @trusted-ai-lab/web test:e2e",
+    "check:size": "node scripts/check-bundle-size.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.2",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.8",
+    "globals": "17.14.0",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.73.0"
+  }
+}

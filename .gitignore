@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# Test artifacts
+playwright-report/
+test-results/
+blob-report/
+
+# Secrets — API keys live only in .env.local (see CLAUDE.md, rule 2)
+.env*
+
+# Model weights are downloaded from CDN at runtime, never committed
+*.onnx
+*.safetensors
+*.gguf
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log

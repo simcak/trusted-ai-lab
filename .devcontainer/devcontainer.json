@@ -1,0 +1,15 @@
+{
+  "name": "trusted-ai-lab",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:5-24",
+  "postCreateCommand": "npm install -g pnpm@12.23.0 && pnpm install --frozen-lockfile",
+  "forwardPorts": [5173, 4173],
+  "portsAttributes": {
+    "5173": { "label": "Vite dev server", "onAutoForward": "openPreview" },
+    "4173": { "label": "Vite preview (production build)" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
+  }
+}

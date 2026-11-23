@@ -1,0 +1,7 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Supply-chain guard: refuse package versions published less than 3 days ago
+# (most malicious releases are detected and unpublished within that window).
+minimumReleaseAge: 4320

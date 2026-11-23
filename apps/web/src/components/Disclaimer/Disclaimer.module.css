@@ -1,0 +1,17 @@
+.disclaimer {
+  max-width: 44rem;
+  color: var(--color-text-muted);
+}
+
+.heading {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-2);
+  color: var(--color-text);
+}
+
+.list {
+  margin: 0;
+  padding-left: var(--space-5);
+}
