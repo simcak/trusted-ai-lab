@@ -16,6 +16,11 @@
     "format": "prettier --write .",
     "typecheck": "tsc -p tsconfig.json && pnpm -r typecheck",
     "test": "pnpm -r test",
+    "generate:pii": "node data/pii/generate.ts",
+    "eval:pii": "node evals/pii/run.ts",
+    "eval:pii:ner": "node evals/pii/run-ner.ts && node evals/pii/run.ts",
+    "evals:check": "node data/pii/generate.ts --check && node evals/pii/run.ts --check",
+    "fetch:pii-reference-data": "node scripts/fetch-pii-reference-data.ts",
     "test:e2e": "pnpm --filter @trusted-ai-lab/web test:e2e",
     "check:size": "node scripts/check-bundle-size.ts"
   },

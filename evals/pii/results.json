@@ -1,0 +1,1284 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-23T22:31:06.894Z",
+  "library": {
+    "name": "@trusted-ai-lab/pii-cz",
+    "version": "0.1.0",
+    "minScore": 0.5
+  },
+  "corpus": {
+    "hash": "3e3f9c101b7da9434b5b1d70d1ca74118066fc93bd62544a6bf5338ede3ad192",
+    "referenceDate": "2026-11-01",
+    "generatorVersion": 1,
+    "fakerVersion": "10.6.0",
+    "splits": {
+      "dev": {
+        "seed": 1001,
+        "documents": 100,
+        "goldSpans": 257
+      },
+      "test": {
+        "seed": 2002,
+        "documents": 300,
+        "goldSpans": 766
+      }
+    }
+  },
+  "ner": {
+    "model": {
+      "id": "onnx-community/small-e-czech-finetuned-ner-wikiann-ONNX",
+      "revision": "0c3c43a6451bd12d65bf429ffefc9f7948085a36",
+      "dtype": "q8",
+      "runtime": "@huggingface/transformers (Node, onnxruntime-node, CPU)",
+      "runtimeVersion": "4.3.2"
+    },
+    "detector": {
+      "minTokenScore": 0.5,
+      "weight": 0.8
+    },
+    "recordedAt": "2026-11-23T22:30:49.053Z",
+    "durationMs": 958
+  },
+  "configs": {
+    "rules": {
+      "dev": {
+        "documents": 100,
+        "perType": {
+          "PERSON": {
+            "support": 113,
+            "predicted": 102,
+            "tp": 101,
+            "fp": 1,
+            "fn": 12,
+            "strict": {
+              "precision": 0.9902,
+              "recall": 0.8938,
+              "f1": 0.9395
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 0.9027,
+              "f1": 0.9489,
+              "tp": 102
+            }
+          },
+          "RODNE_CISLO": {
+            "support": 21,
+            "predicted": 21,
+            "tp": 21,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 21
+            }
+          },
+          "ADDRESS": {
+            "support": 27,
+            "predicted": 27,
+            "tp": 27,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 27
+            }
+          },
+          "PHONE": {
+            "support": 28,
+            "predicted": 28,
+            "tp": 28,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 28
+            }
+          },
+          "EMAIL": {
+            "support": 16,
+            "predicted": 16,
+            "tp": 16,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 16
+            }
+          },
+          "BANK_ACCOUNT": {
+            "support": 17,
+            "predicted": 17,
+            "tp": 17,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 17
+            }
+          },
+          "IBAN": {
+            "support": 9,
+            "predicted": 9,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 9
+            }
+          },
+          "ICO": {
+            "support": 9,
+            "predicted": 9,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 9
+            }
+          },
+          "DIC": {
+            "support": 6,
+            "predicted": 6,
+            "tp": 6,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 6
+            }
+          },
+          "ID_CARD": {
+            "support": 6,
+            "predicted": 6,
+            "tp": 6,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 6
+            }
+          },
+          "PASSPORT": {
+            "support": 3,
+            "predicted": 3,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 3
+            }
+          },
+          "PSC": {
+            "support": 2,
+            "predicted": 2,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 2
+            }
+          }
+        },
+        "micro": {
+          "support": 257,
+          "predicted": 246,
+          "tp": 245,
+          "fp": 1,
+          "fn": 12,
+          "strict": {
+            "precision": 0.9959,
+            "recall": 0.9533,
+            "f1": 0.9741
+          },
+          "overlap": {
+            "precision": 1,
+            "recall": 0.9572,
+            "f1": 0.9781,
+            "tp": 246
+          }
+        },
+        "leakage": {
+          "goldSpans": 257,
+          "leakedSpans": 11,
+          "partialSpans": 1,
+          "spanRate": 0.0428,
+          "goldChars": 3858,
+          "leakedChars": 133,
+          "charRate": 0.0345
+        },
+        "errors": []
+      },
+      "test": {
+        "documents": 300,
+        "perType": {
+          "PERSON": {
+            "support": 332,
+            "predicted": 313,
+            "tp": 308,
+            "fp": 5,
+            "fn": 24,
+            "strict": {
+              "precision": 0.984,
+              "recall": 0.9277,
+              "f1": 0.955
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 0.9428,
+              "f1": 0.9706,
+              "tp": 313
+            }
+          },
+          "RODNE_CISLO": {
+            "support": 67,
+            "predicted": 67,
+            "tp": 67,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 67
+            }
+          },
+          "ADDRESS": {
+            "support": 83,
+            "predicted": 83,
+            "tp": 83,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 83
+            }
+          },
+          "PHONE": {
+            "support": 86,
+            "predicted": 82,
+            "tp": 82,
+            "fp": 0,
+            "fn": 4,
+            "strict": {
+              "precision": 1,
+              "recall": 0.9535,
+              "f1": 0.9762
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 0.9535,
+              "f1": 0.9762,
+              "tp": 82
+            }
+          },
+          "EMAIL": {
+            "support": 49,
+            "predicted": 49,
+            "tp": 49,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 49
+            }
+          },
+          "BANK_ACCOUNT": {
+            "support": 50,
+            "predicted": 50,
+            "tp": 50,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 50
+            }
+          },
+          "IBAN": {
+            "support": 25,
+            "predicted": 25,
+            "tp": 25,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 25
+            }
+          },
+          "ICO": {
+            "support": 24,
+            "predicted": 24,
+            "tp": 24,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 24
+            }
+          },
+          "DIC": {
+            "support": 16,
+            "predicted": 16,
+            "tp": 16,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 16
+            }
+          },
+          "ID_CARD": {
+            "support": 17,
+            "predicted": 17,
+            "tp": 17,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 17
+            }
+          },
+          "PASSPORT": {
+            "support": 8,
+            "predicted": 8,
+            "tp": 8,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 8
+            }
+          },
+          "PSC": {
+            "support": 9,
+            "predicted": 9,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 9
+            }
+          }
+        },
+        "micro": {
+          "support": 766,
+          "predicted": 743,
+          "tp": 738,
+          "fp": 5,
+          "fn": 28,
+          "strict": {
+            "precision": 0.9933,
+            "recall": 0.9634,
+            "f1": 0.9781
+          },
+          "overlap": {
+            "precision": 1,
+            "recall": 0.97,
+            "f1": 0.9848,
+            "tp": 743
+          }
+        },
+        "leakage": {
+          "goldSpans": 766,
+          "leakedSpans": 23,
+          "partialSpans": 5,
+          "spanRate": 0.03,
+          "goldChars": 11685,
+          "leakedChars": 323,
+          "charRate": 0.0276
+        },
+        "errors": [
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "partial",
+            "docId": "test-0011",
+            "span": "Armida Holoubková",
+            "context": "⟦Armida Holoubková⟧, trvale bytem Lučany nad Niso…"
+          },
+          {
+            "kind": "false_positive",
+            "type": "PERSON",
+            "note": "partial",
+            "docId": "test-0011",
+            "span": "Holoubková",
+            "context": "Armida ⟦Holoubková⟧, trvale bytem Lučany nad Niso…"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "missed",
+            "docId": "test-0022",
+            "span": "scholastika zavřelová",
+            "context": "ahoj, tady ⟦scholastika zavřelová⟧, volám kvůli výpisu. zavolej …"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "missed",
+            "docId": "test-0057",
+            "span": "Jozue Kuneš",
+            "context": "…] atlas.cz, telefon nezvedám. ⟦Jozue Kuneš⟧"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "missed",
+            "docId": "test-0059",
+            "span": "radana václavková",
+            "context": "ahoj, tady ⟦radana václavková⟧, volám kvůli výpisu. zavolej …"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "partial",
+            "docId": "test-0062",
+            "span": "Filibert Lorenc",
+            "context": "⟦Filibert Lorenc⟧, trvale bytem Litvínov č. p. …"
+          },
+          {
+            "kind": "false_positive",
+            "type": "PERSON",
+            "note": "partial",
+            "docId": "test-0062",
+            "span": "Lorenc",
+            "context": "Filibert ⟦Lorenc⟧, trvale bytem Litvínov č. p. …"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PHONE",
+            "note": "missed",
+            "docId": "test-0092",
+            "span": "799515076",
+            "context": "…m kvůli výpisu. zavolej mi na ⟦799515076⟧ díky"
+          },
+          {
+            "kind": "false_positive",
+            "type": "PERSON",
+            "note": "partial",
+            "docId": "test-0099",
+            "span": "Ambrož",
+            "context": "Smluvní strany: 1. Pelhřim ⟦Ambrož⟧, r. č. 860213/8369, bytem Kun…"
+          },
+          {
+            "kind": "false_positive",
+            "type": "PERSON",
+            "note": "partial",
+            "docId": "test-0142",
+            "span": "Miko",
+            "context": "Dobrý den, jmenuji se Bret ⟦Miko⟧. Chtěl bych změnit účet pro v…"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PHONE",
+            "note": "missed",
+            "docId": "test-0155",
+            "span": "792128365",
+            "context": "…m kvůli výpisu. zavolej mi na ⟦792128365⟧ díky"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PHONE",
+            "note": "missed",
+            "docId": "test-0203",
+            "span": "602462829",
+            "context": "…m kvůli výpisu. zavolej mi na ⟦602462829⟧ díky"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PHONE",
+            "note": "missed",
+            "docId": "test-0224",
+            "span": "737876982",
+            "context": "…m kvůli výpisu. zavolej mi na ⟦737876982⟧ díky"
+          },
+          {
+            "kind": "false_positive",
+            "type": "PERSON",
+            "note": "partial",
+            "docId": "test-0225",
+            "span": "Antošová",
+            "context": "Rozamunda ⟦Antošová⟧ a Matouš Nejedlý podepsali sp…"
+          }
+        ]
+      }
+    },
+    "rules+ner": {
+      "dev": {
+        "documents": 100,
+        "perType": {
+          "PERSON": {
+            "support": 113,
+            "predicted": 109,
+            "tp": 108,
+            "fp": 1,
+            "fn": 5,
+            "strict": {
+              "precision": 0.9908,
+              "recall": 0.9558,
+              "f1": 0.973
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 0.9646,
+              "f1": 0.982,
+              "tp": 109
+            }
+          },
+          "RODNE_CISLO": {
+            "support": 21,
+            "predicted": 21,
+            "tp": 21,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 21
+            }
+          },
+          "ADDRESS": {
+            "support": 27,
+            "predicted": 27,
+            "tp": 27,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 27
+            }
+          },
+          "PHONE": {
+            "support": 28,
+            "predicted": 28,
+            "tp": 28,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 28
+            }
+          },
+          "EMAIL": {
+            "support": 16,
+            "predicted": 16,
+            "tp": 16,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 16
+            }
+          },
+          "BANK_ACCOUNT": {
+            "support": 17,
+            "predicted": 17,
+            "tp": 17,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 17
+            }
+          },
+          "IBAN": {
+            "support": 9,
+            "predicted": 9,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 9
+            }
+          },
+          "ICO": {
+            "support": 9,
+            "predicted": 9,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 9
+            }
+          },
+          "DIC": {
+            "support": 6,
+            "predicted": 6,
+            "tp": 6,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 6
+            }
+          },
+          "ID_CARD": {
+            "support": 6,
+            "predicted": 6,
+            "tp": 6,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 6
+            }
+          },
+          "PASSPORT": {
+            "support": 3,
+            "predicted": 3,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 3
+            }
+          },
+          "PSC": {
+            "support": 2,
+            "predicted": 2,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 2
+            }
+          }
+        },
+        "micro": {
+          "support": 257,
+          "predicted": 253,
+          "tp": 252,
+          "fp": 1,
+          "fn": 5,
+          "strict": {
+            "precision": 0.996,
+            "recall": 0.9805,
+            "f1": 0.9882
+          },
+          "overlap": {
+            "precision": 1,
+            "recall": 0.9844,
+            "f1": 0.9921,
+            "tp": 253
+          }
+        },
+        "leakage": {
+          "goldSpans": 257,
+          "leakedSpans": 4,
+          "partialSpans": 0,
+          "spanRate": 0.0156,
+          "goldChars": 3858,
+          "leakedChars": 47,
+          "charRate": 0.0122
+        },
+        "errors": []
+      },
+      "test": {
+        "documents": 300,
+        "perType": {
+          "PERSON": {
+            "support": 332,
+            "predicted": 320,
+            "tp": 318,
+            "fp": 2,
+            "fn": 14,
+            "strict": {
+              "precision": 0.9938,
+              "recall": 0.9578,
+              "f1": 0.9755
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 0.9639,
+              "f1": 0.9816,
+              "tp": 320
+            }
+          },
+          "RODNE_CISLO": {
+            "support": 67,
+            "predicted": 67,
+            "tp": 67,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 67
+            }
+          },
+          "ADDRESS": {
+            "support": 83,
+            "predicted": 83,
+            "tp": 83,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 83
+            }
+          },
+          "PHONE": {
+            "support": 86,
+            "predicted": 82,
+            "tp": 82,
+            "fp": 0,
+            "fn": 4,
+            "strict": {
+              "precision": 1,
+              "recall": 0.9535,
+              "f1": 0.9762
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 0.9535,
+              "f1": 0.9762,
+              "tp": 82
+            }
+          },
+          "EMAIL": {
+            "support": 49,
+            "predicted": 49,
+            "tp": 49,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 49
+            }
+          },
+          "BANK_ACCOUNT": {
+            "support": 50,
+            "predicted": 50,
+            "tp": 50,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 50
+            }
+          },
+          "IBAN": {
+            "support": 25,
+            "predicted": 25,
+            "tp": 25,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 25
+            }
+          },
+          "ICO": {
+            "support": 24,
+            "predicted": 24,
+            "tp": 24,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 24
+            }
+          },
+          "DIC": {
+            "support": 16,
+            "predicted": 16,
+            "tp": 16,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 16
+            }
+          },
+          "ID_CARD": {
+            "support": 17,
+            "predicted": 17,
+            "tp": 17,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 17
+            }
+          },
+          "PASSPORT": {
+            "support": 8,
+            "predicted": 8,
+            "tp": 8,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 8
+            }
+          },
+          "PSC": {
+            "support": 9,
+            "predicted": 9,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0,
+            "strict": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            "overlap": {
+              "precision": 1,
+              "recall": 1,
+              "f1": 1,
+              "tp": 9
+            }
+          }
+        },
+        "micro": {
+          "support": 766,
+          "predicted": 750,
+          "tp": 748,
+          "fp": 2,
+          "fn": 18,
+          "strict": {
+            "precision": 0.9973,
+            "recall": 0.9765,
+            "f1": 0.9868
+          },
+          "overlap": {
+            "precision": 1,
+            "recall": 0.9791,
+            "f1": 0.9894,
+            "tp": 750
+          }
+        },
+        "leakage": {
+          "goldSpans": 766,
+          "leakedSpans": 16,
+          "partialSpans": 1,
+          "spanRate": 0.0209,
+          "goldChars": 11685,
+          "leakedChars": 199,
+          "charRate": 0.017
+        },
+        "errors": [
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "missed",
+            "docId": "test-0022",
+            "span": "scholastika zavřelová",
+            "context": "ahoj, tady ⟦scholastika zavřelová⟧, volám kvůli výpisu. zavolej …"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "missed",
+            "docId": "test-0057",
+            "span": "Jozue Kuneš",
+            "context": "…] atlas.cz, telefon nezvedám. ⟦Jozue Kuneš⟧"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "missed",
+            "docId": "test-0059",
+            "span": "radana václavková",
+            "context": "ahoj, tady ⟦radana václavková⟧, volám kvůli výpisu. zavolej …"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "missed",
+            "docId": "test-0082",
+            "span": "Chval Švejda",
+            "context": "…centrum.cz, telefon nezvedám. ⟦Chval Švejda⟧"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PERSON",
+            "note": "missed",
+            "docId": "test-0092",
+            "span": "slaviboj černohorský",
+            "context": "ahoj, tady ⟦slaviboj černohorský⟧, volám kvůli výpisu. zavolej …"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PHONE",
+            "note": "missed",
+            "docId": "test-0092",
+            "span": "799515076",
+            "context": "…m kvůli výpisu. zavolej mi na ⟦799515076⟧ díky"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PHONE",
+            "note": "missed",
+            "docId": "test-0155",
+            "span": "792128365",
+            "context": "…m kvůli výpisu. zavolej mi na ⟦792128365⟧ díky"
+          },
+          {
+            "kind": "false_positive",
+            "type": "PERSON",
+            "note": "partial",
+            "docId": "test-0175",
+            "span": "Zavolat Ždanovi Sýkorovi",
+            "context": "⟦Zavolat Ždanovi Sýkorovi⟧ po 15. hodině na +420 792 871…"
+          },
+          {
+            "kind": "false_positive",
+            "type": "PERSON",
+            "note": "partial",
+            "docId": "test-0187",
+            "span": "Polakova",
+            "context": "Dobry den, jsem Zaneta ⟦Polakova⟧ a potrebuji zmenit ucet na 83…"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PHONE",
+            "note": "missed",
+            "docId": "test-0203",
+            "span": "602462829",
+            "context": "…m kvůli výpisu. zavolej mi na ⟦602462829⟧ díky"
+          },
+          {
+            "kind": "false_negative",
+            "type": "PHONE",
+            "note": "missed",
+            "docId": "test-0224",
+            "span": "737876982",
+            "context": "…m kvůli výpisu. zavolej mi na ⟦737876982⟧ díky"
+          }
+        ]
+      }
+    }
+  },
+  "nerOnlyPerson": {
+    "dev": {
+      "support": 113,
+      "predicted": 110,
+      "tp": 97,
+      "fp": 13,
+      "fn": 16,
+      "strict": {
+        "precision": 0.8818,
+        "recall": 0.8584,
+        "f1": 0.8699
+      },
+      "overlap": {
+        "precision": 0.9091,
+        "recall": 0.885,
+        "f1": 0.8969,
+        "tp": 100
+      }
+    },
+    "test": {
+      "support": 332,
+      "predicted": 310,
+      "tp": 284,
+      "fp": 26,
+      "fn": 48,
+      "strict": {
+        "precision": 0.9161,
+        "recall": 0.8554,
+        "f1": 0.8847
+      },
+      "overlap": {
+        "precision": 0.9323,
+        "recall": 0.8705,
+        "f1": 0.9003,
+        "tp": 289
+      }
+    }
+  }
+}
