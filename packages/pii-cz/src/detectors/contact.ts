@@ -2,9 +2,9 @@ import { after, contextScore, finding } from '../context.ts';
 import type { Detector, Finding, ReasonCode } from '../types.ts';
 import { deobfuscateEmail, isValidEmail, isValidPsc, parsePhone } from '../validators/contact.ts';
 
-// Optional country code (+420 / 00420, possibly in brackets), then 3-3-3 digits.
+// Optional country code (+420 / 00420, possibly in brackets), then 3-3-3 or 3-2-2-2 digits.
 const PHONE =
-  /(?<![\p{L}\p{N}+/-])(?:\(?(?:\+|00)\s?420\)?[\s.-]?)?\d{3}[\s.-]?\d{3}[\s.-]?\d{3}(?![\p{L}\p{N}/-])/gu;
+  /(?<![\p{L}\p{N}+/-])(?:\(?(?:\+|00)\s?420\)?[\s.-]?)?\d{3}(?:[\s.-]?\d{3}[\s.-]?\d{3}|[ ]\d{2}[ ]\d{2}[ ]\d{2})(?![\p{L}\p{N}/-])/gu;
 
 export const detectPhone: Detector = (text) => {
   const out: Finding[] = [];
@@ -74,7 +74,7 @@ export const detectPsc: Detector = (text) => {
       score += 0.2;
       reasons.push('postal_code_and_city');
     }
-    score += contextScore('PSC', text, start, end, reasons, { bonus: 0.45, window: 15 });
+    score += contextScore('PSC', text, start, end, reasons, { bonus: 0.45, window: 25 });
     out.push(finding('PSC', text, start, end, score, reasons));
   }
   return out;

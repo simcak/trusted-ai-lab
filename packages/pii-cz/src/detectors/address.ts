@@ -8,14 +8,23 @@ import { isValidPsc } from '../validators/contact.ts';
  * optionally followed by PSČ and municipality. No street dictionary — the structure is the signal.
  */
 const STREET_TOKEN = String.raw`(?:\p{Lu}\p{Ll}*\.?(?!\p{L})|\d{1,2}\.)`;
-const STREET = String.raw`${STREET_TOKEN}(?:\s?${STREET_TOKEN}){0,4}`;
+const STREET = String.raw`${STREET_TOKEN}(?: ?${STREET_TOKEN}){0,4}`;
 const HOUSE_NUMBER = String.raw`\d{1,4}[a-z]?(?:/\d{1,4}[a-z]?)?`;
 const CITY_WORD = String.raw`\p{Lu}\p{Ll}+(?:-\p{Lu}?\p{Ll}+)*`;
-const CITY = String.raw`${CITY_WORD}(?:\s(?:nad|pod|v|ve|na|u)\s${CITY_WORD}|\s${CITY_WORD}){0,3}(?:\s\d{1,2}(?!\d))?(?:\s\(okres\s${CITY_WORD}\))?`;
+// Words of a municipality are separated by plain spaces only, so the match never runs into the
+// next line („…Cvikov\nČíslo OP").
+const CITY = String.raw`${CITY_WORD}(?: (?:nad|pod|v|ve|na|u) ${CITY_WORD}| ${CITY_WORD}){0,3}(?: \d{1,2}(?!\d))?(?: \(okres ${CITY_WORD}\))?`;
 
 const ADDRESS = new RegExp(
-  String.raw`(?<![\p{L}\p{N}])(${STREET})\s(${HOUSE_NUMBER})(?![\p{L}\p{N}/])` +
-    String.raw`(?:(,?\s+)(\d{3}\s?\d{2})\s+(${CITY})|,\s*(${CITY}))?`,
+  String.raw`(?<![\p{L}\p{N}])(${STREET}) (${HOUSE_NUMBER})(?![\p{L}\p{N}/])` +
+    String.raw`(?:(,?\s+)(\d{3} ?\d{2}) +(${CITY})|, *(${CITY}))?`,
+  'gu',
+);
+
+// Village houses without a street: „Lhota č. p. 45, 538 21 Slatiňany".
+const HOUSE_ONLY = new RegExp(
+  String.raw`(?<![\p{L}\p{N}])(?<base>${CITY},? č\. ?p\. ?\d{1,4})(?![\p{L}\p{N}/])` +
+    String.raw`(?<postal>,?\s+(?<psc>\d{3} ?\d{2}) +${CITY})?`,
   'gu',
 );
 
@@ -36,9 +45,6 @@ const LEADING_NON_STREET = new Set(
     'korespondencni',
     'dorucovaci',
     'kontaktni',
-    'nova',
-    'stara',
-    'misto',
   ].map(fold),
 );
 
@@ -102,6 +108,19 @@ export const detectAddress: Detector = (text) => {
       reasons.push('context_keyword');
     }
     out.push(finding('ADDRESS', text, start, end, score, reasons));
+  }
+  for (const m of text.matchAll(HOUSE_ONLY)) {
+    const { base = '', postal, psc } = m.groups ?? {};
+    const hasPostal = postal !== undefined && psc !== undefined && isValidPsc(psc);
+    const end = m.index + base.length + (hasPostal ? postal.length : 0);
+    const reasons: ReasonCode[] = ['street_and_number'];
+    if (hasPostal) reasons.push('postal_code_and_city');
+    let score = hasPostal ? 0.85 : 0.5;
+    if (CONTEXT.ADDRESS!.test(before(text, m.index, 30))) {
+      score += 0.1;
+      reasons.push('context_keyword');
+    }
+    out.push(finding('ADDRESS', text, m.index, end, score, reasons));
   }
   return out;
 };

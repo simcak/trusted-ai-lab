@@ -52,6 +52,7 @@ describe('contact data', () => {
   it('finds phones by country code or grouping, not bare amounts', () => {
     expect(found('Volejte +420 605 123 456.')).toEqual([['PHONE', '+420 605 123 456']]);
     expect(found('mobil 605 123 456')).toEqual([['PHONE', '605 123 456']]);
+    expect(found('telefon 792 30 82 45')).toEqual([['PHONE', '792 30 82 45']]);
     expect(typesIn('investice 736 028 541 Kč')).toEqual([]);
     expect(typesIn('částka 736 028 541')).toEqual([]);
   });
@@ -89,6 +90,19 @@ describe('address', () => {
   it('finds multi-word municipalities', () => {
     expect(found('Lipová 3, 400 01 Ústí nad Labem')).toEqual([
       ['ADDRESS', 'Lipová 3, 400 01 Ústí nad Labem'],
+    ]);
+  });
+
+  it('finds village houses written with „č. p."', () => {
+    expect(found('trvale bytem Lhota č. p. 45, 538 21 Slatiňany.')).toEqual([
+      ['ADDRESS', 'Lhota č. p. 45, 538 21 Slatiňany'],
+    ]);
+  });
+
+  it('does not run a municipality into the next line', () => {
+    expect(found('Bydliště: Lipová 3, 320 83 Cvikov\nČíslo OP: 205123456')).toEqual([
+      ['ADDRESS', 'Lipová 3, 320 83 Cvikov'],
+      ['ID_CARD', '205123456'],
     ]);
   });
 
@@ -134,6 +148,22 @@ describe('person names', () => {
   it('finds a feminine surname mid-sentence, but not at the start of a sentence', () => {
     expect(found('dnes volala Svobodová a ptala se')).toEqual([['PERSON', 'Svobodová']]);
     expect(typesIn('Úroková sazba je pevná.')).toEqual([]);
+  });
+
+  it('takes two capitalised words after an honorific even when the first name is unknown', () => {
+    expect(found('Klient Teobald Brázda žádá')).toEqual([['PERSON', 'Teobald Brázda']]);
+  });
+
+  it('finds a signature line and a capitalised word before a feminine surname', () => {
+    expect(found('Děkuji,\nŠalamoun Rudolf')).toEqual([['PERSON', 'Šalamoun Rudolf']]);
+    expect(found('Kontaktní osoba Ignácie Antošová.')).toEqual([['PERSON', 'Ignácie Antošová']]);
+    expect(found('zavolat Drahutinovi Truhlářovi?')).toEqual([
+      ['PERSON', 'Drahutinovi Truhlářovi'],
+    ]);
+  });
+
+  it('does not find lower-case names (known limitation)', () => {
+    expect(typesIn('ahoj, tady jana nováková')).toEqual([]);
   });
 
   it('finds a first name alone mid-sentence (vocative)', () => {

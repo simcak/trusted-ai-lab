@@ -8,7 +8,10 @@ import { surnameKey } from './inflection.ts';
  *  A. first name from the MV list (also declined) + adjacent capitalised word(s)  → 0.85
  *  B. honorific or academic title („pan", „paní", „Vážená", „klientka", „Ing.") + name → 0.85
  *  C. capitalised word with the feminine surname suffix -ová / -ové / -ovou          → 0.6
+ *     (with a capitalised word before it → 0.7)
  *  D. first name alone, not at the start of a sentence                                → 0.55
+ *  E. two capitalised words in the male dative -ovi                                   → 0.65
+ *  S. a signature line: 2–3 capitalised words alone on a line / after „Děkuji,"       → 0.7
  * Surnames equal to ordinary words („Nový", „Král") are found only through A or B.
  */
 
@@ -78,6 +81,38 @@ const HONORIFICS = new Set(
     'zmocněnec',
     'zmocněnce',
     'zmocněnkyně',
+    // Role nouns that commonly precede a name in client communication.
+    'zástupce',
+    'zástupci',
+    'zástupcem',
+    'zástupkyně',
+    'osoba',
+    'osoby',
+    'osobě',
+    'osobou',
+    'dítě',
+    'dítěte',
+    'dítěti',
+    'syn',
+    'syna',
+    'synovi',
+    'dcera',
+    'dcery',
+    'dceři',
+    'podnikatel',
+    'podnikatele',
+    'podnikatelka',
+    'majitel',
+    'majitele',
+    'majitelka',
+    'dlužník',
+    'dlužnice',
+    'ručitel',
+    'ručitelka',
+    'poradce',
+    'poradkyně',
+    'jméno',
+    'jménem',
   ].map(fold),
 );
 
@@ -202,6 +237,33 @@ const surnameLike = (t: Token | undefined): t is Token =>
 
 const FEMININE_SURNAME = /^\p{Lu}\p{Ll}{2,}(?:ová|ové|ovou)$/u;
 
+/**
+ * If tokens i… are 2–3 adjacent capitalised words that start a line (or follow „Děkuji," /
+ * „S pozdravem,") and end it, returns the index of the last one.
+ */
+function signatureLine(text: string, tokens: Token[], i: number): number | undefined {
+  const lineBefore = text.slice(text.lastIndexOf('\n', tokens[i]!.start - 1) + 1, tokens[i]!.start);
+  if (
+    !/^\s*$/.test(lineBefore) &&
+    !/(?:děkuji|děkuji vám|s pozdravem|zdraví)[,.]?\s*$/iu.test(lineBefore)
+  ) {
+    return undefined;
+  }
+  let last = i;
+  while (
+    last - i < 2 &&
+    surnameLike(tokens[last + 1]) &&
+    adjacent(text, tokens[last]!, tokens[last + 1]!)
+  ) {
+    last++;
+  }
+  if (last === i || !surnameLike(tokens[i])) return undefined;
+  const end = tokens[last]!.end;
+  const lineEnd = text.indexOf('\n', end);
+  const rest = text.slice(end, lineEnd === -1 ? undefined : lineEnd);
+  return /^[\s.,!]*$/.test(rest) ? last : undefined;
+}
+
 export const detectPerson: Detector = (text) => {
   const tokens = tokenize(text);
   const out: Finding[] = [];
@@ -240,7 +302,14 @@ export const detectPerson: Detector = (text) => {
       const name = tokens[k + 1];
       if (surnameLike(name) && adjacent(text, tokens[k]!, name)) {
         const first = matchFirstName(name.value);
-        const last = first ? extendName(k + 1) : k + 1;
+        const following = tokens[k + 2];
+        // Without a dictionary match, two adjacent capitalised words after an honorific are
+        // still taken as first name + surname („Klient Teobald Brázda").
+        const last = first
+          ? extendName(k + 1)
+          : surnameLike(following) && adjacent(text, name, following)
+            ? k + 2
+            : k + 1;
         const reasons: ReasonCode[] = ['honorific_or_title'];
         if (first) reasons.push('first_name_dictionary');
         if (last > k + 1) reasons.push('followed_by_surname');
@@ -267,9 +336,46 @@ export const detectPerson: Detector = (text) => {
 
     const atStart = sentenceStart(text, tokens, i);
 
-    // C. feminine surname suffix.
+    // S. signature: two or three capitalised words that close a line or the text
+    // („S pozdravem\nAlbertýna Majerová", „Děkuji, Jozue Poláček").
+    const signatureEnd = signatureLine(text, tokens, i);
+    if (signatureEnd !== undefined) {
+      const reasons: ReasonCode[] = ['followed_by_surname'];
+      if (first) reasons.push('first_name_dictionary');
+      emit(i, signatureEnd, 0.7, reasons);
+      i = signatureEnd;
+      continue;
+    }
+
+    // C. feminine surname suffix; a capitalised word right before it is taken as the first name
+    // („Kontaktní osoba Ignácie Antošová") unless it only starts the sentence („Dnes Nováková…").
     if (FEMININE_SURNAME.test(token.value) && !first) {
-      emit(i, i, atStart ? 0.45 : 0.6, ['surname_suffix']);
+      const prev = tokens[i - 1];
+      const prevIsFirstName =
+        prev !== undefined &&
+        !covered.has(i - 1) &&
+        surnameLike(prev) &&
+        adjacent(text, prev, token) &&
+        (matchFirstName(prev.value) !== undefined || !sentenceStart(text, tokens, i - 1));
+      if (prevIsFirstName) {
+        emit(i - 1, i, 0.7, ['surname_suffix', 'followed_by_surname']);
+      } else {
+        emit(i, i, atStart ? 0.45 : 0.6, ['surname_suffix']);
+      }
+      continue;
+    }
+
+    // E. two adjacent capitalised words in the male dative („zavolat Drahutinovi Truhlářovi").
+    const next = tokens[i + 1];
+    if (
+      !atStart &&
+      /ovi$/u.test(token.value) &&
+      surnameLike(next) &&
+      /ovi$/u.test(next.value) &&
+      adjacent(text, token, next)
+    ) {
+      emit(i, i + 1, 0.65, ['surname_suffix', 'followed_by_surname']);
+      i += 1;
       continue;
     }
 
