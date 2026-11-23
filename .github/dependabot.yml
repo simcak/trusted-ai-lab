@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directories: ['/', '/.github/actions/setup']
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 3
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    # Same 3-day quarantine as pnpm's minimumReleaseAge.
+    cooldown:
+      default-days: 3
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
