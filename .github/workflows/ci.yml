@@ -31,6 +31,10 @@ jobs:
         run: pnpm typecheck
       - name: Unit tests
         run: pnpm test
+      - name: Evals (synthetic corpus, cached NER predictions, no keys, no network)
+        run: pnpm evals:check
+      - name: Build pii-cz for npm
+        run: pnpm --filter @trusted-ai-lab/pii-cz build
       - name: Build
         run: pnpm build
       - name: Bundle size budget
