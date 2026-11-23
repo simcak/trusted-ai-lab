@@ -1,9 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"],
-    "erasableSyntaxOnly": true,
-    "allowImportingTsExtensions": true
+    "types": ["node"]
   },
   "include": ["scripts/**/*.ts"]
 }
