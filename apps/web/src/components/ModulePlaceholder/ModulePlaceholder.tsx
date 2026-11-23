@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router';
-import { useDocumentTitle } from '../../hooks/useDocumentTitle.ts';
 import { cs } from '../../i18n/cs.ts';
-import { MODULES, getModule, getNeighbours, type ModuleId } from '../../modules/registry.ts';
+import { getModule, type ModuleId } from '../../modules/registry.ts';
+import { ModuleHeader } from '../ModuleHeader/ModuleHeader.tsx';
+import { StoryNav } from '../StoryNav/StoryNav.tsx';
 import styles from './ModulePlaceholder.module.css';
 
 interface Props {
@@ -14,21 +14,15 @@ interface Props {
 export function ModulePlaceholder({ id, children }: Props) {
   const meta = getModule(id);
   const texts = cs.modules[id];
-  const { prev, next } = getNeighbours(id);
-  useDocumentTitle(texts.title);
 
   return (
     <article className={styles.page}>
-      <header className={styles.header}>
-        <p className={styles.eyebrow}>{cs.placeholder.moduleOf(meta.number, MODULES.length)}</p>
-        <h1>{texts.title}</h1>
-        <p className={styles.question}>{texts.question}</p>
-        <p className={styles.summary}>{texts.summary}</p>
+      <ModuleHeader id={id}>
         <p className={styles.notice}>
           <span className={styles.status}>{cs.status.planned(meta.phase)}</span>
           {cs.placeholder.notice}
         </p>
-      </header>
+      </ModuleHeader>
 
       <div className={styles.columns}>
         <section aria-labelledby="will-do">
@@ -47,22 +41,7 @@ export function ModulePlaceholder({ id, children }: Props) {
 
       {children}
 
-      <nav aria-label={cs.placeholder.storyNav} className={styles.storyNav}>
-        {prev ? (
-          <Link to={prev.path} rel="prev">
-            ← {cs.placeholder.prev}: {cs.modules[prev.id].title}
-          </Link>
-        ) : (
-          <Link to="/">← {cs.placeholder.backHome}</Link>
-        )}
-        {next ? (
-          <Link to={next.path} rel="next">
-            {cs.placeholder.next}: {cs.modules[next.id].title} →
-          </Link>
-        ) : (
-          <Link to="/">{cs.placeholder.backHome} →</Link>
-        )}
-      </nav>
+      <StoryNav id={id} />
     </article>
   );
 }

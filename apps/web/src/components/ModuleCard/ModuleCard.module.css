@@ -50,6 +50,11 @@
   font-weight: 600;
 }
 
+.status[data-status='ready'] {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
 .title {
   font-size: var(--text-xl);
   margin-bottom: var(--space-1);

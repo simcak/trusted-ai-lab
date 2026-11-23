@@ -11,7 +11,9 @@ export function ModuleCard({ module }: { module: ModuleMeta }) {
         <span className={styles.number} aria-hidden="true">
           {module.number}
         </span>
-        <span className={styles.status}>{cs.status.planned(module.phase)}</span>
+        <span className={styles.status} data-status={module.status}>
+          {module.status === 'ready' ? cs.status.ready : cs.status.planned(module.phase)}
+        </span>
       </div>
       <h3 className={styles.title}>
         <Link
