@@ -37,7 +37,7 @@ jobs:
         run: pnpm check:size
 
       - name: Install Playwright browser
-        run: pnpm --filter @trusted-ai-lab/web exec playwright install --with-deps chromium
+        run: pnpm --filter @trusted-ai-lab/web exec playwright install --with-deps --no-shell chromium
       - name: Smoke tests (Playwright)
         run: pnpm test:e2e
       - name: Upload Playwright report

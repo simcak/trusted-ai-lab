@@ -31,7 +31,7 @@ pnpm dev          # http://localhost:5173/trusted-ai-lab/
 | `pnpm check:size` | Hlídá rozpočet úvodního JS (< 300 kB gzip)                   |
 | `pnpm test:e2e`   | Smoke testy v Chromiu (Playwright; sestaví a spustí preview) |
 
-Před prvním `pnpm test:e2e` nainstaluj prohlížeč: `pnpm --filter @trusted-ai-lab/web exec playwright install chromium`.
+Před prvním `pnpm test:e2e` nainstaluj prohlížeč: `pnpm --filter @trusted-ai-lab/web exec playwright install --no-shell chromium`.
 
 ## Struktura
 
