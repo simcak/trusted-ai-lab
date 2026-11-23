@@ -34,7 +34,7 @@ export const cs = {
       summary:
         'Byznys popíše záměr a pravidlový engine navrhne architekturu: vhodný vzor, míru rizika a odhad nákladů.',
       proof:
-        'Umím říct „tady AI nepotřebujete" a každé doporučení zdůvodnit konkrétním pravidlem, které jde otestovat.',
+        'Umím říct „tady AI nepotřebujete“ a každé doporučení zdůvodnit konkrétním pravidlem, které jde otestovat.',
       willDo: [
         'Formulář pro popis záměru: typ dat, uživatelé, dopad na lidi, nároky na vysvětlitelnost, objem a latence.',
         'Doporučený vzor (bez AI, klasický software, strojové učení, RAG, agent, člověk ve smyčce) včetně zamítnutých alternativ a důvodů.',

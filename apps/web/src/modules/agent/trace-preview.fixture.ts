@@ -78,7 +78,7 @@ export const previewScript: readonly PreviewItem[] = [
       policy: {
         decision: 'allow',
         rule: 'tool-allowlist',
-        reason: 'Persona „klient" smí používat nástroj search_funds.',
+        reason: 'Persona „klient“ smí používat nástroj search_funds.',
       },
     },
   },
@@ -106,7 +106,7 @@ export const previewScript: readonly PreviewItem[] = [
         decision: 'deny',
         rule: 'tool-allowlist',
         reason:
-          'Persona „klient" nesmí používat nástroj draft_email. Akce s dopadem je povolená jen poradci.',
+          'Persona „klient“ nesmí používat nástroj draft_email. Akce s dopadem je povolená jen poradci.',
       },
     },
   },
