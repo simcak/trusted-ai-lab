@@ -49,12 +49,13 @@ export type TraceEvent = z.infer<typeof TraceEventSchema>;
 /** What callers emit; the log assigns `id`, `seq` and `timestamp`. */
 export type TraceEventInput = Omit<TraceEvent, 'id' | 'seq' | 'timestamp'>;
 
+/** Members are plain functions (not `this`-bound methods), so they can be passed around directly. */
 export interface TraceLog {
-  emit(event: TraceEventInput): TraceEvent;
+  emit: (event: TraceEventInput) => TraceEvent;
   /** Immutable snapshot; a new array reference after every change (fits `useSyncExternalStore`). */
-  getSnapshot(): readonly TraceEvent[];
-  subscribe(listener: () => void): () => void;
-  clear(): void;
+  getSnapshot: () => readonly TraceEvent[];
+  subscribe: (listener: () => void) => () => void;
+  clear: () => void;
 }
 
 export interface TraceLogOptions {
@@ -72,7 +73,7 @@ export function createTraceLog(options: TraceLogOptions = {}): TraceLog {
   };
 
   return {
-    emit(input) {
+    emit: (input) => {
       const seq = events.length + 1;
       const event: TraceEvent = {
         ...input,
@@ -85,11 +86,13 @@ export function createTraceLog(options: TraceLogOptions = {}): TraceLog {
       return event;
     },
     getSnapshot: () => events,
-    subscribe(listener) {
+    subscribe: (listener) => {
       listeners.add(listener);
-      return () => listeners.delete(listener);
+      return () => {
+        listeners.delete(listener);
+      };
     },
-    clear() {
+    clear: () => {
       if (events.length === 0) return;
       events = [];
       notify();
