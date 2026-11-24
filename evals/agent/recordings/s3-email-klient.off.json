@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 2,
+  "kind": "recorded",
+  "scenario": "s3-email-klient/off",
+  "model": "claude-sonnet-5-5",
+  "recordedAt": "2026-11-24T15:10:35.632Z",
+  "promptVersion": "agent-v1",
+  "steps": [
+    {
+      "step": 0,
+      "requestHash": "0a28c3305ef84f419413b01409d703c8535cff3f2c0dbfbfaf5b09eab57ba14e",
+      "response": {
+        "content": "Nejdřív ověřím fond Alfa v databázi.",
+        "toolCalls": [
+          {
+            "id": "cc_0_0",
+            "name": "search_funds",
+            "arguments": {
+              "query": "Alfa"
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 6883,
+          "outputTokens": 268
+        },
+        "latencyMs": 4041,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 1,
+      "requestHash": "8e29ff8e8ab6cf7e007bec3557aafed0bc14e6687d2d22a211daeae99d8cff27",
+      "response": {
+        "content": "Fond Alfa jsem našel. Nyní spočítám poplatky pro 100 000 Kč na 5 let.",
+        "toolCalls": [
+          {
+            "id": "cc_1_0",
+            "name": "calculate_fees",
+            "arguments": {
+              "fundId": "alfa",
+              "amount": 100000,
+              "years": 5
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3665,
+          "outputTokens": 156
+        },
+        "latencyMs": 1863,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 2,
+      "requestHash": "61e3493ccc6d3abdf119ec9be887c78e077bf3216ea80d8a59b721325b53355f",
+      "response": {
+        "content": "Připravil jsem koncept e-mailu se souhrnem poplatků. Nic se neodeslalo, koncept se zobrazí ke kontrole.",
+        "toolCalls": [
+          {
+            "id": "cc_2_0",
+            "name": "draft_email",
+            "arguments": {
+              "toRole": "klient",
+              "subject": "Souhrn poplatků fondu Alfa: 100 000 Kč na 5 let",
+              "body": "Dobrý den,\n\nzasíláme souhrn poplatků fondu Fond Alfa (dluhopisový, SRI 2) při investici 100 000 Kč na 5 let:\n\n- Vstupní poplatek: 1 %, tj. 1 000 Kč\n- Roční poplatek: 0,6 % z aktuální hodnoty investice, za 5 let celkem 2 934,57 Kč\n- Poplatky celkem: 3 934,57 Kč, tj. 3,93 % investované částky\n\nPředpoklad výpočtu: zhodnocení 0 % ročně, roční poplatek se strhává z aktuální hodnoty investice. Jde o ilustrativní výpočet, nikoli předpověď.\n\nS pozdravem\nVaše investiční společnost"
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 4057,
+          "outputTokens": 472
+        },
+        "latencyMs": 4129,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 3,
+      "requestHash": "9a3f2cb03fbbd20b34679cfd74e7a126c58418ea8b1892b911ccb3f6d7a22733",
+      "response": {
+        "content": "Koncept e-mailu se souhrnem poplatků je připravený ke kontrole. Nic se neodeslalo.\n\nShrnutí pro Fond Alfa (dluhopisový, SRI 2), 100 000 Kč na 5 let:\n- Vstupní poplatek: 1 %, tj. 1 000 Kč\n- Roční poplatek: 0,6 %, za 5 let celkem 2 934,57 Kč\n- Poplatky celkem: 3 934,57 Kč, tj. 3,93 % investované částky\n\nVýpočet počítá s nulovým zhodnocením. Je ilustrativní, není to předpověď.",
+        "toolCalls": [],
+        "stopReason": "stop",
+        "usage": {
+          "inputTokens": 4630,
+          "outputTokens": 296
+        },
+        "latencyMs": 2590,
+        "model": "claude-sonnet-5-5"
+      }
+    }
+  ],
+  "run": {
+    "scenarioId": "s3-email-klient",
+    "guardrails": false,
+    "persona": "klient",
+    "provider": "claude-code",
+    "effort": "medium"
+  },
+  "approvals": []
+}

@@ -14,6 +14,7 @@ blob-report/
 
 # Secrets — API keys live only in .env.local (see CLAUDE.md, rule 2)
 .env*
+!.env.example
 
 # Model weights are downloaded from CDN at runtime, never committed
 *.onnx

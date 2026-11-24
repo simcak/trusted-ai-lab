@@ -15,6 +15,7 @@ se neinstalují, protože kompromitované releasy bývají odhaleny a staženy o
 | `zod`                | 4.6.7  | MIT     | 2026-10-12 | Validace dat, tras, nahrávek a ceníku    |
 
 `packages/pii-cz` nemá žádné runtime závislosti. `packages/intake-rules` používá jen `zod` (schéma ceníku).
+`packages/agent-runtime` používá `zod` a workspace balíčky `llm-core` a `pii-cz`.
 
 ### Volitelný NER v prohlížeči (lazy chunk, stahuje se až po kliknutí)
 
@@ -30,6 +31,23 @@ Tranzitivně se do prohlížeče dostávají `@huggingface/tokenizers` 0.2.0 (Ap
 
 `onnxruntime-web` je přímá závislost webu jen kvůli self-hostingu WASM souboru. Verze je stejná,
 jakou vyžaduje `@huggingface/transformers` 4.3.2, a jde o **dev build** (viz OQ-13).
+
+### Volitelný BYOK v prohlížeči a nahrávací skript (lazy chunk, stahuje se až po spuštění s vlastním klíčem)
+
+| Balíček             | Verze  | Licence    | Vydáno     | Účel                                                                    |
+| ------------------- | ------ | ---------- | ---------- | ----------------------------------------------------------------------- |
+| `@anthropic-ai/sdk` | 1.12.0 | Apache-2.0 | 2026-11-20 | Oficiální SDK pro Messages API: BYOK na `#/agent` a `pnpm record:agent` |
+
+SDK je závislost `packages/llm-core` a importuje se jen z podcesty `@trusted-ai-lab/llm-core/anthropic`.
+Web ho proto načítá jako samostatný chunk (82,8 kB gzip) až po kliknutí na „Spustit s vlastním klíčem“
+a do úvodního bundlu se nedostane. Verze 1.13.0 byla v den instalace mladší než 3 dny.
+Starší vydání SDK (před přechodem na Apache-2.0) byla pod MIT.
+
+Tranzitivně: `@opentelemetry/api` 1.10.0 (Apache-2.0), `json-schema-to-ts` 3.1.1 (MIT) s
+`ts-algebra` 2.0.0 (MIT) a `@babel/runtime` 7.29.15 (MIT), `standardwebhooks` 1.3.0 (MIT) s
+`@stablelib/base64` 1.0.1 (MIT) a `fast-sha256` 1.3.0 (**Unlicense**: permisivní, ekvivalent volného
+díla, mimo seznam MIT/Apache/BSD). `standardwebhooks` a `fast-sha256` slouží k ověřování webhooků,
+které BYOK ani nahrávání nepoužívají.
 
 ### Model, data a reference (nejsou npm balíčky)
 
