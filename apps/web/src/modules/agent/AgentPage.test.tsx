@@ -173,6 +173,15 @@ describe('AgentPage', () => {
     expect(trace.textContent).not.toContain('Petru Malou');
   });
 
+  it('says how the recording reached the model', async () => {
+    const fixture = await fixtureRecording();
+    mocks.recording = { ...fixture, run: { ...fixture.run, provider: 'claude-code' } };
+    renderPage('/agent?scenario=s2-injekce');
+    const provenance = screen.getByLabelText(cs.agent.provenance.label);
+    expect(within(provenance).getByText(cs.agent.provenance.providers['claude-code'])).toBeTruthy();
+    expect(within(provenance).getByText(cs.agent.provenance.claudeCodeNote)).toBeTruthy();
+  });
+
   it('switching guardrails off without a recording disables the run', async () => {
     mocks.recording = await fixtureRecording();
     renderPage('/agent?scenario=s2-injekce');

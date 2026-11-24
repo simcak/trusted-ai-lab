@@ -136,6 +136,10 @@ export default function AgentPage() {
                         </dd>
                       </div>
                       <div>
+                        <dt>{t.provenance.provider}</dt>
+                        <dd>{t.provenance.providers[recording.run.provider]}</dd>
+                      </div>
+                      <div>
                         <dt>{t.provenance.recordedAt}</dt>
                         <dd>{dateFormat.format(new Date(recording.recordedAt))}</dd>
                       </div>
@@ -146,6 +150,9 @@ export default function AgentPage() {
                         </dd>
                       </div>
                     </dl>
+                    {recording.run.provider === 'claude-code' && (
+                      <p className={styles.small}>{t.provenance.claudeCodeNote}</p>
+                    )}
                   </>
                 )}
               </div>
