@@ -32,7 +32,7 @@
     "@trusted-ai-lab/agent-runtime": "workspace:*",
     "@trusted-ai-lab/llm-core": "workspace:*",
     "@trusted-ai-lab/pii-cz": "workspace:*",
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.6",
     "eslint": "10.15.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-react-hooks": "7.1.1",
