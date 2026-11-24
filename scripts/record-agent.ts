@@ -5,14 +5,27 @@
  *   pnpm record:agent --only s1-bezny-dotaz --guardrails on
  *   pnpm record:agent --approve all                      # approvals without asking (decidedBy: flag)
  *   pnpm record:agent --check                            # offline: replay every recording, verify hashes
+ *   pnpm record:agent --provider claude-code --approve all   # Claude subscription, no API key
  *
- * Recording reads ANTHROPIC_API_KEY from .env.local (see .env.example) and never prints it.
- * Each run goes through exactly the code the web page replays: runAgent + policy + tools + pii-cz,
- * with createAnthropicProvider as the model. A run that fails writes nothing.
+ * `--provider anthropic` (default) calls the Messages API with ANTHROPIC_API_KEY from .env.local
+ * (see .env.example) and never prints it. `--provider claude-code` runs headless Claude Code
+ * (`claude -p`, or the binary in --claude-bin / CLAUDE_BIN) with the logged-in subscription; the
+ * key is removed from its environment so it never bills the API.
+ * Each run goes through exactly the code the web page replays: runAgent + policy + tools + pii-cz.
+ * A run that fails writes nothing.
  * The check runs in CI (`pnpm evals:check`) without network and without a key.
  */
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { spawn } from 'node:child_process';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { parseArgs } from 'node:util';
 import {
@@ -36,7 +49,7 @@ import {
   type RecordedApproval,
   type ScenarioId,
 } from '@trusted-ai-lab/agent-runtime';
-import { createTraceLog, type LlmUsage } from '@trusted-ai-lab/llm-core';
+import { createTraceLog, type LlmProvider, type LlmUsage } from '@trusted-ai-lab/llm-core';
 import { z } from 'zod';
 
 const root = resolve(import.meta.dirname, '..');
@@ -147,17 +160,15 @@ function costUsd(usage: LlmUsage): number | null {
   return (usage.inputTokens * price.inputUsd + usage.outputTokens * price.outputUsd) / 1_000_000;
 }
 
-async function record(runs: readonly Run[], approveMode: ApproveMode): Promise<void> {
+type ProviderMode = 'anthropic' | 'claude-code';
+
+async function anthropicProvider(): Promise<LlmProvider> {
   if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) fail('Chybí ANTHROPIC_API_KEY. Zkopíruj .env.example do .env.local a vlož klíč.');
-  if (approveMode === 'ask' && !process.stdin.isTTY) {
-    fail('Schvalování se ptá v terminálu. Bez terminálu použij --approve all nebo --approve none.');
-  }
-
   // Imported only here: --check (CI) never loads the SDK.
   const { createAnthropicProvider } = await import('@trusted-ai-lab/llm-core/anthropic');
-  const model = createAnthropicProvider({
+  return createAnthropicProvider({
     model: AGENT_MODEL,
     browser: false,
     apiKey,
@@ -165,11 +176,64 @@ async function record(runs: readonly Run[], approveMode: ApproveMode): Promise<v
     maxTokens: AGENT_MAX_TOKENS,
     fallbacks: 'default',
   });
+}
+
+const CLAUDE_CODE_TIMEOUT_MS = 300_000;
+const EMAIL_PATTERN = /[\w.%+-]+@[\w-]+(\.[\w-]+)+/;
+
+async function claudeCodeProvider(bin: string): Promise<LlmProvider> {
+  const { createClaudeCodeProvider } = await import('@trusted-ai-lab/llm-core/claude-code');
+  // An empty working directory: no CLAUDE.md, memory or project settings reach the model.
+  const cwd = mkdtempSync(join(tmpdir(), 'record-agent-'));
+  const env = { ...process.env };
+  delete env.ANTHROPIC_API_KEY;
+  return createClaudeCodeProvider({
+    model: AGENT_MODEL,
+    effort: AGENT_EFFORT,
+    exec: (args, stdin, signal) =>
+      new Promise((resolveRun, rejectRun) => {
+        const child = spawn(bin, args, {
+          cwd,
+          env,
+          stdio: ['pipe', 'pipe', 'pipe'],
+          timeout: CLAUDE_CODE_TIMEOUT_MS,
+          ...(signal && { signal }),
+        });
+        let out = '';
+        let err = '';
+        child.stdout.on('data', (chunk: Buffer) => (out += chunk.toString()));
+        child.stderr.on('data', (chunk: Buffer) => (err += chunk.toString()));
+        child.on('error', rejectRun);
+        child.on('close', (code) => {
+          // With --output-format json an API failure still prints a result object.
+          if (out.trim()) resolveRun(out);
+          else rejectRun(new Error(`claude skončil s kódem ${code}: ${err.trim().slice(0, 300)}`));
+        });
+        child.stdin.end(stdin);
+      }),
+  });
+}
+
+async function record(
+  runs: readonly Run[],
+  approveMode: ApproveMode,
+  providerMode: ProviderMode,
+  claudeBin: string,
+): Promise<void> {
+  if (approveMode === 'ask' && !process.stdin.isTTY) {
+    fail('Schvalování se ptá v terminálu. Bez terminálu použij --approve all nebo --approve none.');
+  }
+  const model =
+    providerMode === 'claude-code'
+      ? await claudeCodeProvider(claudeBin)
+      : await anthropicProvider();
   mkdirSync(RECORDINGS_DIR, { recursive: true });
 
   const total: LlmUsage = { inputTokens: 0, outputTokens: 0 };
   let calls = 0;
-  console.log(`Nahrávám ${runs.length} běhů modelem ${AGENT_MODEL} (effort ${AGENT_EFFORT}).`);
+  console.log(
+    `Nahrávám ${runs.length} běhů modelem ${AGENT_MODEL} (effort ${AGENT_EFFORT}) přes ${model.id}.`,
+  );
 
   for (const { id, guardrails } of runs) {
     const scenario = SCENARIOS[id];
@@ -226,6 +290,10 @@ async function record(runs: readonly Run[], approveMode: ApproveMode): Promise<v
       },
       approvals,
     });
+    // Recordings are public. Claude Code puts the account e-mail into the model context, and the
+    // synthetic data contain no e-mail address, so any address in a response is a leak.
+    const leaked = JSON.stringify(recording.steps).match(EMAIL_PATTERN);
+    if (leaked) fail(`\n${key}: odpověď modelu obsahuje e-mailovou adresu, nic se nezapsalo.`);
     // The recording must replay exactly before it is written.
     await replayRecording(recording, { funds, log: createTraceLog(), verifyRequest: true });
     writeFileSync(
@@ -244,9 +312,14 @@ async function record(runs: readonly Run[], approveMode: ApproveMode): Promise<v
   }
 
   const cost = costUsd(total);
+  const costNote =
+    providerMode === 'claude-code'
+      ? ` (čerpá limity předplatného Claude Code; podle ceníku API by to bylo asi ${cost?.toFixed(2) ?? '?'} USD)`
+      : cost === null
+        ? ''
+        : `, přibližně ${cost.toFixed(2)} USD podle data/pricing.json`;
   console.log(
-    `\nHotovo: ${calls} volání modelu, ${total.inputTokens} vstupních / ${total.outputTokens} výstupních tokenů` +
-      (cost === null ? '.' : `, přibližně ${cost.toFixed(2)} USD podle data/pricing.json.`),
+    `\nHotovo: ${calls} volání modelu, ${total.inputTokens} vstupních / ${total.outputTokens} výstupních tokenů${costNote}.`,
   );
   console.log(`Nahrávky: ${RECORDINGS_DIR}`);
 }
@@ -260,6 +333,8 @@ if (import.meta.main) {
       only: { type: 'string', multiple: true },
       guardrails: { type: 'string' },
       approve: { type: 'string', default: 'ask' },
+      provider: { type: 'string', default: 'anthropic' },
+      'claude-bin': { type: 'string', default: process.env.CLAUDE_BIN ?? 'claude' },
     },
   });
   if (values.check) {
@@ -276,11 +351,18 @@ if (import.meta.main) {
     }
     if (!['ask', 'all', 'none'].includes(values.approve))
       fail('--approve musí být ask, all nebo none.');
+    if (!['anthropic', 'claude-code'].includes(values.provider))
+      fail('--provider musí být anthropic nebo claude-code.');
     const runs = ALL_RUNS.filter(
       (r) =>
         (only.length === 0 || only.includes(r.id)) &&
         (values.guardrails === undefined || r.guardrails === (values.guardrails === 'on')),
     );
-    await record(runs, values.approve as ApproveMode);
+    await record(
+      runs,
+      values.approve as ApproveMode,
+      values.provider as ProviderMode,
+      values['claude-bin'],
+    );
   }
 }
