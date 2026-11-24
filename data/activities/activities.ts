@@ -173,6 +173,10 @@ interface Sample {
   cadence?: number;
 }
 
+const GPS_SIGMA_M = 2;
+const GPS_RHO = 0.97;
+const GPS_INNOVATION = GPS_SIGMA_M * Math.sqrt(1 - GPS_RHO ** 2);
+
 interface SimulationOptions {
   seed: number;
   path: Path;
@@ -184,7 +188,11 @@ interface SimulationOptions {
   stop?: { atM: number; durationS: number };
 }
 
-/** HR follows the target with a first-order lag; GPS and altitude get small Gaussian noise. */
+/**
+ * HR follows the target with a first-order lag. GPS error drifts slowly like a real receiver
+ * (AR(1) noise, σ ≈ 2 m), so standing still does not look like walking. Altitude gets small
+ * white noise.
+ */
 function simulate(o: SimulationOptions): Sample[] {
   const rnd = mulberry32(o.seed);
   const out: Sample[] = [];
@@ -192,6 +200,8 @@ function simulate(o: SimulationOptions): Sample[] {
   let t = 0;
   let s = 0;
   let hr = 85;
+  let nx = 0;
+  let ny = 0;
   let stopUntil = -1;
   let stopped = false;
   for (;;) {
@@ -207,7 +217,9 @@ function simulate(o: SimulationOptions): Sample[] {
     hr += (target - hr) * lag;
 
     const p = positionAt(o.path, s);
-    const noisy = toLatLon({ x: p.x + 1.5 * gaussian(rnd), y: p.y + 1.5 * gaussian(rnd) });
+    nx = GPS_RHO * nx + GPS_INNOVATION * gaussian(rnd);
+    ny = GPS_RHO * ny + GPS_INNOVATION * gaussian(rnd);
+    const noisy = toLatLon({ x: p.x + nx, y: p.y + ny });
     out.push({
       t,
       lat: noisy.lat,
