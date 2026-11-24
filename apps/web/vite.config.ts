@@ -9,5 +9,9 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'es2022',
+    // The only chunk above Vite's 500 kB default is @huggingface/transformers (~544 kB), loaded
+    // only after the user clicks „Načíst NER model". The initial JS budget is checked separately
+    // by scripts/check-bundle-size.ts.
+    chunkSizeWarningLimit: 600,
   },
 });

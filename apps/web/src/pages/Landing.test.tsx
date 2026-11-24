@@ -30,4 +30,14 @@ describe('Landing', () => {
       expect(card.getByText(texts.proof)).toBeTruthy();
     });
   });
+
+  it('marks implemented modules as done', () => {
+    render(
+      <MemoryRouter>
+        <Landing />
+      </MemoryRouter>,
+    );
+    const pii = screen.getAllByTestId('module-card')[1]!;
+    expect(within(pii).getByText(cs.status.ready)).toBeTruthy();
+  });
 });

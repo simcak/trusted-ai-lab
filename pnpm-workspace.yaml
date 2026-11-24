@@ -5,3 +5,11 @@ packages:
 # Supply-chain guard: refuse package versions published less than 3 days ago
 # (most malicious releases are detected and unpublished within that window).
 minimumReleaseAge: 4320
+
+# Dependency build scripts are denied explicitly (pnpm denies unknown ones by default and fails
+# the install). Both come from @huggingface/transformers, which is used only by the optional NER:
+# - onnxruntime-node: the postinstall downloads optional GPU (CUDA) binaries; CPU binaries ship in the tarball.
+# - protobufjs: the postinstall only prints a version-compatibility notice.
+allowBuilds:
+  onnxruntime-node: false
+  protobufjs: false

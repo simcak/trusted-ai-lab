@@ -14,6 +14,36 @@ se neinstalují, protože kompromitované releasy bývají odhaleny a staženy o
 | `react-router`       | 8.5.2  | MIT     | 2026-11-18 | `HashRouter` (GitHub Pages nemá rewrite) |
 | `zod`                | 4.6.7  | MIT     | 2026-10-12 | Validace dat, tras a nahrávek            |
 
+`packages/pii-cz` nemá žádné runtime závislosti.
+
+### Volitelný NER v prohlížeči (lazy chunk, stahuje se až po kliknutí)
+
+| Balíček                     | Verze                         | Licence    | Vydáno     | Účel                                                       |
+| --------------------------- | ----------------------------- | ---------- | ---------- | ---------------------------------------------------------- |
+| `@huggingface/transformers` | 4.3.2                         | Apache-2.0 | 2026-10-27 | Pipeline `token-classification` (transformers.js)          |
+| `onnxruntime-web`           | 1.31.0-dev.20260914-8d85527a0 | MIT        | 2026-09-14 | Běhové prostředí ONNX (WASM), servírované z vlastního webu |
+
+Tranzitivně se do prohlížeče dostávají `@huggingface/tokenizers` 0.2.0 (Apache-2.0),
+`@huggingface/jinja` 0.5.13 (MIT), `onnxruntime-common` (MIT), `flatbuffers` (Apache-2.0),
+`long` (Apache-2.0), `platform` (MIT), `protobufjs` (BSD-3-Clause) a `guid-typescript` 1.0.9
+(**ISC**: permisivní licence ekvivalentní MIT; poslední vydání je staré, viz OQ-14).
+
+`onnxruntime-web` je přímá závislost webu jen kvůli self-hostingu WASM souboru. Verze je stejná,
+jakou vyžaduje `@huggingface/transformers` 4.3.2, a jde o **dev build** (viz OQ-13).
+
+### Model, data a reference (nejsou npm balíčky)
+
+| Co                                                                                                                                                                      | Licence / podmínky                                                                                                                                                             | Použití                                                                                            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| NER model [`onnx-community/small-e-czech-finetuned-ner-wikiann-ONNX`](https://huggingface.co/onnx-community/small-e-czech-finetuned-ner-wikiann-ONNX), revize `0c3c43a` | ONNX repozitář licenci neuvádí; původní [`richielo/small-e-czech-finetuned-ner-wikiann`](https://huggingface.co/richielo/small-e-czech-finetuned-ner-wikiann) je **CC BY 4.0** | Volitelná detekce jmen. Stahuje se z Hugging Face, necommituje se. Atribuce je na stránce `#/pii`. |
+| Základní model [`Seznam/small-e-czech`](https://huggingface.co/Seznam/small-e-czech)                                                                                    | CC BY 4.0 („allowing commercial use")                                                                                                                                          | Základ NER modelu                                                                                  |
+| Dataset [WikiAnn](https://huggingface.co/datasets/unimelb-nlp/wikiann) (trénovací data NER)                                                                             | na Hugging Face uvedeno „unknown" (viz OQ-12)                                                                                                                                  | Jen trénink modelu třetí stranou; v repu není                                                      |
+| [MV ČR – Seznam jmen](https://mv.gov.cz/seznam-jmen), CSV `opendata-seznamjmenk2026-06-30` (11 782 jmen)                                                                | U souboru licence neuvedena; [katalog otevřených dat MV](https://mv.gov.cz/opendata/catalogue) uvádí „bez licenčních omezení" (viz OQ-11)                                      | Slovník křestních jmen v `packages/pii-cz/src/data/first-names.json`                               |
+| [ČNB – Číselník kódů bank](https://www.cnb.cz/cs/platebni-styk/ucty-kody-bank/) č. 255, platný od 1. 10. 2026 (47 kódů)                                                 | veřejný číselník ČNB                                                                                                                                                           | `packages/pii-cz/src/data/bank-codes.json`                                                         |
+
+Referenční data stahuje `pnpm fetch:pii-reference-data` (ručně, ne v CI) a ukládá je se zdrojem a
+datem stažení (2026-11-23).
+
 ## Vývoj a testy
 
 | Balíček                            | Verze   | Licence    | Vydáno     | Účel                                       |
@@ -36,6 +66,19 @@ se neinstalují, protože kompromitované releasy bývají odhaleny a staženy o
 | `prettier`                         | 3.10.1  | MIT        | 2026-11-12 | Formátování                                |
 | `@types/react`, `@types/react-dom` | 19.3.0  | MIT        | 2026-09-09 | Typy                                       |
 | `@types/node`                      | 24.19.2 | MIT        | 2026-10-09 | Typy pro Node 24                           |
+| `@faker-js/faker`                  | 10.6.0  | MIT        | 2026-08-14 | Generátor syntetického korpusu PII (cs_CZ) |
+
+### Lokální NER eval (Node, jen `pnpm eval:pii:ner`)
+
+`@huggingface/transformers` je i dev závislost kořene. V Node táhne `onnxruntime-node` 1.30.0
+(MIT, CPU binárky jsou v balíčku) a `sharp` 0.35.5 (Apache-2.0). Build skripty `onnxruntime-node`
+(stahuje volitelné CUDA binárky) a `protobufjs` (vypisuje jen upozornění) jsou zakázané přes
+`allowBuilds` v `pnpm-workspace.yaml`.
+
+**Pozor:** `sharp` instaluje jako volitelnou závislost `@img/sharp-libvips-*` s licencí
+**LGPL-3.0-or-later**. Ta není v povoleném seznamu. NER pracuje jen s textem, takže se `sharp`
+nevolá. Do `dist` ani do balíčku `pii-cz` se nedostane, je jen na vývojovém stroji a v CI.
+Rozhodnutí je zapsané jako OQ-15.
 
 `eslint-config-prettier` má poslední vydání z 07/2025. Jde o malý, stabilní balíček (jen vypíná
 pravidla) s podporou ESLint 10, takže pomalejší tempo vydávání nevadí.

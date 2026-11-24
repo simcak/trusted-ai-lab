@@ -292,3 +292,16 @@ udělal jinak"** 9) disclaimer, licence.
 - **`TraceLog` je samostatná vrstva:** `withTracing(provider, log)` obalí libovolný `LlmProvider`, takže tracing není odpovědnost providerů. Nahrávka (`RecordingSchema`) nese `kind: 'recorded' | 'fixture'`, `model`, `recordedAt` a `promptVersion`.
 - **Náhled `TracePanel` na `#/agent`** používá ručně psanou fixture (`kind: 'fixture'`, `model: 'fixture'`) s viditelným štítkem „ne výstup modelu". Ve fázi 3 ji nahradí skutečné nahrávky.
 - Budoucí balíčky (`pii-cz`, `intake-rules`, `agent-runtime`) a složky `data/`, `evals/`, `docs/adr/` mají zatím jen `README.md`, bez `package.json` a bez kódu.
+
+### 2026-11-23 — fáze 1
+
+- **NER je volitelný plugin.** Vybraný model: `onnx-community/small-e-czech-finetuned-ner-wikiann-ONNX`, revize `0c3c43a` připnutá v `evals/pii/ner-model.ts` (int8, 14,2 MB, CC BY 4.0 upstream). `pii-cz` nemá runtime závislosti a NER dostává přes injektovaný klasifikátor (`createNerDetector`). Používá se jen PER → `PERSON`.
+- **NER eval běží jen lokálně** (`pnpm eval:pii:ner`). Predikce se commitují do `evals/pii/ner-predictions.json` s modelem, revizí, verzí runtime a hashem korpusu. CI je přehrává se současnými pravidly bez sítě a selže, když hash korpusu nesedí.
+- **ONNX Runtime WASM se servíruje z vlastního webu**, ne z výchozího jsDelivr CDN: žádný cizí kód a stejná verze jako v lockfile. Z Hugging Face se stahují jen soubory modelu. `onnxruntime-web` je proto přímá závislost webu ve stejné (dev) verzi, jakou chce transformers.js.
+- **Build skripty `onnxruntime-node` a `protobufjs` jsou zakázané** přes `allowBuilds` v `pnpm-workspace.yaml` (CPU binárky jsou v balíčku, skript stahuje jen CUDA).
+- **Slovník jmen je jen křestní** (MV ČR „Seznam jmen"). Otevřená data četnosti příjmení neexistují, příjmení se proto poznávají heuristikou. Faker se pro slovník nepoužívá, protože generuje korpus a eval by byl kruhový. MV řadí i běžná jména (Jan, Karel, Michal) pod `NEUTRALNI`, takže se prohledávají všechny skupiny.
+- **Generátor korpusu nepoužívá validátory `pii-cz`** (vlastní kontrolní součty a skloňování). Korpus má části `dev` (ladění) a `test` (report). Korpus i výsledky se commitují a CI je ověřuje přes `--check` (`pnpm evals:check`).
+- **Jediný zdroj čísel na stránce je `evals/pii/results.json`**, validovaný zodem (`evals/pii/schema.ts`). Texty, které hodnotí výsledky (např. „model je horší než pravidla"), volí komponenta podle čísel.
+- **Vratná pseudonymizace na `#/pii` nevolá model.** Odpověď je šablona v kódu s viditelným štítkem „Simulovaná odpověď". Skutečné volání přijde ve fázi 3. Trace události `pii` nesou jen počty a zástupné symboly.
+- **Placeholder** se sdílenými komponentami `ModuleHeader` a `StoryNav`. `registry.ts` má `status: 'ready' | 'planned'`, karta hotového modulu ukazuje „Hotovo".
+- **`pii-cz` má build pro npm** (`tsc` → `dist`, `rewriteRelativeImportExtensions`), ale zůstává `private`, dokud se nevyřeší licence slovníku jmen (OQ-11).
