@@ -239,6 +239,9 @@ importers:
       '@huggingface/transformers':
         specifier: 4.3.2
         version: 4.3.2(@types/node@24.19.2)
+      '@trusted-ai-lab/agent-runtime':
+        specifier: workspace:*
+        version: link:../../packages/agent-runtime
       '@trusted-ai-lab/intake-rules':
         specifier: workspace:*
         version: link:../../packages/intake-rules

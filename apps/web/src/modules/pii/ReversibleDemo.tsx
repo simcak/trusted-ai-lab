@@ -6,6 +6,7 @@ import {
   type PseudonymEntry,
 } from '@trusted-ai-lab/pii-cz';
 import { useMemo } from 'react';
+import { Link } from 'react-router';
 import { TracePanel } from '../../components/TracePanel/TracePanel.tsx';
 import { cs } from '../../i18n/cs.ts';
 import styles from './pii.module.css';
@@ -118,7 +119,13 @@ export function ReversibleDemo({ text, findings }: { text: string; findings: rea
               {flow.unknown.length > 0 && <p role="alert">{t.unknown(flow.unknown.join(', '))}</p>}
             </li>
           </ol>
-          <p className={styles.small}>{t.simulatedNote}</p>
+          <p className={styles.small}>
+            {t.simulatedNote}{' '}
+            <Link to={{ pathname: '/agent', search: '?scenario=s4-rodne-cislo' }}>
+              {t.simulatedNoteLink}
+            </Link>
+            .
+          </p>
           <p className={styles.small}>{t.limitation}</p>
 
           <h3>{t.mapHeading}</h3>
