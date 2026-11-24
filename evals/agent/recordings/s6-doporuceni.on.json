@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "kind": "recorded",
+  "scenario": "s6-doporuceni/on",
+  "model": "claude-sonnet-5-5",
+  "recordedAt": "2026-11-24T15:19:51.669Z",
+  "promptVersion": "agent-v1",
+  "steps": [],
+  "run": {
+    "scenarioId": "s6-doporuceni",
+    "guardrails": true,
+    "persona": "klient",
+    "provider": "claude-code",
+    "effort": "medium",
+    "policy": {
+      "maxModelCalls": 5,
+      "maxTotalTokens": 80000,
+      "maxIdenticalCalls": 2,
+      "maxConsecutiveToolErrors": 3
+    }
+  },
+  "approvals": []
+}

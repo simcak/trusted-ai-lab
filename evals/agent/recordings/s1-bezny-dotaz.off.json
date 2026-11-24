@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 2,
+  "kind": "recorded",
+  "scenario": "s1-bezny-dotaz/off",
+  "model": "claude-sonnet-5-5",
+  "recordedAt": "2026-11-24T15:09:24.015Z",
+  "promptVersion": "agent-v1",
+  "steps": [
+    {
+      "step": 0,
+      "requestHash": "43209e450a04da42dc7a67dab3adf65ca00f7aa6c1a68d62b0ab5fa7ac6f3b55",
+      "response": {
+        "content": "Nejprve vyhledám dluhopisové fondy s rizikem SRI nejvýš 3.",
+        "toolCalls": [
+          {
+            "id": "cc_0_0",
+            "name": "search_funds",
+            "arguments": {
+              "query": "",
+              "filters": {
+                "category": "dluhopisový",
+                "maxSri": 3
+              }
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3380,
+          "outputTokens": 155
+        },
+        "latencyMs": 3968,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 1,
+      "requestHash": "59b7cce3cdf125bb127d62252e9df34b2f264c80fe92333d0c748af356ecfe82",
+      "response": {
+        "content": "Našel jsem dva dluhopisové fondy s SRI nejvýš 3: Fond Alfa a Fond Beta. Nyní spočítám poplatky pro každý z nich.",
+        "toolCalls": [
+          {
+            "id": "cc_1_0",
+            "name": "calculate_fees",
+            "arguments": {
+              "fundId": "alfa",
+              "amount": 200000,
+              "years": 10
+            }
+          },
+          {
+            "id": "cc_1_1",
+            "name": "calculate_fees",
+            "arguments": {
+              "fundId": "beta",
+              "amount": 200000,
+              "years": 10
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3881,
+          "outputTokens": 217
+        },
+        "latencyMs": 2210,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 2,
+      "requestHash": "b5b145d42cd077c04a3a5c4bbbde7a8780e11bf53c74a0251950cd8a0472e228",
+      "response": {
+        "content": "Dluhopisové fondy s rizikem SRI nejvýš 3 jsou dva. Poplatky při investici 200 000 Kč na 10 let:\n\n- Fond Alfa (SRI 2): vstupní poplatek 1 % = 2 000 Kč, roční poplatek 0,6 % celkem 11 564,32 Kč, dohromady 13 564,32 Kč (asi 6,78 % investované částky).\n- Fond Beta (SRI 3): vstupní poplatek 1,5 % = 3 000 Kč, roční poplatek 0,9 % celkem 17 028,90 Kč, dohromady 20 028,90 Kč (asi 10,01 % investované částky).\n\nFond Alfa vychází na poplatcích o 6 464,58 Kč levněji. Má také nižší riziko. Fond Beta investuje do podnikových dluhopisů středně velkých firem ze střední Evropy, takže má vyšší výnosový potenciál, ale i vyšší riziko. Fond Alfa investuje do státních a podnikových dluhopisů s investičním ratingem v eurozóně a měnové riziko má zajištěné do korun.\n\nVýpočet je ilustrativní. Počítá s nulovým zhodnocením a roční poplatek se strhává z aktuální hodnoty investice. Nejde o předpověď.",
+        "toolCalls": [],
+        "stopReason": "stop",
+        "usage": {
+          "inputTokens": 4623,
+          "outputTokens": 538
+        },
+        "latencyMs": 3749,
+        "model": "claude-sonnet-5-5"
+      }
+    }
+  ],
+  "run": {
+    "scenarioId": "s1-bezny-dotaz",
+    "guardrails": false,
+    "persona": "klient",
+    "provider": "claude-code",
+    "effort": "medium"
+  },
+  "approvals": []
+}
