@@ -55,35 +55,6 @@ for (const m of modules) {
   });
 }
 
-test('agent preview replays the fixture into the TracePanel and copies JSON', async ({
-  page,
-  context,
-}) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-  await page.goto('./#/agent');
-
-  await expect(page.getByTestId('fixture-badge')).toContainText('ne výstup modelu');
-  await page.getByRole('button', { name: 'Přehrát ukázku' }).click();
-
-  const panel = page.getByTestId('trace-panel');
-  await expect(panel.getByTestId('trace-event')).toHaveCount(6);
-  await expect(panel.getByText('Zamítnuto')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Přehrát ukázku' })).toBeEnabled();
-
-  await panel.getByRole('button', { name: 'Zkopírovat trace jako JSON' }).click();
-  await expect(panel.getByRole('status')).toHaveText('Trace je zkopírovaný do schránky.');
-  const copied = await page.evaluate(() => navigator.clipboard.readText());
-  const parsed = JSON.parse(copied) as { type: string }[];
-  expect(parsed.map((e) => e.type)).toEqual([
-    'llm_call',
-    'policy_decision',
-    'tool_call',
-    'llm_call',
-    'policy_decision',
-    'llm_call',
-  ]);
-});
-
 test('unknown route shows the not-found page', async ({ page }) => {
   await page.goto('./#/neexistuje');
   await expect(page.getByRole('heading', { level: 1, name: 'Stránka nenalezena' })).toBeVisible();

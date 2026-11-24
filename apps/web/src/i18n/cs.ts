@@ -709,22 +709,6 @@ export const cs = {
     backHome: 'Zpět na úvod',
   },
 
-  tracePreview: {
-    heading: 'Náhled komponenty: časová osa trace',
-    fixtureBadge: 'Testovací fixture: ručně psaná data, ne výstup modelu',
-    description:
-      'Takhle bude vypadat záznam běhu agenta. Data procházejí stejnou cestou jako budoucí skutečné nahrávky (ReplayProvider → trace → panel), ale jsou ručně připravená, ne vygenerovaná modelem.',
-    provenance: 'Původ dat',
-    model: 'Model',
-    recordedAt: 'Datum',
-    promptVersion: 'Verze promptu',
-    run: 'Přehrát ukázku',
-    running: 'Přehrávám…',
-    clear: 'Vymazat',
-    userMessage: 'Najdi akciové fondy s nízkými poplatky a pošli mi shrnutí e-mailem.',
-    panelTitle: 'Trace ukázkového běhu',
-  },
-
   trace: {
     defaultTitle: 'Trace',
     empty: 'Zatím žádné události.',
