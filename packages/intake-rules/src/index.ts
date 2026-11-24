@@ -1,11 +1,12 @@
 /**
  * intake-rules — deterministic rules engine for the Intake module ("should this be AI at all?").
  *
- *   const result = evaluate(facts);
+ *   const result = evaluate(PRESETS['credit-decision']);
  *   result.pattern;          // 'classic-ml'
  *   result.humanInTheLoop;   // true
  *   result.aiAct.category;   // 'high-risk'
  *   result.fired;            // ids of every rule that applied, see RULES
+ *   estimateCost(result.pattern, input.volume, input.latency, PricingSchema.parse(json));
  *
  * No language model, no I/O: the same input always yields the same answer.
  */
@@ -46,4 +47,21 @@ export {
   type IntakeResult,
   type RejectedPattern,
 } from './engine.ts';
+export {
+  estimateCost,
+  MODEL_TIERS,
+  PricingSchema,
+  TOKEN_PROFILES,
+  tokenPatternOf,
+  VOLUME_RANGES,
+  type CostEstimate,
+  type ModelTier,
+  type Pricing,
+  type Range,
+  type TierEstimate,
+  type TokenPattern,
+  type TokenProfile,
+} from './cost.ts';
+export { PRESET_IDS, PRESETS, type PresetId } from './presets.ts';
+
 export const VERSION = '0.1.0';
