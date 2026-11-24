@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { test as base, expect } from '@playwright/test';
 
@@ -162,4 +162,113 @@ test('pii eval table shows the numbers from evals/pii/results.json', async ({ pa
 
   await page.getByLabel('Jen pravidla').check();
   await expect(total).toContainText(percent.format(results.configs.rules!.test.micro.strict.f1));
+});
+
+// Agent (module 3) --------------------------------------------------------------------------------
+
+const RECORDINGS_DIR = resolve(import.meta.dirname, '../../../evals/agent/recordings');
+const recordingFiles = existsSync(RECORDINGS_DIR)
+  ? readdirSync(RECORDINGS_DIR).filter((f) => f.endsWith('.json'))
+  : [];
+
+test('agent page works offline: scenarios, rules and the BYOK panel without any network call', async ({
+  page,
+}) => {
+  const external: string[] = [];
+  page.on('request', (req) => {
+    if (new URL(req.url()).hostname !== 'localhost') external.push(req.url());
+  });
+  await page.goto('./#/agent?scenario=s4-rodne-cislo');
+  await expect(page.getByRole('radio', { name: /Rodné číslo v dotazu/ })).toBeChecked();
+  await expect(page.getByText('785215/3650')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Pravidla' })).toBeVisible();
+  await expect(page.getByTestId('byok-panel')).toBeVisible();
+  if (recordingFiles.length === 0) {
+    await expect(page.getByTestId('agent-not-recorded')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Spustit', exact: true })).toBeDisabled();
+  }
+  expect(external).toEqual([]);
+});
+
+test('every recorded scenario replays to an answer without errors or network calls', async ({
+  page,
+}) => {
+  test.skip(recordingFiles.length === 0, 'Nahrávky zatím chybí (pnpm record:agent).');
+  test.setTimeout(120_000);
+  const external: string[] = [];
+  page.on('request', (req) => {
+    if (new URL(req.url()).hostname !== 'localhost') external.push(req.url());
+  });
+  for (const file of recordingFiles) {
+    const [scenario, mode] = file.replace(/\.json$/, '').split('.');
+    await page.goto(`./#/agent?scenario=${scenario}${mode === 'off' ? '&guardrails=off' : ''}`);
+    await expect(page.getByTestId('agent-provenance')).toBeVisible();
+    await page.getByRole('button', { name: 'Spustit', exact: true }).click();
+    const answer = page.getByTestId('agent-answer');
+    const dialog = page.getByTestId('approval-dialog');
+    // Approvals show the recorded decision; continue until the run ends.
+    while (!(await answer.isVisible())) {
+      if (await dialog.isVisible())
+        await dialog.getByRole('button', { name: 'Pokračovat' }).click();
+      await page.waitForTimeout(100);
+    }
+    await expect(page.getByTestId('agent-error')).toHaveCount(0);
+    await expect(page.getByTestId('trace-panel').getByTestId('trace-event').first()).toBeVisible();
+  }
+  expect(external).toEqual([]);
+});
+
+test('BYOK sends the browser-access header only after the click and keeps the key out of storage', async ({
+  page,
+}) => {
+  const apiRequests: { method: string; browserAccess: string | undefined }[] = [];
+  const cors = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-headers': '*',
+    'access-control-allow-methods': 'POST, OPTIONS',
+  };
+  await page.route('https://api.anthropic.com/**', async (route) => {
+    const request = route.request();
+    apiRequests.push({
+      method: request.method(),
+      browserAccess: request.headers()['anthropic-dangerous-direct-browser-access'],
+    });
+    if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+    // Mocked API answer — a test fixture, not model output.
+    return route.fulfill({
+      status: 200,
+      headers: { ...cors, 'content-type': 'application/json', 'request-id': 'req_e2e' },
+      body: JSON.stringify({
+        id: 'msg_e2e',
+        type: 'message',
+        role: 'assistant',
+        model: 'claude-sonnet-5-5',
+        content: [{ type: 'text', text: 'Testovací odpověď z podvrženého API.' }],
+        stop_reason: 'end_turn',
+        stop_sequence: null,
+        usage: { input_tokens: 12, output_tokens: 7 },
+      }),
+    });
+  });
+
+  await page.goto('./#/agent');
+  const panel = page.getByTestId('byok-panel');
+  await panel.locator('summary').click();
+  await panel.getByLabel('API klíč Anthropic').fill('test-key-not-real');
+  expect(apiRequests).toEqual([]);
+
+  await panel.getByRole('button', { name: 'Spustit s vlastním klíčem' }).click();
+  await expect(page.getByTestId('agent-answer')).toContainText('Testovací odpověď');
+  await expect(page.getByText('Živý běh s vaším klíčem')).toBeVisible();
+
+  const post = apiRequests.find((r) => r.method === 'POST');
+  expect(post?.browserAccess).toBe('true');
+  const stored = await page.evaluate(() => ({
+    local: localStorage.length,
+    session: sessionStorage.length,
+    href: location.href,
+  }));
+  expect(stored.local + stored.session).toBe(0);
+  expect(stored.href).not.toContain('test-key');
+  await expect(page.getByTestId('trace-panel')).not.toContainText('test-key');
 });
