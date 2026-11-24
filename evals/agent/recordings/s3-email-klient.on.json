@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 2,
+  "kind": "recorded",
+  "scenario": "s3-email-klient/on",
+  "model": "claude-sonnet-5-5",
+  "recordedAt": "2026-11-24T15:10:23.793Z",
+  "promptVersion": "agent-v1",
+  "steps": [
+    {
+      "step": 0,
+      "requestHash": "a660b702460dd629f3fc578e23f2eaaa912285047336929a2f5bc6318e30ec86",
+      "response": {
+        "content": "Nejdřív ověřím fond Alfa v databázi.",
+        "toolCalls": [
+          {
+            "id": "cc_0_0",
+            "name": "search_funds",
+            "arguments": {
+              "query": "Alfa"
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3047,
+          "outputTokens": 237
+        },
+        "latencyMs": 2643,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 1,
+      "requestHash": "a7be516fb08fee2f78f99dbd2d5ec06868a579c57902e6fc6e060a65ef38d871",
+      "response": {
+        "content": "Fond Alfa jsem našel. Nyní spočítám poplatky.",
+        "toolCalls": [
+          {
+            "id": "cc_1_0",
+            "name": "calculate_fees",
+            "arguments": {
+              "fundId": "alfa",
+              "amount": 100000,
+              "years": 5
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3401,
+          "outputTokens": 141
+        },
+        "latencyMs": 1723,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 2,
+      "requestHash": "d65520b13aeba15e8458e8bb1b0202b125e2e7ab023f048737f88891315b0b4c",
+      "response": {
+        "content": "E-mail odeslat neumím, protože k tomu nemám nástroj. Souhrn vám proto píšu sem a můžete si ho zkopírovat.\n\nFond Alfa (dluhopisový, SRI 2), investice 100 000 Kč na 5 let:\n- Vstupní poplatek: 1 % (1 000 Kč)\n- Roční poplatek: 0,6 % z aktuální hodnoty investice, za 5 let celkem 2 934,57 Kč\n- Poplatky celkem: 3 934,57 Kč, tedy 3,93 % investované částky\n\nJde o ilustrativní výpočet s nulovým zhodnocením. Není to předpověď.",
+        "toolCalls": [],
+        "stopReason": "stop",
+        "usage": {
+          "inputTokens": 7943,
+          "outputTokens": 573
+        },
+        "latencyMs": 4828,
+        "model": "claude-sonnet-5-5"
+      }
+    }
+  ],
+  "run": {
+    "scenarioId": "s3-email-klient",
+    "guardrails": true,
+    "persona": "klient",
+    "provider": "claude-code",
+    "effort": "medium",
+    "policy": {
+      "maxModelCalls": 5,
+      "maxTotalTokens": 80000,
+      "maxIdenticalCalls": 2,
+      "maxConsecutiveToolErrors": 3
+    }
+  },
+  "approvals": []
+}
