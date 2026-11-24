@@ -2,7 +2,7 @@
 
 > **EN:** Provider-neutral LLM interface shared by all modules: `LlmProvider` with a deterministic
 > `ReplayProvider` (default, offline) and an Anthropic BYOK provider over the official SDK,
-> recordings with a per-step request hash for drift detection, and trace events that every module
+> a local WebLLM provider (the model runs on the visitor's GPU), recordings with a per-step request hash for drift detection, and trace events that every module
 > renders with the shared `TracePanel`.
 
 ```ts
@@ -12,15 +12,16 @@ interface LlmProvider {
 }
 ```
 
-| Co                                                    | Kde                           | Poznámka                                                                                                                        |
-| ----------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Zprávy, nástroje, odpověď                             | `types.ts`                    | `system` je pole požadavku; asistent nese `toolCalls` a neprůhledný `providerState` (thinking bloky), který se vrací beze změny |
-| `ReplayProvider`                                      | `replay-provider.ts`          | odpovídá z nahrávky podle `scenario + step`; s `verifyRequest` porovná otisk požadavku a při rozdílu hodí `ReplayDriftError`    |
-| `hashRequest`                                         | `request-hash.ts`             | SHA-256 kanonického požadavku (bez `context` a `providerState`): detekce nesouladu, ne ochrana proti úpravám                    |
-| Nahrávka                                              | `recording.ts`                | `kind: recorded \| fixture`, model, datum, verze promptu; každý krok nese otisk, odpověď a model, který ho obsloužil            |
-| Trace                                                 | `trace.ts`, `with-tracing.ts` | `withTracing(provider, log)` zapíše každé volání; `providerState` do trace nikdy nejde                                          |
-| BYOK Anthropic (`@trusted-ai-lab/llm-core/anthropic`) | `anthropic-provider.ts`       | samostatná podcesta, aby SDK nebylo v úvodním bundlu                                                                            |
-| Claude Code (`@trusted-ai-lab/llm-core/claude-code`)  | `claude-code-provider.ts`     | jen pro nahrávací skript: `claude -p` s předplatným; konverzace jako JSON, nástroje přes strukturovaný výstup                   |
+| Co                                                    | Kde                           | Poznámka                                                                                                                                 |
+| ----------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Zprávy, nástroje, odpověď                             | `types.ts`                    | `system` je pole požadavku; asistent nese `toolCalls` a neprůhledný `providerState` (thinking bloky), který se vrací beze změny          |
+| `ReplayProvider`                                      | `replay-provider.ts`          | odpovídá z nahrávky podle `scenario + step`; s `verifyRequest` porovná otisk požadavku a při rozdílu hodí `ReplayDriftError`             |
+| `hashRequest`                                         | `request-hash.ts`             | SHA-256 kanonického požadavku (bez `context` a `providerState`): detekce nesouladu, ne ochrana proti úpravám                             |
+| Nahrávka                                              | `recording.ts`                | `kind: recorded \| fixture`, model, datum, verze promptu; každý krok nese otisk, odpověď a model, který ho obsloužil                     |
+| Trace                                                 | `trace.ts`, `with-tracing.ts` | `withTracing(provider, log)` zapíše každé volání; `providerState` do trace nikdy nejde                                                   |
+| BYOK Anthropic (`@trusted-ai-lab/llm-core/anthropic`) | `anthropic-provider.ts`       | samostatná podcesta, aby SDK nebylo v úvodním bundlu                                                                                     |
+| Lokální model (`@trusted-ai-lab/llm-core/webllm`)     | `webllm-provider.ts`          | engine WebLLM se předává zvenku (strukturální rozhraní), takže `llm-core` na WebLLM nezávisí; streamuje text přes `onText`, bez nástrojů |
+| Claude Code (`@trusted-ai-lab/llm-core/claude-code`)  | `claude-code-provider.ts`     | jen pro nahrávací skript: `claude -p` s předplatným; konverzace jako JSON, nástroje přes strukturovaný výstup                            |
 
 ## BYOK z prohlížeče
 

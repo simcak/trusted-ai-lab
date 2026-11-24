@@ -2,14 +2,15 @@
   "name": "@trusted-ai-lab/llm-core",
   "version": "0.0.0",
   "private": true,
-  "description": "LlmProvider interface, Replay and Anthropic (BYOK) implementations and trace types shared by all modules.",
+  "description": "LlmProvider interface, Replay, Anthropic (BYOK) and local WebLLM implementations and trace types shared by all modules.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
     "./anthropic": "./src/anthropic.ts",
-    "./claude-code": "./src/claude-code.ts"
+    "./claude-code": "./src/claude-code.ts",
+    "./webllm": "./src/webllm.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
