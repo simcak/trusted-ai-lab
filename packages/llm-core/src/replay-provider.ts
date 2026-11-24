@@ -1,4 +1,5 @@
 import type { RecordedStep, Recording } from './recording.ts';
+import { hashRequest } from './request-hash.ts';
 import type { LlmProvider, LlmRequest, LlmResponse } from './types.ts';
 
 export class ReplayMissError extends Error {
@@ -17,9 +18,26 @@ export class ReplayMissError extends Error {
   }
 }
 
+/** The code sent a different request than the one the recorded response answered. */
+export class ReplayDriftError extends Error {
+  override readonly name = 'ReplayDriftError';
+  readonly scenario: string;
+  readonly step: number;
+
+  constructor(scenario: string, step: number) {
+    super(
+      `Request for scenario "${scenario}", step ${String(step)} differs from the recorded one — re-record the scenario`,
+    );
+    this.scenario = scenario;
+    this.step = step;
+  }
+}
+
 export interface ReplayProviderOptions {
   /** Artificial delay before resolving, so the UI can show a loading state. Default 0. */
   delayMs?: number;
+  /** Compare `hashRequest(req)` with the recorded `requestHash` and throw `ReplayDriftError` on mismatch. */
+  verifyRequest?: boolean;
 }
 
 interface IndexedStep {
@@ -38,9 +56,11 @@ export class ReplayProvider implements LlmProvider {
   private readonly index = new Map<string, IndexedStep>();
   private readonly recordingsByScenario = new Map<string, Recording>();
   private readonly delayMs: number;
+  private readonly verifyRequest: boolean;
 
   constructor(recordings: readonly Recording[], options: ReplayProviderOptions = {}) {
     this.delayMs = options.delayMs ?? 0;
+    this.verifyRequest = options.verifyRequest ?? false;
     for (const recording of recordings) {
       if (this.recordingsByScenario.has(recording.scenario)) {
         throw new Error(`Duplicate recording for scenario "${recording.scenario}"`);
@@ -65,14 +85,15 @@ export class ReplayProvider implements LlmProvider {
     const hit = this.index.get(keyOf(ctx.scenario, ctx.step));
     if (!hit) throw new ReplayMissError(ctx.scenario, ctx.step);
 
+    if (this.verifyRequest && (await hashRequest(req)) !== hit.step.requestHash) {
+      throw new ReplayDriftError(ctx.scenario, ctx.step);
+    }
+
     if (this.delayMs > 0) await sleep(this.delayMs, signal);
+    signal?.throwIfAborted();
 
     // Clone so callers can never mutate the recording and break determinism.
-    return {
-      ...structuredClone(hit.step.response),
-      model: hit.recording.model,
-      provider: this.id,
-    };
+    return { ...structuredClone(hit.step.response), provider: this.id };
   }
 }
 

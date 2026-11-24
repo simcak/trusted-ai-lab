@@ -37,8 +37,10 @@ describe('Landing', () => {
         <Landing />
       </MemoryRouter>,
     );
-    const [intake, pii] = screen.getAllByTestId('module-card');
-    expect(within(intake!).getByText(cs.status.ready)).toBeTruthy();
-    expect(within(pii!).getByText(cs.status.ready)).toBeTruthy();
+    const [intake, pii, agent, local] = screen.getAllByTestId('module-card');
+    for (const card of [intake, pii, agent]) {
+      expect(within(card!).getByText(cs.status.ready)).toBeTruthy();
+    }
+    expect(within(local!).queryByText(cs.status.ready)).toBeNull();
   });
 });

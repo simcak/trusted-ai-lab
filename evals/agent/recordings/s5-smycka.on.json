@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 2,
+  "kind": "recorded",
+  "scenario": "s5-smycka/on",
+  "model": "claude-sonnet-5-5",
+  "recordedAt": "2026-11-24T15:11:11.635Z",
+  "promptVersion": "agent-v1",
+  "steps": [
+    {
+      "step": 0,
+      "requestHash": "d23aedb5f1a36f054624decb5124456b272d3f7d84b336b29f034fcec34df269",
+      "response": {
+        "content": "Ověřuji nabídku fondů peněžního trhu v databázi.",
+        "toolCalls": [
+          {
+            "id": "cc_0_0",
+            "name": "search_funds",
+            "arguments": {
+              "query": "",
+              "filters": {
+                "category": "peněžní trh"
+              }
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3034,
+          "outputTokens": 139
+        },
+        "latencyMs": 1819,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 1,
+      "requestHash": "b2b39bd0d52a42395f51339053d8ec8b71d552e43402cb42cdd494b34761922c",
+      "response": {
+        "content": "Vyhledávání fondů selhalo kvůli dočasné chybě služby. Zkouším to znovu.",
+        "toolCalls": [
+          {
+            "id": "cc_1_0",
+            "name": "search_funds",
+            "arguments": {
+              "query": "",
+              "filters": {
+                "category": "peněžní trh"
+              }
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3298,
+          "outputTokens": 179
+        },
+        "latencyMs": 2036,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 2,
+      "requestHash": "4ceb87260f904fe8ac10392b7048e60e0303ad464c9a469aca32014ccba3689c",
+      "response": {
+        "content": "Vyhledávání fondů selhalo podruhé kvůli dočasné chybě služby. Zkouším to ještě jednou.",
+        "toolCalls": [
+          {
+            "id": "cc_2_0",
+            "name": "search_funds",
+            "arguments": {
+              "query": "peněžní trh",
+              "filters": {
+                "category": "peněžní trh"
+              }
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3575,
+          "outputTokens": 244
+        },
+        "latencyMs": 2521,
+        "model": "claude-sonnet-5-5"
+      }
+    }
+  ],
+  "run": {
+    "scenarioId": "s5-smycka",
+    "guardrails": true,
+    "persona": "klient",
+    "provider": "claude-code",
+    "effort": "medium",
+    "policy": {
+      "maxModelCalls": 5,
+      "maxTotalTokens": 80000,
+      "maxIdenticalCalls": 2,
+      "maxConsecutiveToolErrors": 3
+    }
+  },
+  "approvals": []
+}

@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 2,
+  "kind": "recorded",
+  "scenario": "s5-smycka/off",
+  "model": "claude-sonnet-5-5",
+  "recordedAt": "2026-11-24T15:11:20.905Z",
+  "promptVersion": "agent-v1",
+  "steps": [
+    {
+      "step": 0,
+      "requestHash": "e754ba7e92ed90bd1f734b5eaeab7f697fe7c7b425fa48d6ef938bd1f6fb4c07",
+      "response": {
+        "content": "Zjišťuji dostupné fondy peněžního trhu.",
+        "toolCalls": [
+          {
+            "id": "cc_0_0",
+            "name": "search_funds",
+            "arguments": {
+              "query": "",
+              "filters": {
+                "category": "peněžní trh"
+              }
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3337,
+          "outputTokens": 136
+        },
+        "latencyMs": 1619,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 1,
+      "requestHash": "d9b22baa8df3363f156d26bf21d3dcfc7e938f0817dff707eb3141b639ed69b4",
+      "response": {
+        "content": "Služba vrátila chybu 503, zkouším dotaz zopakovat.",
+        "toolCalls": [
+          {
+            "id": "cc_1_0",
+            "name": "search_funds",
+            "arguments": {
+              "query": "",
+              "filters": {
+                "category": "peněžní trh"
+              }
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 7122,
+          "outputTokens": 188
+        },
+        "latencyMs": 5205,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 2,
+      "requestHash": "d51422d9bffc5c0fbe409e05082b4d8b06985a254b950290391c6d4af47a9608",
+      "response": {
+        "content": "Služba s fondy je stále nedostupná. Zkusím to ještě jednou, tentokrát s textovým dotazem.",
+        "toolCalls": [
+          {
+            "id": "cc_2_0",
+            "name": "search_funds",
+            "arguments": {
+              "query": "peněžní trh"
+            }
+          }
+        ],
+        "stopReason": "tool_use",
+        "usage": {
+          "inputTokens": 3784,
+          "outputTokens": 252
+        },
+        "latencyMs": 2945,
+        "model": "claude-sonnet-5-5"
+      }
+    },
+    {
+      "step": 3,
+      "requestHash": "a7a07b5fd5e4979879862f2727b3a84ce7c91c45799abcc71d37a4628182606b",
+      "response": {
+        "content": "Omlouvám se, ale nepodařilo se mi zjistit aktuální nabídku fondů peněžního trhu. Databáze fondů je dočasně nedostupná (chyba 503) a tři pokusy po sobě selhaly. Nechci uvádět údaje o fondech ani poplatcích z paměti, protože by mohly být nepřesné.\n\n- Zkuste dotaz prosím zopakovat za chvíli, rád ho znovu zpracuji.\n- Až se služba obnoví, vypíšu fondy peněžního trhu a poplatky u nich nechám spočítat. K tomu budu potřebovat investovanou částku a dobu investice.",
+        "toolCalls": [],
+        "stopReason": "stop",
+        "usage": {
+          "inputTokens": 4014,
+          "outputTokens": 303
+        },
+        "latencyMs": 3332,
+        "model": "claude-sonnet-5-5"
+      }
+    }
+  ],
+  "run": {
+    "scenarioId": "s5-smycka",
+    "guardrails": false,
+    "persona": "klient",
+    "provider": "claude-code",
+    "effort": "medium"
+  },
+  "approvals": []
+}

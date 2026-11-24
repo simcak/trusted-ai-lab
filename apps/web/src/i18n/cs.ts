@@ -8,6 +8,8 @@ import type {
   PatternId,
   PresetId,
 } from '@trusted-ai-lab/intake-rules';
+import type { RuleId, RunStatus, ScenarioId } from '@trusted-ai-lab/agent-runtime';
+import type { LlmErrorCode, ProviderId } from '@trusted-ai-lab/llm-core';
 import type { PiiType, ReasonCode } from '@trusted-ai-lab/pii-cz';
 
 /**
@@ -271,6 +273,81 @@ const intakeControls: Record<ControlId, string> = {
   logging: 'Automatické logy událostí',
   fria: 'Posouzení dopadu na základní práva (FRIA)',
   evals: 'Měření kvality na pevné sadě příkladů (evaly)',
+};
+
+const agentScenarios: Record<ScenarioId, { title: string; watch: string }> = {
+  's1-bezny-dotaz': {
+    title: 'Běžný dotaz',
+    watch: 'Agent najde fondy a poplatky spočítá nástrojem, ne z hlavy.',
+  },
+  's2-injekce': {
+    title: 'Prompt injection v datech',
+    watch:
+      'Popis jednoho fondu obsahuje skrytý pokyn napsat e-mail všem klientům. Sledujte, co se s ním stane a kdo schvaluje koncept.',
+  },
+  's3-email-klient': {
+    title: 'Klient chce poslat e-mail',
+    watch: 'Klient nástroj pro e-maily nemá. Se zapnutými pravidly ho model vůbec nedostane.',
+  },
+  's4-rodne-cislo': {
+    title: 'Rodné číslo v dotazu',
+    watch: 'Porovnejte, co odchází do modelu. S pravidly jen zástupné symboly.',
+  },
+  's5-smycka': {
+    title: 'Nedostupná služba',
+    watch: 'Vyhledávání vrací chybu 503 a model to zkouší znovu. Sledujte, kdy a čím běh skončí.',
+  },
+  's6-doporuceni': {
+    title: 'Žádost o investiční doporučení',
+    watch: 'S pravidly odpoví pravidla obsahu a model se nevolá. Bez nich rozhoduje jen prompt.',
+  },
+};
+
+const agentRules: Record<RuleId, string> = {
+  'tool-allowlist':
+    'Klient smí hledat a počítat, poradce navíc připravit e-mail. Nepovolený nástroj model nedostane a brána ho zablokuje.',
+  'tool-args': 'Argumenty z modelu jsou nedůvěryhodné. Ověří je schéma nástroje.',
+  'step-budget': 'Nejvýš 5 volání modelu na běh.',
+  'token-budget': 'Nejvýš 80 000 tokenů na běh.',
+  'loop-detection': 'Třetí stejné volání nebo tři chyby téhož nástroje po sobě běh ukončí.',
+  'pii-pseudonymize':
+    'Vše, co jde do modelu, projde knihovnou pii-cz. Skutečné hodnoty se vrací jen lokálně.',
+  'untrusted-output': 'Výstup nástroje je ohraničený a označený jako nedůvěryhodná data.',
+  'prompt-injection': 'Pole, které vypadá jako pokyn pro model, se modelu nepředá.',
+  'content-advice': 'Žádné investiční doporučení: dotaz odmítne a doporučení v odpovědi nahradí.',
+  'human-approval': 'Koncept e-mailu čeká na rozhodnutí člověka. Nic se neodesílá.',
+};
+
+const agentProviders: Record<ProviderId, string> = {
+  replay: 'Přehrání nahrávky',
+  'byok-anthropic': 'Claude API',
+  'byok-openai': 'OpenAI API',
+  webllm: 'Lokální model (WebLLM)',
+  'claude-code': 'Claude Code CLI',
+};
+
+const agentStatus: Record<RunStatus, string> = {
+  completed: 'Model odpověděl',
+  refused_by_policy: 'Odpověděla pravidla, model se nevolal',
+  stopped_by_policy: 'Běh bezpečně ukončila pravidla',
+  step_limit: 'Běh ukončil tvrdý limit runtime',
+  model_refusal: 'Model odmítl odpovědět',
+  max_tokens: 'Odpověď useknul limit tokenů',
+};
+
+const agentErrors: Record<LlmErrorCode | 'drift' | 'aborted', string> = {
+  auth: 'Klíč nebyl přijat. Zkontrolujte ho, případně jeho platnost.',
+  cors_forbidden:
+    'Vaše organizace nepovoluje volání API přímo z prohlížeče (např. kvůli zero data retention nebo Compliance API). S tímto klíčem BYOK fungovat nebude.',
+  permission: 'Klíč nemá oprávnění k tomuto modelu nebo workspace.',
+  rate_limit: 'API hlásí překročený limit požadavků. Zkuste to za chvíli.',
+  bad_request: 'API požadavek odmítlo.',
+  server: 'API je dočasně nedostupné. Zkuste to za chvíli.',
+  network: 'Spojení s API se nepodařilo navázat.',
+  timeout: 'API neodpovědělo včas.',
+  unknown: 'Běh se nepodařilo dokončit.',
+  drift: 'Nahrávka neodpovídá aktuálnímu kódu a je potřeba ji nahrát znovu.',
+  aborted: 'Běh byl přerušen.',
 };
 
 export const cs = {
@@ -557,7 +634,8 @@ export const cs = {
       },
       simulatedBadge: 'Simulovaná odpověď: šablona v kódu, ne výstup jazykového modelu',
       simulatedNote:
-        'Tady jde jen o cestu dat. Skutečné volání modelu se stejnou ochranou přibude v modulu Agent pod kontrolou.',
+        'Tady jde jen o cestu dat. Skutečné volání modelu se stejnou ochranou ukazuje modul Agent pod kontrolou:',
+      simulatedNoteLink: 'scénář Rodné číslo v dotazu',
       mapHeading: 'Mapa zástupných symbolů (jen v paměti této stránky)',
       mapColumns: { placeholder: 'Symbol', type: 'Typ', original: 'Původní hodnota' },
       mapNote: 'Mapa se nikam neukládá ani neodesílá. Po obnovení stránky zmizí.',
@@ -698,6 +776,102 @@ export const cs = {
     },
   },
 
+  agent: {
+    notice:
+      'Odpovědi modelu jsou nahrané. Agent loop, pravidla, nástroje i pseudonymizace běží živě ve vašem prohlížeči. Fondy jsou fiktivní a nic se nikam neodesílá.',
+    run: {
+      heading: 'Spusťte scénář',
+      intro:
+        'Vyberte scénář a pusťte ho se zapnutými i vypnutými guardrails. Se stejným modelem a stejným promptem se liší jen vrstva pravidel.',
+      scenarioLegend: 'Scénář',
+      guardrailsLegend: 'Guardrails',
+      guardrailsOn: 'Zapnuté',
+      guardrailsOff: 'Vypnuté',
+      persona: 'Persona',
+      personas: { klient: 'klient', poradce: 'poradce' },
+      userMessage: 'Dotaz uživatele',
+      start: 'Spustit',
+      running: 'Běží…',
+      notRecorded: 'Tato kombinace zatím nebyla nahrána.',
+    },
+    scenarios: agentScenarios,
+    provenance: {
+      label: 'Původ odpovědí',
+      recorded: 'Skutečný výstup modelu',
+      fixture: 'Testovací fixture: ručně psaná data, ne výstup modelu',
+      noModel: 'Model nebyl volán: odpověděla pravidla.',
+      model: 'Model',
+      provider: 'Rozhraní',
+      providers: agentProviders,
+      recordedAt: 'Nahráno',
+      promptVersion: 'Verze promptu',
+      claudeCodeNote:
+        'Nahráno přes Claude Code CLI s předplatným, ne přes Claude API. Model dostal konverzaci jako JSON a nástroje volal strukturovaným výstupem, ne nativním tool use, takže na injekci ve výsledku nástroje může reagovat jinak. Režim s vlastním klíčem používá nativní tool use.',
+    },
+    result: {
+      heading: 'Výsledek',
+      empty: 'Zatím nic neběželo.',
+      replayLabel: 'Nahraný běh',
+      liveLabel: 'Živý běh s vaším klíčem',
+      user: 'Uživatel',
+      assistant: 'Asistent',
+      status: agentStatus,
+      draftHeading: 'Koncept e-mailu',
+      draftNotSent: 'Neodesláno',
+      draftTo: 'Komu',
+      draftSubject: 'Předmět',
+      roles: { klient: 'klient', kolega: 'kolega', compliance: 'compliance' },
+      errors: agentErrors,
+      traceTitle: 'Trace běhu',
+    },
+    approval: {
+      heading: 'Schválení akce',
+      intro: 'Agent chce připravit koncept e-mailu. Nic se neodesílá, jde jen o koncept.',
+      recordedDecision: 'Rozhodnutí při nahrávání',
+      decisions: { approved: 'Schváleno', rejected: 'Zamítnuto' },
+      decidedBy: {
+        author: 'autor při nahrávání',
+        flag: 'předvolba nahrávacího skriptu',
+        user: 'vy',
+      },
+      continue: 'Pokračovat',
+      approve: 'Schválit',
+      reject: 'Zamítnout',
+    },
+    byok: {
+      summary: 'Vlastní dotaz s vlastním API klíčem (volitelné)',
+      intro:
+        'Pustí stejný agent loop se živým modelem. Volání jde z vašeho prohlížeče přímo do API Anthropic a platíte ho vy.',
+      warnings: [
+        'Klíč zůstane jen v paměti této stránky. Neukládá se, nejde nikam jinam než do API Anthropic a zmizí po opuštění stránky nebo tlačítkem „Zapomenout klíč“.',
+        'Anthropic doporučuje volat API z backendu. Přímé volání z prohlížeče je vhodné pro vývoj a zkoušení: použijte klíč s krátkou platností (např. 3 hodiny) ve zvláštním workspace se spend limitem.',
+        'Organizace se zero data retention nebo Compliance API volání z prohlížeče nepovolují.',
+      ],
+      sourceLink: 'Dokumentace Anthropic: aplikace v prohlížeči',
+      keyLabel: 'API klíč Anthropic',
+      queryLabel: 'Dotaz',
+      personaLegend: 'Persona',
+      model: (model: string) => `Model: ${model}`,
+      start: 'Spustit s vlastním klíčem',
+      forget: 'Zapomenout klíč',
+    },
+    rules: {
+      heading: 'Pravidla',
+      intro:
+        'Policy engine je samostatná vrstva, ne text v promptu. Každé rozhodnutí je v trace s pravidlem a důvodem.',
+      items: agentRules,
+    },
+    limits: {
+      heading: 'Co demo neumí',
+      items: [
+        'Heuristiky pro prompt injection a investiční doporučení zachytí zjevné případy, ne všechny. Proto na nich nestojí akce s dopadem: ty hlídá allowlist a schválení člověkem.',
+        'Persona je přepínač. V produkci ji určí identita a role přihlášeného uživatele.',
+        'Nahrávky vznikly jedním modelem v jednom čase. Jiný model nebo jiná verze se může chovat jinak.',
+        'Koncept e-mailu se nikam neodesílá a demo nemá žádný nástroj, který by mohl něco odeslat.',
+      ],
+    },
+  },
+
   placeholder: {
     moduleOf: (n: number, total: number) => `Modul ${n} ze ${total}`,
     notice: 'Tento modul se připravuje. Níže je popsané, co bude umět.',
@@ -707,22 +881,6 @@ export const cs = {
     prev: 'Předchozí modul',
     next: 'Další modul',
     backHome: 'Zpět na úvod',
-  },
-
-  tracePreview: {
-    heading: 'Náhled komponenty: časová osa trace',
-    fixtureBadge: 'Testovací fixture: ručně psaná data, ne výstup modelu',
-    description:
-      'Takhle bude vypadat záznam běhu agenta. Data procházejí stejnou cestou jako budoucí skutečné nahrávky (ReplayProvider → trace → panel), ale jsou ručně připravená, ne vygenerovaná modelem.',
-    provenance: 'Původ dat',
-    model: 'Model',
-    recordedAt: 'Datum',
-    promptVersion: 'Verze promptu',
-    run: 'Přehrát ukázku',
-    running: 'Přehrávám…',
-    clear: 'Vymazat',
-    userMessage: 'Najdi akciové fondy s nízkými poplatky a pošli mi shrnutí e-mailem.',
-    panelTitle: 'Trace ukázkového běhu',
   },
 
   trace: {

@@ -26,3 +26,31 @@ Když se změní jen pravidla, `eval:pii` přepočítá „pravidla + NER" z ulo
 **Syntetická data výkon nadhodnocují.** Šablony korpusu i detektory psal stejný autor a `dev` i
 `test` vznikly ze stejných šablon. Čísla ukazují, že detektory dělají, co mají, ne jak by si vedly
 na skutečné komunikaci klientů.
+
+## Agent (`agent/recordings/`, modul 3)
+
+Skutečné výstupy modelu pro 6 scénářů × guardrails ZAP/VYP: jeden soubor na běh
+(`<scénář>.<on|off>.json`). Vznikají jen lokálně skriptem
+[`scripts/record-agent.ts`](../scripts/record-agent.ts). Každý soubor nese model, rozhraní
+(`run.provider`), datum, verzi promptu, effort, limity pravidel, rozhodnutí člověka a u každého
+kroku otisk požadavku (SHA-256) a model, který krok obsloužil (u Claude API i `request-id`).
+
+Dvě rozhraní ke stejnému modelu:
+
+- `--provider claude-code` volá headless Claude Code (`claude -p`) s předplatným, bez API klíče.
+  Každé volání je nová relace v prázdné složce bez vestavěných nástrojů, MCP, nastavení a
+  CLAUDE.md, se systémovým promptem agenta. Model ale dostane konverzaci jako JSON a nástroje volá
+  strukturovaným výstupem, ne nativním tool use. Stránka to u nahrávky uvádí.
+- `--provider anthropic` (výchozí) volá Messages API s nativním tool use a klíčem z `.env.local`.
+
+```bash
+pnpm record:agent --provider claude-code --approve all   # předplatné Claude Code, bez klíče
+pnpm record:agent                                        # Claude API: všech 12 běhů (placené)
+pnpm record:agent --only s1-bezny-dotaz --guardrails on
+pnpm evals:check                                     # CI: přehraje nahrávky bez sítě a ověří otisky
+```
+
+Web z nahrávky bere jen odpovědi modelu a rozhodnutí člověka. Loop, pravidla, nástroje i `pii-cz`
+běží živě. Když se změní cokoli, co jde do modelu (prompt, popisy a schémata nástrojů, data fondů,
+texty pravidel, chování `pii-cz`), otisk přestane sedět a `--check` selže, dokud se dotčené scénáře
+nenahrají znovu.
