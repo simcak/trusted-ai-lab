@@ -1,3 +1,13 @@
+import type {
+  AiActCategory,
+  ControlId,
+  DataSensitivity,
+  FactField,
+  IntakeFacts,
+  ModelTier,
+  PatternId,
+  PresetId,
+} from '@trusted-ai-lab/intake-rules';
 import type { PiiType, ReasonCode } from '@trusted-ai-lab/pii-cz';
 
 /**
@@ -49,6 +59,218 @@ const piiReasons: Record<ReasonCode, string> = {
   street_and_number: 'ulice a číslo domu',
   postal_code_and_city: 'PSČ a obec',
   ner_model: 'rozpoznal NER model',
+};
+
+const intakePresets: Record<PresetId, { label: string; description: string }> = {
+  'fee-calculation': {
+    label: 'Výpočet poplatků',
+    description:
+      'Klient na webu zadá částku a dobu investice a uvidí, kolik zaplatí na poplatcích podle sazebníku.',
+  },
+  'policy-summary': {
+    label: 'Shrnutí interních směrnic',
+    description:
+      'Zaměstnanci se ptají na interní směrnice a dostanou odpověď s odkazem na konkrétní pasáž.',
+  },
+  'credit-decision': {
+    label: 'Automatické rozhodnutí o úvěru',
+    description:
+      'Systém z údajů žadatele spočítá skóre a sám schválí nebo zamítne spotřebitelský úvěr.',
+  },
+  'client-chatbot': {
+    label: 'Klientský chatbot',
+    description: 'Chatbot na webu odpovídá klientům na otázky k produktům a k jejich smlouvám.',
+  },
+  'mail-triage': {
+    label: 'Třídění příchozí pošty',
+    description:
+      'Příchozí e-maily se automaticky přiřadí správnému oddělení. Můžou obsahovat i zdravotní údaje z pojistných událostí.',
+  },
+  'contract-extraction': {
+    label: 'Extrakce dat ze smluv',
+    description:
+      'Ze smluv v PDF se vytáhnou smluvní strany, částky a termíny do strukturované podoby pro další systém.',
+  },
+  'emotion-analysis': {
+    label: 'Emoce operátorů call centra',
+    description:
+      'Z hlasu operátorů se během hovorů vyhodnocuje jejich emoční stav jako podklad pro jejich hodnocení.',
+  },
+  'advisor-assistant': {
+    label: 'Asistent poradce',
+    description:
+      'Poradce zadá požadavek klienta. Asistent vyhledá vhodné fondy, spočítá poplatky a připraví koncept e-mailu.',
+  },
+};
+
+type FieldTexts<K extends FactField> = {
+  legend: string;
+  /** Short name used when a rule condition is shown as text. */
+  short: string;
+  options: Record<`${IntakeFacts[K]}`, string>;
+};
+
+const intakeFields: { [K in FactField]: FieldTexts<K> } = {
+  task: {
+    legend: 'Co má systém dělat',
+    short: 'Úloha',
+    options: {
+      calculation: 'Spočítat výsledek',
+      'document-qa': 'Odpovídat z dokumentů',
+      classification: 'Třídit',
+      extraction: 'Vytěžit údaje z dokumentů',
+      drafting: 'Psát texty',
+      actions: 'Provádět kroky v systémech',
+      scoring: 'Hodnotit nebo předpovídat',
+    },
+  },
+  deterministic: {
+    legend: 'Dá se úloha zapsat přesnými pravidly nebo vzorcem?',
+    short: 'Přesné řešení',
+    options: { true: 'Ano', false: 'Ne' },
+  },
+  labeledData: {
+    legend: 'Máte historické příklady se správnou odpovědí?',
+    short: 'Označená data',
+    options: { true: 'Ano', false: 'Ne' },
+  },
+  dataSensitivity: {
+    legend: 'Nejcitlivější data v systému',
+    short: 'Data',
+    options: {
+      public: 'Veřejná',
+      internal: 'Interní',
+      confidential: 'Důvěrná',
+      personal: 'Osobní údaje',
+      special: 'Zvláštní kategorie (např. zdraví)',
+    },
+  },
+  audience: {
+    legend: 'Kdo se systémem pracuje',
+    short: 'Uživatelé',
+    options: { internal: 'Zaměstnanci', clients: 'Klienti' },
+  },
+  decisionAboutPeople: {
+    legend: 'Rozhoduje výstup o lidech?',
+    short: 'Rozhodnutí o lidech',
+    options: {
+      none: 'Ne',
+      credit: 'Úvěr',
+      insurance: 'Životní / zdravotní pojištění',
+      employment: 'Zaměstnání (HR)',
+      other: 'Jiné rozhodnutí o lidech',
+    },
+  },
+  automation: {
+    legend: 'Kdo má poslední slovo',
+    short: 'Automatizace',
+    options: { assist: 'Člověk (systém radí)', automatic: 'Systém (rozhodne nebo jedná sám)' },
+  },
+  explainability: {
+    legend: 'Musí jít každý výsledek přesně vysvětlit?',
+    short: 'Vysvětlitelnost',
+    options: { standard: 'Stačí obecně', high: 'Ano, každý' },
+  },
+  errorTolerance: {
+    legend: 'Tolerance chyb',
+    short: 'Tolerance chyb',
+    options: { low: 'Nízká (chyba je drahá)', medium: 'Střední', high: 'Vysoká' },
+  },
+  practice: {
+    legend: 'Zvláštní účel',
+    short: 'Účel',
+    options: {
+      none: 'Žádný z níže uvedených',
+      'emotion-workplace': 'Rozpoznávání emocí zaměstnanců',
+      'social-scoring': 'Hodnocení lidí podle chování (social scoring)',
+    },
+  },
+  volume: {
+    legend: 'Dotazů měsíčně',
+    short: 'Objem',
+    options: {
+      hundreds: '100–1 000',
+      thousands: '1 000–10 000',
+      'tens-of-thousands': '10 000–100 000',
+      'hundreds-of-thousands': '100 000–1 000 000',
+    },
+  },
+  latency: {
+    legend: 'Jak rychle je potřeba odpověď',
+    short: 'Latence',
+    options: {
+      realtime: 'Okamžitě (pod 1 s)',
+      interactive: 'Během pár sekund',
+      batch: 'Stačí dávkově',
+    },
+  },
+};
+
+const intakePatterns: Record<PatternId, { label: string; summary: string }> = {
+  'no-ai': {
+    label: 'AI nepotřebujete',
+    summary:
+      'Úloha má přesné řešení. Stačí výpočet nebo pravidla v běžném kódu, který jde otestovat a vysvětlit.',
+  },
+  'classic-software': {
+    label: 'Klasický software',
+    summary: 'Pevný postup nebo vyhledávání bez AI: workflow, fulltextové hledání, formulář.',
+  },
+  'classic-ml': {
+    label: 'Klasické strojové učení',
+    summary:
+      'Model natrénovaný na vašich označených datech. Je levný v provozu, rychlý a jeho přesnost jde změřit.',
+  },
+  llm: {
+    label: 'Jazykový model (jedno volání)',
+    summary: 'Jedno volání modelu se strukturovaným výstupem, bez vyhledávání a bez nástrojů.',
+  },
+  rag: {
+    label: 'RAG (vyhledávání + jazykový model)',
+    summary:
+      'Model odpovídá jen z dokumentů, které k dotazu najde vyhledávání, a odkazuje na zdroj.',
+  },
+  agent: {
+    label: 'Agent',
+    summary: 'Model volá nástroje v několika krocích. Každý krok hlídá samostatná vrstva pravidel.',
+  },
+  'human-in-the-loop': {
+    label: 'Člověk ve smyčce',
+    summary:
+      'Žádný automatizovaný vzor nesplňuje požadavky. Rozhoduje člověk, systém mu nanejvýš připraví podklady.',
+  },
+};
+
+const aiActCategories: Record<AiActCategory, string> = {
+  prohibited: 'Zakázaná praktika',
+  'high-risk': 'Vysoce riziková',
+  transparency: 'Povinnosti transparentnosti',
+  minimal: 'Minimální riziko',
+  'out-of-scope': 'Mimo AI Act (nejde o AI systém)',
+};
+
+const intakeDataClasses: Record<DataSensitivity, string> = {
+  public: 'Veřejná data',
+  internal: 'Interní data',
+  confidential: 'Důvěrná data (obchodní tajemství)',
+  personal: 'Osobní údaje (GDPR)',
+  special: 'Zvláštní kategorie osobních údajů (GDPR)',
+};
+
+const intakeControls: Record<ControlId, string> = {
+  pseudonymization: 'Pseudonymizace před voláním modelu',
+  'local-processing': 'Zpracování jen ve vlastním prostředí nebo na zařízení',
+  'provider-terms': 'Smlouva s poskytovatelem modelu: bez tréninku na datech, region, uchování',
+  'permission-aware-retrieval': 'Vyhledávání respektuje přístupová práva',
+  'prompt-injection-defense': 'Ochrana proti prompt injection',
+  'agent-guardrails': 'Guardrails agenta: povolené nástroje, rozpočet, audit',
+  'action-approval': 'Schválení akcí člověkem',
+  'human-intervention': 'Právo na lidský zásah a napadení rozhodnutí',
+  dpia: 'Posouzení vlivu na ochranu osobních údajů (DPIA)',
+  'human-oversight': 'Navržený lidský dohled',
+  logging: 'Automatické logy událostí',
+  fria: 'Posouzení dopadu na základní práva (FRIA)',
+  evals: 'Měření kvality na pevné sadě příkladů (evaly)',
 };
 
 export const cs = {
@@ -139,6 +361,114 @@ export const cs = {
         'Malý lokální model (WebLLM) dostane jen agregované metriky, nikdy surové GPS body.',
         'Panel síťové aktivity, který ukáže, že po nahrání souboru neodešel žádný požadavek.',
       ],
+    },
+  },
+
+  intake: {
+    notice:
+      'Bez jazykového modelu: doporučení skládají pravidla, každé s důvodem a odkazem na zdroj. Nic se nikam neodesílá.',
+    presetsLabel: 'Ukázkové záměry',
+    presets: intakePresets,
+    formHeading: 'Popište záměr',
+    descriptionLabel: 'Popis záměru',
+    descriptionHint: 'Pravidla text nečtou, jen ho převezmou do ADR.',
+    fields: intakeFields,
+    groups: { work: 'Úloha a data', impact: 'Dopad a provoz' },
+
+    resultLabel: 'Doporučení',
+    patterns: intakePatterns,
+    blocked: {
+      label: 'Nenasazovat',
+      summary: 'Účel je podle AI Act zakázaný. Na volbě technologie tu nezáleží.',
+    },
+    withHuman: '+ člověk ve smyčce',
+    humanWhy: 'Proč člověk ve smyčce',
+
+    aiAct: {
+      heading: 'AI Act (orientačně)',
+      categories: aiActCategories,
+      appliesFrom: (date: string, inForce: boolean) =>
+        inForce ? `Platí od ${date}` : `Bude platit od ${date}`,
+      asOf: (date: string) => `Stav k ${date} · zdroje`,
+      amendedBy: 'Ve znění nařízení (EU) 2026/1744 (Digital Omnibus on AI).',
+    },
+
+    data: {
+      heading: 'Data a kontroly',
+      classes: intakeDataClasses,
+      controls: intakeControls,
+      none: 'Žádné zvláštní kontroly.',
+      moduleLink: (number: number, title: string) => `Modul ${number}: ${title}`,
+    },
+
+    cost: {
+      heading: 'Odhad nákladů na tokeny',
+      tiers: {
+        small: 'Malý model',
+        medium: 'Střední model',
+        large: 'Velký model',
+      } satisfies Record<ModelTier, string>,
+      perMonth: 'USD / měsíc',
+      range: (min: string, max: string) => `${min}–${max}`,
+      unverified: 'cena neověřena',
+      noTokens: 'Bez nákladů na tokeny: řešení nevolá jazykový model.',
+      notTokenBased:
+        'Klasické ML se platí provozem a trénováním modelu, ne tokeny. Z ceníku tokenů se neodhaduje.',
+      assumption: (input: string, output: string) =>
+        `Předpoklad dema, ne měření: ${input} vstupních a ${output} výstupních tokenů na dotaz.`,
+      batch: 'Dávkově: počítáno s cenami Batch API (poloviční).',
+      sources: 'Ceníky',
+      retrievedAt: (date: string) => `k ${date}`,
+    },
+
+    rejected: {
+      heading: 'Zamítnuté alternativy',
+      allBlocked: 'Žádná: účel je zakázaný.',
+    },
+
+    rules: {
+      summary: (n: number) => `Proč to systém doporučil: použitá pravidla (${n})`,
+      condition: 'Kdy',
+      always: 'vždy (vyhodnocuje engine)',
+      and: ' a zároveň ',
+      or: ' nebo ',
+      not: (inner: string) => `neplatí (${inner})`,
+      isNot: (field: string, value: string) => `${field}: není ${value}`,
+      is: (field: string, value: string) => `${field}: ${value}`,
+      oneOf: ' / ',
+      patternField: 'Zvolený vzor',
+    },
+
+    adr: {
+      button: 'Stáhnout ADR (.md)',
+      hint: 'Rozhodnutí ve formátu MADR, připravené k uložení do repozitáře.',
+      untitled: 'Nový záměr',
+      title: (name: string) => `ADR: ${name}`,
+      status: 'Stav',
+      statusValue: 'navrženo (vygenerováno modulem Intake)',
+      date: 'Datum',
+      decision: 'Rozhodnutí',
+      context: 'Kontext a problém',
+      noDescription: '(bez popisu)',
+      parameter: 'Parametr',
+      value: 'Hodnota',
+      chosen: 'Zvolený vzor',
+      alternatives: 'Zvažované alternativy',
+      rejectedBecause: 'zamítnuto',
+      consequences: 'Důsledky',
+      controls: 'Požadované kontroly',
+      aiAct: (date: string) => `AI Act (orientačně, stav k ${date})`,
+      category: 'Kategorie',
+      sources: 'Zdroje',
+      cost: 'Odhad nákladů na tokeny',
+      tier: 'Velikost modelu',
+      models: 'Modely',
+      rules: 'Použitá pravidla',
+      rule: 'Pravidlo',
+      rationale: 'Zdůvodnění',
+      reference: 'Zdroj',
+      disclaimer:
+        'Vygenerováno technickým demem „Bezpečná AI v praxi“ (modul Intake). Klasifikace podle AI Act je orientační a nejde o právní posouzení.',
     },
   },
 

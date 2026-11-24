@@ -37,7 +37,8 @@ describe('Landing', () => {
         <Landing />
       </MemoryRouter>,
     );
-    const pii = screen.getAllByTestId('module-card')[1]!;
-    expect(within(pii).getByText(cs.status.ready)).toBeTruthy();
+    const [intake, pii] = screen.getAllByTestId('module-card');
+    expect(within(intake!).getByText(cs.status.ready)).toBeTruthy();
+    expect(within(pii!).getByText(cs.status.ready)).toBeTruthy();
   });
 });
