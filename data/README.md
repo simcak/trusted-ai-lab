@@ -2,12 +2,12 @@
 
 Pouze **syntetická data** a jejich generátory. Žádné reálné osoby, fondy ani data zaměstnavatele.
 
-| Složka                  | Obsah                                                        | Fáze |
-| ----------------------- | ------------------------------------------------------------ | ---- |
-| [`pii/`](pii/README.md) | syntetický korpus PII se zlatými spany (`pnpm generate:pii`) | 1    |
-| `pricing.json`          | ceník tokenů se zdrojem a datem (ručně, ověřeno, viz OQ-18)  | 2    |
-| `funds.json`            | 8 fiktivních fondů pro modul 3 (ručně, viz níže)             | 3    |
-| `activities/`           | ukázkové aktivity                                            | 4    |
+| Složka                                | Obsah                                                              | Fáze |
+| ------------------------------------- | ------------------------------------------------------------------ | ---- |
+| [`pii/`](pii/README.md)               | syntetický korpus PII se zlatými spany (`pnpm generate:pii`)       | 1    |
+| `pricing.json`                        | ceník tokenů se zdrojem a datem (ručně, ověřeno, viz OQ-18)        | 2    |
+| `funds.json`                          | 8 fiktivních fondů pro modul 3 (ručně, viz níže)                   | 3    |
+| [`activities/`](activities/README.md) | 3 syntetické aktivity GPX / TCX / FIT (`pnpm generate:activities`) | 4    |
 
 `pricing.json` nejsou syntetická data, ale veřejné ceníky (Anthropic, OpenAI) přepsané ručně se
 zdrojem a datem načtení. Schéma hlídá `PricingSchema` v `packages/intake-rules`, test ho ověřuje

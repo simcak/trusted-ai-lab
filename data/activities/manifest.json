@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "generator": "data/activities/generate.ts",
+  "generatorVersion": 1,
+  "note": "Syntetická data: smyšlený sportovec, smyšlené zařízení, procedurální trasy, které nesledují ulice. Nejde o záznam skutečné osoby.",
+  "athlete": {
+    "maxHr": 195,
+    "restHr": 55
+  },
+  "activities": [
+    {
+      "id": "run",
+      "file": "vecerni-beh.gpx",
+      "format": "gpx",
+      "sport": "run",
+      "title": "Večerní běh",
+      "startTime": "2026-11-16T17:30:00Z",
+      "intervalS": 3,
+      "samples": 708,
+      "durationS": 2121,
+      "pathLengthM": 6197.2,
+      "approachM": 700
+    },
+    {
+      "id": "ride",
+      "file": "vyjizdka-na-kole.tcx",
+      "format": "tcx",
+      "sport": "ride",
+      "title": "Vyjížďka na kole",
+      "startTime": "2026-11-18T14:00:00Z",
+      "intervalS": 5,
+      "samples": 675,
+      "durationS": 3370,
+      "pathLengthM": 25326.5,
+      "approachM": 900
+    },
+    {
+      "id": "intervals",
+      "file": "intervaly.fit",
+      "format": "fit",
+      "sport": "run",
+      "title": "Intervaly 6 × 2 minuty",
+      "startTime": "2026-11-21T08:00:00Z",
+      "intervalS": 2,
+      "samples": 1262,
+      "durationS": 2522,
+      "pathLengthM": 7896,
+      "approachM": 1200
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Generated sample activities: keep the bytes exactly as written (verified by --check in CI).
+data/activities/*.fit binary
+data/activities/*.gpx -text
+data/activities/*.tcx -text
