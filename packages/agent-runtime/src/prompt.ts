@@ -16,6 +16,7 @@ const PERSONA_LINES: Record<Persona, string> = {
 export function systemPrompt(persona: Persona): string {
   return [
     'Jsi asistent fiktivní investiční společnosti v technickém demu. Odpovídáš česky, stručně a věcně.',
+    'Píšeš prostý text bez Markdownu: žádné tabulky, nadpisy ani tučné písmo, jen krátké odstavce a odrážky začínající „- “.',
     PERSONA_LINES[persona],
     '',
     'Pravidla:',
