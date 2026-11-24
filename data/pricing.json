@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "currency": "USD",
+  "unit": "per_1m_tokens",
+  "note": "Ceny přepsané ručně z oficiálních ceníků (standardní tarif, krátký kontext). Ceny se mění, před použitím je ověřte (docs/OPEN_QUESTIONS.md OQ-18).",
+  "providers": [
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "retrievedAt": "2026-11-24",
+      "batchMultiplier": 0.5,
+      "note": "Batch API: „a 50 percent discount on both input and output tokens“.",
+      "models": [
+        {
+          "model": "Claude Haiku 5.5",
+          "tier": "small",
+          "inputUsd": 0.1,
+          "outputUsd": 0.5,
+          "promptTokensUpTo": 100000,
+          "note": "Prompty nad 100 000 tokenů: 0,50 / 2,50 USD."
+        },
+        { "model": "Claude Sonnet 5.5", "tier": "medium", "inputUsd": 2, "outputUsd": 10 },
+        { "model": "Claude Opus 5.5", "tier": "large", "inputUsd": 4, "outputUsd": 20 }
+      ]
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "retrievedAt": "2026-11-24",
+      "batchMultiplier": 0.5,
+      "note": "Tabulka Batch uvádí u těchto modelů přesně polovinu cen Standard (gpt-6.2-sol 1,00 / 5,00 USD). Krátký kontext: ≤272K vstupních tokenů.",
+      "models": [
+        {
+          "model": "gpt-6-luna",
+          "tier": "small",
+          "inputUsd": 0.1,
+          "outputUsd": 0.5,
+          "promptTokensUpTo": 272000
+        },
+        {
+          "model": "gpt-6.2-sol",
+          "tier": "medium",
+          "inputUsd": 2,
+          "outputUsd": 10,
+          "promptTokensUpTo": 272000
+        },
+        {
+          "model": "gpt-6.2-astra",
+          "tier": "large",
+          "inputUsd": 8,
+          "outputUsd": 40,
+          "promptTokensUpTo": 272000
+        }
+      ]
+    }
+  ]
+}

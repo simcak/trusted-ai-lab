@@ -99,6 +99,48 @@ test('initial load does not download module chunks', async ({ page }) => {
   expect(scripts.filter((s) => /(Intake|Pii|Agent|Local)Page/.test(s))).toEqual([]);
 });
 
+test('intake recommends from presets, links to the modules and exports an ADR without any network call', async ({
+  page,
+}) => {
+  const external: string[] = [];
+  page.on('request', (req) => {
+    if (new URL(req.url()).hostname !== 'localhost') external.push(req.url());
+  });
+  await page.goto('./#/intake');
+
+  const pattern = page.getByTestId('intake-pattern');
+  const aiAct = page.getByTestId('intake-ai-act');
+  await expect(pattern).toHaveText('AI nepotřebujete');
+
+  await page.getByRole('button', { name: 'Automatické rozhodnutí o úvěru' }).click();
+  await expect(pattern).toHaveText('Klasické strojové učení + člověk ve smyčce');
+  await expect(aiAct).toContainText('Vysoce riziková');
+  await expect(aiAct).toContainText('2. 12. 2027');
+
+  await page.getByRole('button', { name: 'Emoce operátorů call centra' }).click();
+  await expect(pattern).toHaveText('Nenasazovat');
+  await expect(aiAct).toContainText('Zakázaná praktika');
+
+  await page.getByRole('button', { name: 'Klientský chatbot' }).click();
+  await expect(aiAct).toContainText('Povinnosti transparentnosti');
+  const downloading = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Stáhnout ADR (.md)' }).click();
+  const download = await downloading;
+  expect(download.suggestedFilename()).toMatch(/^adr-klientsky-chatbot-\d{4}-\d{2}-\d{2}\.md$/);
+  const adr = readFileSync(await download.path(), 'utf8');
+  expect(adr.startsWith('# ADR: Klientský chatbot\n')).toBe(true);
+  expect(adr).toContain('RAG (vyhledávání + jazykový model)');
+
+  await page
+    .getByTestId('intake-controls')
+    .getByRole('link', { name: '→ Modul 2: Ochrana dat' })
+    .click();
+  await expect(page).toHaveURL(/#\/pii$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Ochrana dat' })).toBeVisible();
+
+  expect(external).toEqual([]);
+});
+
 test('pii module detects, pseudonymises and redacts in the browser without any network call', async ({
   page,
 }) => {

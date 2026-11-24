@@ -233,6 +233,9 @@ importers:
       '@huggingface/transformers':
         specifier: 4.3.2
         version: 4.3.2(@types/node@24.19.2)
+      '@trusted-ai-lab/intake-rules':
+        specifier: workspace:*
+        version: link:../../packages/intake-rules
       '@trusted-ai-lab/llm-core':
         specifier: workspace:*
         version: link:../../packages/llm-core
@@ -282,6 +285,16 @@ importers:
       vite:
         specifier: 8.3.8
         version: 8.3.8(@types/node@24.19.2)
+      vitest:
+        specifier: 5.1.1
+        version: 5.1.1(@types/node@24.19.2)(jsdom@31.0.1)(vite@8.3.8(@types/node@24.19.2))
+
+  packages/intake-rules:
+    dependencies:
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+    devDependencies:
       vitest:
         specifier: 5.1.1
         version: 5.1.1(@types/node@24.19.2)(jsdom@31.0.1)(vite@8.3.8(@types/node@24.19.2))

@@ -1,7 +1,7 @@
 # Závislosti třetích stran
 
 Před přidáním závislosti se ověřuje licence (povolené MIT / Apache-2.0 / BSD) a aktivní údržba.
-Licence ověřena z metadat npm registru; „Vydáno" = datum vydání použité verze. Stav k 2026-11-23.
+Licence ověřena z metadat npm registru; „Vydáno" = datum vydání použité verze. Stav k 2026-11-24.
 
 Instalace navíc hlídá `minimumReleaseAge` (3 dny) v `pnpm-workspace.yaml`. Verze mladší než 3 dny
 se neinstalují, protože kompromitované releasy bývají odhaleny a staženy obvykle během pár dní.
@@ -12,9 +12,9 @@ se neinstalují, protože kompromitované releasy bývají odhaleny a staženy o
 | -------------------- | ------ | ------- | ---------- | ---------------------------------------- |
 | `react`, `react-dom` | 19.3.1 | MIT     | 2026-10-14 | UI                                       |
 | `react-router`       | 8.5.2  | MIT     | 2026-11-18 | `HashRouter` (GitHub Pages nemá rewrite) |
-| `zod`                | 4.6.7  | MIT     | 2026-10-12 | Validace dat, tras a nahrávek            |
+| `zod`                | 4.6.7  | MIT     | 2026-10-12 | Validace dat, tras, nahrávek a ceníku    |
 
-`packages/pii-cz` nemá žádné runtime závislosti.
+`packages/pii-cz` nemá žádné runtime závislosti. `packages/intake-rules` používá jen `zod` (schéma ceníku).
 
 ### Volitelný NER v prohlížeči (lazy chunk, stahuje se až po kliknutí)
 
@@ -40,6 +40,15 @@ jakou vyžaduje `@huggingface/transformers` 4.3.2, a jde o **dev build** (viz OQ
 | Dataset [WikiAnn](https://huggingface.co/datasets/unimelb-nlp/wikiann) (trénovací data NER)                                                                             | na Hugging Face uvedeno „unknown" (viz OQ-12)                                                                                                                                  | Jen trénink modelu třetí stranou; v repu není                                                      |
 | [MV ČR – Seznam jmen](https://mv.gov.cz/seznam-jmen), CSV `opendata-seznamjmenk2026-06-30` (11 782 jmen)                                                                | U souboru licence neuvedena; [katalog otevřených dat MV](https://mv.gov.cz/opendata/catalogue) uvádí „bez licenčních omezení" (viz OQ-11)                                      | Slovník křestních jmen v `packages/pii-cz/src/data/first-names.json`                               |
 | [ČNB – Číselník kódů bank](https://www.cnb.cz/cs/platebni-styk/ucty-kody-bank/) č. 255, platný od 1. 10. 2026 (47 kódů)                                                 | veřejný číselník ČNB                                                                                                                                                           | `packages/pii-cz/src/data/bank-codes.json`                                                         |
+
+### Zdroje modulu Intake (citované, nic se nestahuje za běhu)
+
+| Co                                                                                                                                                                                                                                                                                                                 | Podmínky                                               | Použití                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------- |
+| Ceník [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing) a [OpenAI](https://developers.openai.com/api/docs/pricing), načteno 2026-11-24                                                                                                                                                         | veřejné ceníky; citují se jen čísla se zdrojem a datem | `data/pricing.json` (OQ-18)                                       |
+| [AI Act Service Desk](https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act) (Evropská komise), [EUR-Lex](https://eur-lex.europa.eu/eli/reg/2024/1689/oj), [Legislative Observatory EP](<https://oeil.europarl.europa.eu/oeil/en/procedure-file?reference=2025/0359(COD)>) | texty EU, odkazy                                       | `packages/intake-rules/src/ai-act.ts`, reference pravidel (OQ-17) |
+| [OWASP Top 10 for LLM Applications 2026](https://genai.owasp.org/top-10-for-llm-applications-2026/)                                                                                                                                                                                                                | odkaz                                                  | reference pravidel                                                |
+| [Google, Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml)                                                                                                                                                                                                             | odkaz                                                  | reference pravidla `pattern.exact-solution`                       |
 
 Referenční data stahuje `pnpm fetch:pii-reference-data` (ručně, ne v CI) a ukládá je se zdrojem a
 datem stažení (2026-11-23).

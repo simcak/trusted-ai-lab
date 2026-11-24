@@ -1,0 +1,22 @@
+{
+  "name": "@trusted-ai-lab/intake-rules",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic rules engine for the Intake module: recommends an architecture pattern, controls, an indicative EU AI Act category and a token cost range. Rules are data with rationale and reference.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "vitest": "5.1.1"
+  }
+}
