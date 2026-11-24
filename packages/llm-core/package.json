@@ -8,7 +8,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./anthropic": "./src/anthropic.ts"
+    "./anthropic": "./src/anthropic.ts",
+    "./claude-code": "./src/claude-code.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
