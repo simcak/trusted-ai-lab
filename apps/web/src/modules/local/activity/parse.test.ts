@@ -1,6 +1,6 @@
 import { haversineMeters } from '@trusted-ai-lab/pii-cz';
 import { describe, expect, it } from 'vitest';
-import { SAMPLES, type SampleId } from '../samples.ts';
+import { readSample, SAMPLES, type SampleId } from '../samples.ts';
 import { distanceMeters, movingSeconds } from './metrics.ts';
 import { detectFormat, parseActivityFile } from './parse.ts';
 import { protect } from './privacy.ts';
@@ -24,7 +24,7 @@ describe.each(SAMPLES.map((s) => s.id))('sample %s', (id) => {
   const meta = sample(id);
 
   it('parses every sample the generator wrote, with heart rate and GPS', async () => {
-    const activity = await parseActivityFile(meta.bytes());
+    const activity = await parseActivityFile(await readSample(meta.id));
     expect(activity.format).toBe(meta.format);
     expect(activity.sport).toBe(meta.sport);
     expect(activity.points).toHaveLength(meta.samples);
@@ -37,12 +37,12 @@ describe.each(SAMPLES.map((s) => s.id))('sample %s', (id) => {
 
   it('measures a distance within 3 % of the noise-free route', async () => {
     // GPS noise adds a little, sampling every few seconds cuts curves a little.
-    const distance = distanceMeters((await parseActivityFile(meta.bytes())).points)!;
+    const distance = distanceMeters((await parseActivityFile(await readSample(meta.id))).points)!;
     expect(Math.abs(distance / meta.pathLengthM - 1)).toBeLessThan(0.03);
   });
 
   it('trims the start and end around the fictional home', async () => {
-    const activity = await parseActivityFile(meta.bytes());
+    const activity = await parseActivityFile(await readSample(meta.id));
     const home = activity.points[0] as { lat: number; lon: number };
     const end = activity.points.at(-1) as { lat: number; lon: number };
     const kept = protect(activity, 400);
@@ -59,7 +59,7 @@ describe.each(SAMPLES.map((s) => s.id))('sample %s', (id) => {
 describe('the evening run', () => {
   it('does not count the 42 s stop as moving', async () => {
     const run = sample('run');
-    const moving = movingSeconds((await parseActivityFile(run.bytes())).points)!;
+    const moving = movingSeconds((await parseActivityFile(await readSample(run.id))).points)!;
     expect(moving).toBeLessThanOrEqual(run.durationS - 36);
     expect(moving).toBeGreaterThan(run.durationS - 120);
   });

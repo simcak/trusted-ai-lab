@@ -1,12 +1,11 @@
 import { z } from 'zod';
+import type { SAMPLE_CONTENT } from './sample-content.ts';
 import manifestJson from '../../../../../data/activities/manifest.json' with { type: 'json' };
-import runGpx from '../../../../../data/activities/vecerni-beh.gpx?raw';
-import rideTcx from '../../../../../data/activities/vyjizdka-na-kole.tcx?raw';
-import intervalsFit from '../../../../../data/activities/intervaly.fit?inline';
 
 /**
- * The sample files are bundled into this module's chunk (text, and the FIT file as a data URL),
- * so choosing a sample sends no network request and the network panel stays at zero.
+ * The sample files live in their own chunk, which the page starts downloading as soon as it opens
+ * (`preloadSamples`). Choosing a sample later therefore sends no request and the network panel
+ * stays at zero: a request counts by the moment it started.
  */
 const SAMPLE_IDS = ['run', 'ride', 'intervals'] as const;
 export type SampleId = (typeof SAMPLE_IDS)[number];
@@ -32,30 +31,19 @@ const ManifestSchema = z.object({
 const manifest = ManifestSchema.parse(manifestJson);
 export type SampleMeta = (typeof manifest.activities)[number];
 
-function textBytes(text: string): () => ArrayBuffer {
-  return () => new TextEncoder().encode(text).buffer;
+export const SAMPLES: SampleMeta[] = manifest.activities;
+
+let content: Promise<{ SAMPLE_CONTENT: typeof SAMPLE_CONTENT }> | undefined;
+
+/** Starts (once) the download of the sample files; called when the page opens. */
+export function preloadSamples() {
+  content ??= import('./sample-content.ts');
+  return content;
 }
 
-function dataUrlBytes(url: string): () => ArrayBuffer {
-  return () => {
-    const binary = atob(url.slice(url.indexOf(',') + 1));
-    const out = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i);
-    return out.buffer;
-  };
+export async function readSample(id: SampleId): Promise<ArrayBuffer> {
+  return (await preloadSamples()).SAMPLE_CONTENT[id]();
 }
-
-const CONTENT: Record<SampleId, () => ArrayBuffer> = {
-  run: textBytes(runGpx),
-  ride: textBytes(rideTcx),
-  intervals: dataUrlBytes(intervalsFit),
-};
-
-export interface Sample extends SampleMeta {
-  bytes: () => ArrayBuffer;
-}
-
-export const SAMPLES: Sample[] = manifest.activities.map((a) => ({ ...a, bytes: CONTENT[a.id] }));
 
 /** Heart-rate parameters the synthetic athlete was simulated with. */
 export const SAMPLE_ATHLETE = manifest.athlete;

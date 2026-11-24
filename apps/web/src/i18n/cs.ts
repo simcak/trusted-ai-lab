@@ -11,6 +11,11 @@ import type {
 import type { RuleId, RunStatus, ScenarioId } from '@trusted-ai-lab/agent-runtime';
 import type { LlmErrorCode, ProviderId } from '@trusted-ai-lab/llm-core';
 import type { PiiType, ReasonCode } from '@trusted-ai-lab/pii-cz';
+import type { TrimpCoefficient } from '../modules/local/activity/heart-rate.ts';
+import type { MetadataKind, ParseErrorCode, Sport } from '../modules/local/activity/types.ts';
+import type { LoadErrorKind } from '../modules/local/coach/engine.ts';
+import type { CoachModelKey } from '../modules/local/coach/model.ts';
+import type { NetworkPhase } from '../modules/local/network/network-monitor.ts';
 
 /**
  * All user-facing Czech texts. Components must not hard-code UI strings.
@@ -870,6 +875,247 @@ export const cs = {
         'Koncept e-mailu se nikam neodesílá a demo nemá žádný nástroj, který by mohl něco odeslat.',
       ],
     },
+  },
+
+  local: {
+    notice:
+      'Všechno běží ve vašem prohlížeči. Soubor nikam neodchází a panel Síťová aktivita dole to dokládá.',
+    pick: {
+      heading: '1. Vyberte aktivitu',
+      intro:
+        'Zkuste ukázku, nebo nahrajte vlastní záznam z hodinek či sportovní aplikace (GPX, TCX nebo FIT).',
+      samplesLabel: 'Ukázky',
+      samples: {
+        run: { title: 'Večerní běh', detail: 'GPX · 6 km' },
+        ride: { title: 'Vyjížďka na kole', detail: 'TCX · 25 km' },
+        intervals: { title: 'Intervaly', detail: 'FIT · 6 × 2 min' },
+      },
+      week: 'Celý týden (všechny tři)',
+      syntheticNote:
+        'Ukázky jsou syntetické: smyšlený sportovec, smyšlené hodinky a trasy, které nesledují ulice.',
+      drop: 'Přetáhněte sem soubor, nebo',
+      browse: 'ho vyberte z počítače',
+      dropHint:
+        'Můžete jich vybrat i víc najednou. Soubor čte jen tato stránka, nikam se nenahrává.',
+      loadedLabel: 'Načtené aktivity',
+      remove: (name: string) => `Odebrat ${name}`,
+      reading: 'Čtu soubor…',
+      errors: {
+        unknown_format: 'Tohle není soubor GPX, TCX ani FIT.',
+        invalid_file: 'Soubor se nepodařilo přečíst. Možná je poškozený.',
+        no_points: 'V souboru nejsou body s časem.',
+        too_large: 'Soubor je větší než 50 MB.',
+      } satisfies Record<ParseErrorCode, string>,
+      errorFor: (file: string, message: string) => `${file}: ${message}`,
+      untitled: 'Aktivita',
+    },
+    sports: { run: 'běh', ride: 'kolo', other: 'jiný sport' } satisfies Record<Sport, string>,
+    privacy: {
+      heading: '2. Ochrana polohy',
+      intro:
+        'Začátek a konec trasy často prozradí, kde bydlíte. Proto je stránka ořízne hned po načtení, dřív než cokoli spočítá.',
+      radius: 'Velikost privacy zone',
+      radiusValue: (m: number) => (m === 0 ? 'vypnuto' : `${m} m`),
+      trimmed: (start: string, end: string) =>
+        `Skryto ${start} na začátku a ${end} na konci trasy.`,
+      off: 'Privacy zone je vypnutá. Mapa i výpočty používají celou trasu.',
+      allInside: 'Celá aktivita leží uvnitř zóny, nezbylo nic. Zónu zmenšete.',
+      noGps: 'Soubor nemá polohu GPS, není co skrývat.',
+      mapLabel: (name: string) =>
+        `Trasa: ${name}. Vybledlé úseky jsou skryté, barva čáry ukazuje tepovou zónu.`,
+      hidden: 'skryto',
+      dropped: 'Ze souboru stránka zahodila:',
+      droppedNone: 'Soubor neobsahoval žádné údaje o zařízení.',
+      metadata: {
+        device: 'název zařízení',
+        manufacturer: 'výrobce',
+        serialNumber: 'sériové číslo',
+        softwareVersion: 'verzi firmwaru',
+        application: 'aplikaci, která soubor vytvořila',
+        author: 'jméno autora',
+      } satisfies Record<MetadataKind, string>,
+    },
+    metrics: {
+      heading: '3. Co spočítal kód',
+      intro:
+        'Tahle čísla počítají obyčejné funkce v JavaScriptu, žádná AI. Jsou přesná, opakovatelná a dají se otestovat.',
+      distance: { label: 'Vzdálenost', hint: 'Součet vzdáleností mezi body GPS.' },
+      moving: {
+        label: 'Čas v pohybu',
+        hint: (total: string) => `Bez zastávek. Celkem i se zastávkami ${total}.`,
+      },
+      pace: { label: 'Průměrné tempo', hint: 'Kolik minut v průměru trval jeden kilometr.' },
+      speed: { label: 'Průměrná rychlost', hint: 'Počítá se z času v pohybu.' },
+      climb: { label: 'Stoupání', hint: 'Součet všech stoupání. Změny pod 3 m jsou šum.' },
+      hr: { label: 'Průměrný tep', hint: (max: number) => `Nejvyšší tep ${max} za minutu.` },
+      trimp: {
+        label: 'TRIMP',
+        hint: 'Jedno číslo pro zátěž tréninku: délka × intenzita. Srovnávejte hlavně své vlastní tréninky.',
+      },
+      none: '—',
+      noHr: 'Soubor nemá tep, zóny a TRIMP proto chybí.',
+    },
+    hr: {
+      heading: 'Tepové zóny',
+      intro:
+        'Zóny jsou pásma podle procent maximálního tepu (50–60–70–80–90 %). Zóna 2 je klidná vytrvalost, zóna 5 je naplno.',
+      settings: 'Vaše hodnoty',
+      sampleValues: 'Předvyplněno hodnotami smyšleného sportovce z ukázek. Zadejte své.',
+      maxHr: 'Maximální tep',
+      useAge: 'Maximální tep neznám, odhadněte ho z věku',
+      age: 'Věk',
+      estimate: (value: number) => `Odhad 220 − věk = ${value} tepů za minutu.`,
+      estimateWarning:
+        'Je to jen hrubý odhad. Skutečné maximum se u jednotlivce může výrazně lišit, zóny pak berte orientačně.',
+      restHr: 'Klidový tep',
+      restHint: 'Změřte ho ráno po probuzení, ještě vleže.',
+      coefficient: 'Vzorec TRIMP',
+      coefficients: { male: 'pro muže', female: 'pro ženy' } satisfies Record<
+        TrimpCoefficient,
+        string
+      >,
+      coefficientHint: 'Banister kalibroval vzorec zvlášť pro muže a pro ženy.',
+      bpm: 'tepů/min',
+      zonesLabel: 'Čas v zónách',
+      zone: (n: number) => (n === 0 ? 'pod zónou 1' : `zóna ${n}`),
+      zoneNames: ['odpočinek', 'velmi lehká', 'lehká', 'střední', 'náročná', 'maximální'],
+      sources:
+        'Zdroje: TRIMP podle Morton, Fitz-Clarke a Banister (1990). Vzorec 220 − věk podle Fox a kol. (1971), jeho slabiny popsali Robergs a Landwehr (2002).',
+    },
+    week: {
+      heading: 'Týdenní zátěž',
+      intro: 'TRIMP po dnech za posledních 7 dní, které nahrané aktivity pokrývají.',
+      total: (sum: number) => `Celkem TRIMP ${sum}.`,
+      acwrLabel: 'ACWR (poměr zátěže tohoto týdne k průměru posledních 4 týdnů)',
+      acwrInsufficient: (days: number) =>
+        `ACWR potřebuje aspoň 4 týdny záznamů. Teď pokrývají ${days} ${days === 1 ? 'den' : days < 5 ? 'dny' : 'dní'}.`,
+      acwrValue: (ratio: string) => `ACWR ${ratio}`,
+      acwrNote:
+        'Pozor, ACWR je sporný ukazatel (Gabbett 2016, kritika Impellizzeri a kol. 2020). Berte ho jako zajímavost, ne jako verdikt.',
+      chartLabel: 'TRIMP po dnech',
+    },
+    payload: {
+      heading: '4. Co uvidí AI',
+      intro:
+        'Model nedostane váš soubor. Dostane jen tento souhrn: žádné souřadnice, žádné časy, žádné zařízení ani název aktivity.',
+      file: 'Váš soubor',
+      fileDetail: (points: string) => `${points} bodů trasy`,
+      model: 'Model dostane',
+      modelDetail: (count: number) => `${count} souhrnných údajů, žádná poloha ani čas`,
+      jsonLabel: 'Přesně tohle jde do modelu',
+      promptLabel: 'Pokyny pro model (systémový prompt)',
+    },
+    coach: {
+      heading: '5. AI trenér',
+      intro:
+        'Malý jazykový model se jednou stáhne do prohlížeče a pak běží na grafické kartě vašeho počítače. Bez účtu, bez API klíče, zdarma.',
+      checking: 'Zjišťuji, jestli prohlížeč umí WebGPU…',
+      gpu: (label: string) => `Model poběží na grafice: ${label}.`,
+      gpuUnknown: 'Prohlížeč umí WebGPU, model poběží na grafické kartě.',
+      unsupported: {
+        no_api: 'Váš prohlížeč neumí WebGPU, takže tady jazykový model nespustíme.',
+        no_adapter: 'Prohlížeč WebGPU zná, ale nenašel použitelnou grafickou kartu.',
+      },
+      unsupportedHint:
+        'Zkuste aktuální Chrome nebo Edge na počítači. Zatím níže vidíte shrnutí, které složila pravidla v kódu.',
+      modelLegend: 'Velikost modelu',
+      models: {
+        small: { label: 'Menší', detail: '0,6 miliardy parametrů · rychlejší, horší čeština' },
+        large: { label: 'Větší', detail: '1,7 miliardy parametrů · pomalejší, lepší čeština' },
+      } satisfies Record<CoachModelKey, { label: string; detail: string }>,
+      download: (size: string) => `Stáhnout a spustit (${size})`,
+      start: 'Spustit (už je stažený)',
+      downloadNote: 'Stahuje se jen jednou, pak zůstane uložený v prohlížeči. Doporučujeme Wi-Fi.',
+      loading: 'Načítám model…',
+      progress: (percent: number) => `${percent} %`,
+      ready: (name: string) => `${name} běží ve vašem prohlížeči.`,
+      selectFirst: 'Nejdřív vyberte aktivitu.',
+      explain: 'Vysvětlit trénink',
+      stop: 'Zastavit',
+      writing: 'Píšu…',
+      speed: (tokensPerSecond: string) => `${tokensPerSecond} tokenů za sekundu`,
+      answerLabel: 'AI trenér',
+      questionLabel: (question: string) => `Otázka: ${question}`,
+      caution: 'Malý model se může mýlit. Platí čísla výše, ta spočítal kód.',
+      templateLabel: 'Shrnutí z pravidel (bez AI)',
+      askHeading: 'Zeptejte se trenéra',
+      askLabel: 'Vaše otázka',
+      askPlaceholder: 'Například: Jak se příště zlepšit?',
+      ask: 'Zeptat se',
+      suggestions: ['Byl to náročný trénink?', 'Na co se příště zaměřit?', 'Co znamená zóna 4?'],
+      askHint:
+        'Otázka jde jen do modelu ve vašem prohlížeči. Jména, telefony a podobné údaje ještě předtím zakryje knihovna pii-cz z modulu 2.',
+      redacted: (count: number) => `Před předáním modelu zakryto osobních údajů: ${count}.`,
+      delete: 'Smazat model z prohlížeče',
+      deleted: 'Model je smazaný. Příště se stáhne znovu.',
+      errors: {
+        webgpu: 'Prohlížeč neumí WebGPU.',
+        shader_f16: 'Grafika nepodporuje potřebnou funkci. Zkuste to prosím znovu.',
+        memory: 'Grafická karta nemá na tento model dost paměti. Zkuste menší model.',
+        storage: 'V prohlížeči není dost místa na uložení modelu.',
+        network: 'Stahování se přerušilo. Zkontrolujte připojení a zkuste to znovu.',
+        unknown: 'Model se nepodařilo spustit.',
+        generation: 'Model při psaní narazil na chybu. Zkuste to znovu.',
+      } satisfies Record<LoadErrorKind | 'generation', string>,
+      credits: (version: string) =>
+        `Modely Qwen3 (licence Apache-2.0) přes knihovnu WebLLM ${version}. Váhy i knihovny jsou připnuté na konkrétní verzi.`,
+    },
+    template: {
+      overview: (sport: string, km: string | null, minutes: number, moving: number | null) =>
+        km === null
+          ? `Trénink (${sport}) trval ${minutes} min.`
+          : `Trénink (${sport}): ${km} km za ${minutes} min${moving !== null && moving < minutes ? `, z toho ${moving} min v pohybu` : ''}.`,
+      pace: (pace: string) => `Průměrné tempo ${pace} min/km.`,
+      speed: (speed: string) => `Průměrná rychlost ${speed} km/h.`,
+      climb: (m: number) => `Stoupání celkem ${m} m.`,
+      dominantZone: (percent: number, zone: number, name: string) =>
+        `Nejvíc času (${percent} %) bylo srdce v zóně ${zone}, tedy ${name} intenzita.`,
+      highIntensity: (percent: number) =>
+        `Ve vysoké intenzitě (zóny 4 a 5) uběhlo ${percent} % času.`,
+      noHighIntensity: 'Do zón 4 a 5 se trénink nedostal, šlo o klidnější zátěž.',
+      trimp: (value: number) =>
+        `TRIMP vyšel ${value}. Srovnávejte ho hlavně se svými dalšími tréninky.`,
+      estimated: 'Maximální tep je odhad z věku, zóny proto berte orientačně.',
+      week: (count: number, sum: number) =>
+        `Za týden: ${count} ${count < 5 ? 'aktivity' : 'aktivit'}, TRIMP celkem ${sum}.`,
+      noHr: 'Bez tepu nejde říct, jak náročný trénink byl.',
+    },
+    network: {
+      heading: '6. Síťová aktivita',
+      intro:
+        'Tohle je důkaz. Prohlížeč zapisuje každý síťový požadavek stránky a tady je vidíte všechny.',
+      counterLabel: 'Od výběru souboru odešlo požadavků',
+      beforeFile: 'Zatím jste nevybrali žádnou aktivitu.',
+      zero: 'Nula. Vaše data neopustila zařízení.',
+      nonZero: 'Po výběru souboru proběhly požadavky. Jsou vypsané níže, ať vidíte, kam šly.',
+      phases: {
+        page: 'Načtení stránky',
+        model: 'Stažení modelu',
+        afterFile: 'Po výběru souboru',
+      } satisfies Record<NetworkPhase, string>,
+      phaseHints: {
+        page: 'Kód a styly tohoto webu.',
+        model: 'Jen stahování modelu do prohlížeče. Spouští ho až vaše kliknutí.',
+        afterFile: 'Tady by se objevilo cokoli, co by mohlo odnést vaše data.',
+      } satisfies Record<NetworkPhase, string>,
+      requests: (count: number) =>
+        `${count} ${count === 1 ? 'požadavek' : count >= 2 && count <= 4 ? 'požadavky' : 'požadavků'}`,
+      listLabel: 'Seznam požadavků',
+      worker: 'model',
+      caveat:
+        'Měření používá PerformanceObserver. Nevidí úplně všechno, třeba požadavky rozšíření prohlížeče. Ověřte si to i sami: klávesa F12 → karta Síť (Network).',
+    },
+    limits: {
+      heading: 'Co tohle demo neumí',
+      items: [
+        'Privacy zone ořezává jen začátek a konec. Když trasa uprostřed projde kolem domova, ten úsek zůstane.',
+        'Pevný kruh jde na veřejně sdílené mapě zpětně dopočítat ze dvou míst, kde trasa „začíná“. V produkci by se střed zóny náhodně posouval.',
+        'Metriky jsou zjednodušené: prahy pro pohyb a stoupání jsou zvolené, ne změřené, a vzdálenost se počítá na kouli.',
+        'Malý model píše česky s chybami a může si vymýšlet. Neslouží jako trenér ani lékař.',
+      ],
+    },
+    traceSummary: 'Pod kapotou: záznam kroků',
+    traceTitle: 'Záznam kroků',
   },
 
   placeholder: {

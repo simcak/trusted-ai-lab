@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SAMPLES } from '../samples.ts';
+import { readSample, SAMPLES } from '../samples.ts';
 import { parseActivityFile } from './parse.ts';
 import { protect } from './privacy.ts';
 import {
@@ -84,7 +84,7 @@ function toCoachInputFor() {
 describe.each(SAMPLES.map((s) => s.id))('model input for sample %s', (id) => {
   it('contains no coordinates, times, names or device data', async () => {
     const sample = SAMPLES.find((s) => s.id === id)!;
-    const activity = protect(await parseActivityFile(sample.bytes()), 400).activity;
+    const activity = protect(await parseActivityFile(await readSample(sample.id)), 400).activity;
     const json = JSON.stringify(toCoachInput(computeMetrics(activity, settings), settings));
     expect(json).not.toMatch(/49\.2|16\.6/); // the fictional home is at 49.2078, 16.6086
     expect(json).not.toMatch(/2026|T\d\d:/);
