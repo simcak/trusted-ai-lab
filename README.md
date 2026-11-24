@@ -8,7 +8,7 @@
 
 Čtyři interaktivní ukázky toho, jak architekt rozhoduje, jestli a jak nasadit AI tam, kde jde o citlivá data.
 
-**Stav:** rozpracováno, fáze 0 (kostra, landing a placeholdery modulů). Plný README přijde ve fázi 5.
+**Stav:** rozpracováno. Hotové jsou moduly Intake (fáze 2) a Ochrana dat (fáze 1), agent a lokální model přijdou ve fázích 3 a 4. Plný README přijde ve fázi 5.
 
 - Živé demo: <https://simcak.github.io/trusted-ai-lab/> (dostupné po prvním nasazení)
 - [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/simcak/trusted-ai-lab)
@@ -38,8 +38,8 @@ Před prvním `pnpm test:e2e` nainstaluj prohlížeč: `pnpm --filter @trusted-a
 ```
 apps/web/              frontend: landing, 4 moduly (lazy chunky), sdílený TracePanel
 packages/llm-core/     rozhraní LlmProvider, ReplayProvider, trace typy (zod)
-packages/pii-cz/       fáze 1
-packages/intake-rules/ fáze 2
+packages/pii-cz/       detekce a pseudonymizace českých osobních údajů
+packages/intake-rules/ pravidlový engine modulu Intake (bez LLM)
 packages/agent-runtime/ fáze 3
 data/, evals/, docs/   syntetická data, evaly, dokumentace
 ```

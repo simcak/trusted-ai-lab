@@ -52,6 +52,8 @@ agent i trenér **používají knihovnu `pii-cz`** — sdílená vrstva, ne kopi
    bez vazby na zmíněné společnosti; AI Act klasifikace je orientační.
 8. **Poctivost ve vyjadřování.** README a UI nepřehánějí. Co demo nedělá, říká sekce
    „Co bych v produkci udělal jinak".
+9. **Drž se pravidla "Méně je více"** - Jsi profesionalni UX UI designér a architekt.
+   Dáváš na stránku jen ty informace, které jsou nezbytné a užitečné pro člověka aby pochopil o čem stránka je.
 
 ---
 
@@ -305,3 +307,16 @@ udělal jinak"** 9) disclaimer, licence.
 - **Vratná pseudonymizace na `#/pii` nevolá model.** Odpověď je šablona v kódu s viditelným štítkem „Simulovaná odpověď". Skutečné volání přijde ve fázi 3. Trace události `pii` nesou jen počty a zástupné symboly.
 - **Placeholder** se sdílenými komponentami `ModuleHeader` a `StoryNav`. `registry.ts` má `status: 'ready' | 'planned'`, karta hotového modulu ukazuje „Hotovo".
 - **`pii-cz` má build pro npm** (`tsc` → `dist`, `rewriteRelativeImportExtensions`), ale zůstává `private`, dokud se nevyřeší licence slovníku jmen (OQ-11).
+
+### 2026-11-24 — fáze 2
+
+- **Sedm vzorů místo šesti.** Přibyl `llm`, tedy jedno volání modelu se strukturovaným výstupem bez vyhledávání a bez nástrojů (extrakce, koncepty textů). Bez něj by extrakce ze smluv musela vyjít jako RAG. `human-in-the-loop` je hlavní výsledek jen tehdy, když nesedí žádný automatizovaný vzor; jinak je to příznak `humanInTheLoop` nad technickým vzorem. Rozhodl autor.
+- **Doplněné předvolby:** „Emoce operátorů call centra“ (zakázaná praktika, čl. 5 odst. 1 písm. f) a „Asistent poradce“ (agent se schválením, modul 3). Na modul 4 vede třídění pošty se zdravotními údaji. Rozhodl autor.
+- **Podmínky pravidel jsou data** (`is`, `in`, `all`, `any`, `not`), žádné funkce. Stránka je ukazuje česky a ADR je cituje.
+- **Vyhodnocení ve dvou krocích.** Nejdřív se vybere vzor: zakázaná praktika výběr ukončí, jinak vyhraje nejjednodušší nevyřazený vzor. Pak se ze vstupu a zvoleného vzoru odvodí HITL, kategorie AI Act a kontroly. Test invariantů prochází všech 151 200 kombinací vstupů.
+- **Zdůvodnění a štítky referencí jsou česky přímo v datech pravidel** (`packages/intake-rules`), protože pravidlo = data. Popisky UI (vzory, pole, kategorie, kontroly, předvolby) jsou v `cs.ts`. Generátor ADR je ve webu (`modules/intake/adr.ts`), protože skládá texty z `cs.ts`.
+- **Kategorie AI Act „mimo působnost“** pro řešení bez AI (čl. 3 bod 1). Vysoké riziko se přiřazuje jen vzorům s AI. GDPR čl. 22 (lidský zásah, DPIA) platí i bez AI.
+- **AI Act ve znění nařízení (EU) 2026/1744 (Digital Omnibus)**, stav k 2026-11-24 v `packages/intake-rules/src/ai-act.ts`: příloha III od 2. 12. 2027, příloha I od 2. 8. 2028, čl. 50 od 2. 8. 2026. Ověřeno ze stránek Komise a EP, EUR-Lex strojově nečitelný (OQ-17).
+- **OWASP Top 10 for LLM Applications má aktuální vydání 2026** (např. Excessive Agency je LLM03:2026). Platí i pro threat model ve fázi 5.
+- **Ceník po velikostech modelů** (malý / střední / velký, Anthropic + OpenAI) v `data/pricing.json` se zdrojem a datem u každého poskytovatele. Odhad je rozsah přes poskytovatele a počítá se jen pro `llm`, `rag` a `agent`. Tokeny na dotaz jsou označený předpoklad (OQ-19). Částky mají 2 platné číslice.
+- **Bez ADR souborů v `docs/adr/`.** Zdůvodnění „Intake bez LLM“ (ADR-010) přijde ve fázi 5 podle plánu.
