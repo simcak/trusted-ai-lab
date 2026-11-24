@@ -19,7 +19,8 @@
     "generate:pii": "node data/pii/generate.ts",
     "eval:pii": "node evals/pii/run.ts",
     "eval:pii:ner": "node evals/pii/run-ner.ts && node evals/pii/run.ts",
-    "evals:check": "node data/pii/generate.ts --check && node evals/pii/run.ts --check",
+    "record:agent": "node scripts/record-agent.ts",
+    "evals:check": "node data/pii/generate.ts --check && node evals/pii/run.ts --check && node scripts/record-agent.ts --check",
     "fetch:pii-reference-data": "node scripts/fetch-pii-reference-data.ts",
     "test:e2e": "pnpm --filter @trusted-ai-lab/web test:e2e",
     "check:size": "node scripts/check-bundle-size.ts"
@@ -28,6 +29,8 @@
     "@eslint/js": "10.0.1",
     "@faker-js/faker": "10.6.0",
     "@huggingface/transformers": "4.3.2",
+    "@trusted-ai-lab/agent-runtime": "workspace:*",
+    "@trusted-ai-lab/llm-core": "workspace:*",
     "@trusted-ai-lab/pii-cz": "workspace:*",
     "@types/node": "24.19.2",
     "eslint": "10.15.0",

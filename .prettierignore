@@ -8,3 +8,4 @@ CLAUDE.md
 packages/pii-cz/src/data/
 data/pii/corpus.json
 evals/pii/*.json
+evals/agent/recordings/
