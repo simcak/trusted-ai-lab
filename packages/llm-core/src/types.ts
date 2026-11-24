@@ -1,7 +1,16 @@
 import { z } from 'zod';
 
-/** Every LLM backend the demo can use. `replay` and `byok-anthropic` are implemented. */
-export const ProviderIdSchema = z.enum(['replay', 'byok-anthropic', 'byok-openai', 'webllm']);
+/**
+ * Every LLM backend the demo can use. Implemented: `replay`, `byok-anthropic` (Messages API) and
+ * `claude-code` (headless Claude Code CLI, used only by the recording script).
+ */
+export const ProviderIdSchema = z.enum([
+  'replay',
+  'byok-anthropic',
+  'byok-openai',
+  'webllm',
+  'claude-code',
+]);
 export type ProviderId = z.infer<typeof ProviderIdSchema>;
 
 export const ToolCallSchema = z.object({

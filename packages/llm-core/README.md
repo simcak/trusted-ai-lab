@@ -20,6 +20,7 @@ interface LlmProvider {
 | Nahrávka                                              | `recording.ts`                | `kind: recorded \| fixture`, model, datum, verze promptu; každý krok nese otisk, odpověď a model, který ho obsloužil            |
 | Trace                                                 | `trace.ts`, `with-tracing.ts` | `withTracing(provider, log)` zapíše každé volání; `providerState` do trace nikdy nejde                                          |
 | BYOK Anthropic (`@trusted-ai-lab/llm-core/anthropic`) | `anthropic-provider.ts`       | samostatná podcesta, aby SDK nebylo v úvodním bundlu                                                                            |
+| Claude Code (`@trusted-ai-lab/llm-core/claude-code`)  | `claude-code-provider.ts`     | jen pro nahrávací skript: `claude -p` s předplatným; konverzace jako JSON, nástroje přes strukturovaný výstup                   |
 
 ## BYOK z prohlížeče
 
