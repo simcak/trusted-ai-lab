@@ -8,7 +8,7 @@
 > Zero runtime dependencies; optional NER via an injected classifier.
 
 Knihovna pro detekci a pseudonymizaci českých osobních údajů. Používá ji stránka
-[`#/pii`](../../apps/web/src/modules/pii/) a v dalších fázích agent a lokální trenér.
+[`#/pii`](../../apps/web/src/modules/pii/), agent (`#/agent`) a lokální trenér (`#/local`).
 
 ```ts
 import { createPseudonymizer, detect, pseudonymize, redact } from '@trusted-ai-lab/pii-cz';
@@ -56,6 +56,22 @@ import { createNerDetector, detectAsync } from '@trusted-ai-lab/pii-cz';
 const ner = createNerDetector((text) => pipelineFromTransformersJs(text), { weight: 0.8 });
 const findings = await detectAsync(text, [ner]);
 ```
+
+## Poloha (privacy zone)
+
+Poloha je také osobní údaj: začátek a konec nahrané aktivity bývá adresa bydliště.
+`applyPrivacyZone` ořízne začátek trasy, dokud poprvé neopustí kruh o poloměru R kolem prvního
+bodu GPS, a stejně tak konec. Oříznuté body zmizí celé (i s tepem), takže je nic dalšího nepoužije.
+
+```ts
+import { applyPrivacyZone, haversineMeters } from '@trusted-ai-lab/pii-cz';
+
+const { points, trimmedStart, trimmedEnd, allInside } = applyPrivacyZone(track, 400);
+haversineMeters({ lat: 0, lon: 0 }, { lat: 0.01, lon: 0 }); // 1 111,95 m
+```
+
+Je to ořez začátku a konce, ne geofence: když trasa uprostřed projde kolem domova, ten úsek zůstane.
+Pevný kruh navíc jde na sdílené mapě zpětně dopočítat ze dvou míst, kde trasa „začíná“.
 
 ## Eval
 
