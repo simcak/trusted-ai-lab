@@ -9,7 +9,7 @@ import type {
   PresetId,
 } from '@trusted-ai-lab/intake-rules';
 import type { RuleId, RunStatus, ScenarioId } from '@trusted-ai-lab/agent-runtime';
-import type { LlmErrorCode } from '@trusted-ai-lab/llm-core';
+import type { LlmErrorCode, ProviderId } from '@trusted-ai-lab/llm-core';
 import type { PiiType, ReasonCode } from '@trusted-ai-lab/pii-cz';
 
 /**
@@ -316,6 +316,14 @@ const agentRules: Record<RuleId, string> = {
   'prompt-injection': 'Pole, které vypadá jako pokyn pro model, se modelu nepředá.',
   'content-advice': 'Žádné investiční doporučení: dotaz odmítne a doporučení v odpovědi nahradí.',
   'human-approval': 'Koncept e-mailu čeká na rozhodnutí člověka. Nic se neodesílá.',
+};
+
+const agentProviders: Record<ProviderId, string> = {
+  replay: 'Přehrání nahrávky',
+  'byok-anthropic': 'Claude API',
+  'byok-openai': 'OpenAI API',
+  webllm: 'Lokální model (WebLLM)',
+  'claude-code': 'Claude Code CLI',
 };
 
 const agentStatus: Record<RunStatus, string> = {
@@ -793,8 +801,12 @@ export const cs = {
       fixture: 'Testovací fixture: ručně psaná data, ne výstup modelu',
       noModel: 'Model nebyl volán: odpověděla pravidla.',
       model: 'Model',
+      provider: 'Rozhraní',
+      providers: agentProviders,
       recordedAt: 'Nahráno',
       promptVersion: 'Verze promptu',
+      claudeCodeNote:
+        'Nahráno přes Claude Code CLI s předplatným, ne přes Claude API. Model dostal konverzaci jako JSON a nástroje volal strukturovaným výstupem, ne nativním tool use, takže na injekci ve výsledku nástroje může reagovat jinak. Režim s vlastním klíčem používá nativní tool use.',
     },
     result: {
       heading: 'Výsledek',
