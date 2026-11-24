@@ -2,17 +2,20 @@
   "name": "@trusted-ai-lab/llm-core",
   "version": "0.0.0",
   "private": true,
-  "description": "LlmProvider interface, Replay implementation and trace types shared by all modules.",
+  "description": "LlmProvider interface, Replay and Anthropic (BYOK) implementations and trace types shared by all modules.",
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./anthropic": "./src/anthropic.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "1.12.0",
     "zod": "4.6.7"
   },
   "devDependencies": {

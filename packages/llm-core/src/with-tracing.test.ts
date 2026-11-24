@@ -54,4 +54,52 @@ describe('withTracing', () => {
       error: { name: 'ReplayMissError' },
     });
   });
+
+  it('never puts providerState into the trace', async () => {
+    const log = createTraceLog({ now: fixedClock });
+    const provider = withTracing(new ReplayProvider([fixtureRecording]), log);
+    await provider.complete({
+      messages: [
+        { role: 'user', content: 'Ahoj' },
+        { role: 'assistant', content: 'Ahoj', providerState: [{ signature: 'secret-sig' }] },
+        { role: 'user', content: 'Dál' },
+      ],
+      context: { scenario: 'test-scenario', step: 1 },
+    });
+    expect(JSON.stringify(log.getSnapshot())).not.toContain('secret-sig');
+  });
+
+  it('in delta mode shows the system prompt once and then only new messages', async () => {
+    const log = createTraceLog({ now: fixedClock });
+    const provider = withTracing(new ReplayProvider([fixtureRecording]), log, { input: 'delta' });
+    const tools = [{ name: 'search_funds', description: '', inputSchema: {} }];
+    const first: LlmRequest = {
+      system: 'Systém',
+      tools,
+      messages: [{ role: 'user', content: 'Ahoj' }],
+      context: { scenario: 'test-scenario', step: 0 },
+    };
+    await provider.complete(first);
+    await provider.complete({
+      ...first,
+      messages: [
+        ...first.messages,
+        { role: 'assistant', content: '', toolCalls: [] },
+        { role: 'tool', toolCallId: 'call-1', content: '[]' },
+      ],
+      context: { scenario: 'test-scenario', step: 1 },
+    });
+
+    const [a, b] = log.getSnapshot();
+    expect(a?.input).toEqual({
+      system: 'Systém',
+      tools: ['search_funds'],
+      maxTokens: undefined,
+      messageCount: 1,
+      newMessages: [{ role: 'user', content: 'Ahoj' }],
+    });
+    expect(b?.input).toMatchObject({ messageCount: 3, tools: ['search_funds'] });
+    expect(b?.input).not.toHaveProperty('system');
+    expect((b?.input as { newMessages: unknown[] }).newMessages).toHaveLength(2);
+  });
 });
