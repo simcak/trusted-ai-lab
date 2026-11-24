@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ReplayMissError, ReplayProvider } from './replay-provider.ts';
+import type { Recording } from './recording.ts';
+import { ReplayDriftError, ReplayMissError, ReplayProvider } from './replay-provider.ts';
+import { hashRequest } from './request-hash.ts';
 import { fixtureRecording } from './test-fixtures.ts';
 import type { LlmRequest } from './types.ts';
 
@@ -18,11 +20,7 @@ describe('ReplayProvider', () => {
     const res = await provider.complete(request(0));
 
     expect(provider.id).toBe('replay');
-    expect(res).toEqual({
-      ...fixtureRecording.steps[0]?.response,
-      model: 'fixture',
-      provider: 'replay',
-    });
+    expect(res).toEqual({ ...fixtureRecording.steps[0]?.response, provider: 'replay' });
   });
 
   it('is deterministic and immune to callers mutating the result', async () => {
@@ -85,5 +83,43 @@ describe('ReplayProvider', () => {
       promptVersion: 'test-v1',
     });
     expect(provider.getRecording('missing')).toBeUndefined();
+  });
+
+  describe('verifyRequest', () => {
+    const withHashes = async (): Promise<Recording> => ({
+      ...fixtureRecording,
+      steps: await Promise.all(
+        fixtureRecording.steps.map(async (s) => ({
+          ...s,
+          requestHash: await hashRequest(request(s.step)),
+        })),
+      ),
+    });
+
+    it('answers when the request matches the recorded hash', async () => {
+      const provider = new ReplayProvider([await withHashes()], { verifyRequest: true });
+      await expect(provider.complete(request(0))).resolves.toMatchObject({
+        stopReason: 'tool_use',
+      });
+    });
+
+    it('ignores context and providerState when comparing', async () => {
+      const provider = new ReplayProvider([await withHashes()], { verifyRequest: true });
+      const req = request(0);
+      await expect(
+        provider.complete({ ...req, context: { ...req.context!, promptVersion: 'other' } }),
+      ).resolves.toBeDefined();
+    });
+
+    it('throws ReplayDriftError when the code sends a different request', async () => {
+      const provider = new ReplayProvider([await withHashes()], { verifyRequest: true });
+      const changed: LlmRequest = { ...request(0), system: 'Nový systémový prompt' };
+      await expect(provider.complete(changed)).rejects.toBeInstanceOf(ReplayDriftError);
+    });
+
+    it('does not compare hashes unless enabled', async () => {
+      const provider = new ReplayProvider([fixtureRecording]);
+      await expect(provider.complete(request(0))).resolves.toBeDefined();
+    });
   });
 });
