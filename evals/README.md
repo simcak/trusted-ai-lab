@@ -31,12 +31,21 @@ na skutečné komunikaci klientů.
 
 Skutečné výstupy modelu pro 6 scénářů × guardrails ZAP/VYP: jeden soubor na běh
 (`<scénář>.<on|off>.json`). Vznikají jen lokálně skriptem
-[`scripts/record-agent.ts`](../scripts/record-agent.ts) s klíčem autora. Každý soubor nese model,
-datum, verzi promptu, effort, limity pravidel, rozhodnutí člověka a u každého kroku otisk
-požadavku (SHA-256), model, který krok obsloužil, a `request-id` z API.
+[`scripts/record-agent.ts`](../scripts/record-agent.ts). Každý soubor nese model, rozhraní
+(`run.provider`), datum, verzi promptu, effort, limity pravidel, rozhodnutí člověka a u každého
+kroku otisk požadavku (SHA-256) a model, který krok obsloužil (u Claude API i `request-id`).
+
+Dvě rozhraní ke stejnému modelu:
+
+- `--provider claude-code` volá headless Claude Code (`claude -p`) s předplatným, bez API klíče.
+  Každé volání je nová relace v prázdné složce bez vestavěných nástrojů, MCP, nastavení a
+  CLAUDE.md, se systémovým promptem agenta. Model ale dostane konverzaci jako JSON a nástroje volá
+  strukturovaným výstupem, ne nativním tool use. Stránka to u nahrávky uvádí.
+- `--provider anthropic` (výchozí) volá Messages API s nativním tool use a klíčem z `.env.local`.
 
 ```bash
-pnpm record:agent                                    # lokálně: všech 12 běhů (placené API)
+pnpm record:agent --provider claude-code --approve all   # předplatné Claude Code, bez klíče
+pnpm record:agent                                        # Claude API: všech 12 běhů (placené)
 pnpm record:agent --only s1-bezny-dotaz --guardrails on
 pnpm evals:check                                     # CI: přehraje nahrávky bez sítě a ověří otisky
 ```
