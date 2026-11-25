@@ -11,7 +11,8 @@ import type { NetworkMonitor } from '../network/network-monitor.ts';
 import { deleteCachedModel, isModelCached } from './cache.ts';
 import { classifyLoadError, startModelWorker, type LoadErrorKind } from './engine.ts';
 import { COACH_MODELS, DEFAULT_MODEL, type CoachModelKey, type ModelVariant } from './model.ts';
-import { buildCoachRequest } from './prompt.ts';
+import { plainAnswer } from './plain-answer.ts';
+import { buildCoachRequest, COACH_SAMPLING } from './prompt.ts';
 import { detectWebGpu, type GpuStatus } from './webgpu.ts';
 import type { LocalModelClient } from './worker-client.ts';
 
@@ -105,6 +106,8 @@ export function useCoach(network: NetworkMonitor, log: TraceLog) {
       endDownload();
       if (clientRef.current === client) unload();
       const kind = classifyLoadError(err);
+      // For developers: the raw reason (WebLLM errors arrive as text from the worker).
+      console.warn('Local model failed to load:', err);
       if (kind === 'shader_f16') setForceF32(true);
       setLoad({ status: 'error', kind });
       return;
@@ -115,9 +118,10 @@ export function useCoach(network: NetworkMonitor, log: TraceLog) {
         engine: client.engine,
         model: variant.modelId,
         extraBody: { enable_thinking: false },
+        sampling: COACH_SAMPLING,
         onText: (delta) => {
           textRef.current += delta;
-          const text = stripThinking(textRef.current);
+          const text = plainAnswer(stripThinking(textRef.current));
           setAnswer((prev) => (prev.status === 'writing' ? { ...prev, text } : prev));
         },
         onStats: (stats) => (statsRef.current = stats),
@@ -165,7 +169,7 @@ export function useCoach(network: NetworkMonitor, log: TraceLog) {
         const res = await provider.complete(buildCoachRequest(input, question), controller.signal);
         setAnswer({
           status: 'done',
-          text: res.content,
+          text: plainAnswer(res.content),
           question,
           redactions,
           stats: statsRef.current,
@@ -175,7 +179,7 @@ export function useCoach(network: NetworkMonitor, log: TraceLog) {
         if (err instanceof DOMException && err.name === 'AbortError') {
           setAnswer({
             status: 'done',
-            text: stripThinking(textRef.current),
+            text: plainAnswer(stripThinking(textRef.current)),
             question,
             redactions,
             stats: undefined,

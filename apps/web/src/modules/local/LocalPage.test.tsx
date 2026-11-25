@@ -26,7 +26,7 @@ describe('LocalPage', () => {
     expect(screen.getByTestId('privacy-status').textContent).toMatch(/^Skryto/);
 
     const input = screen.getByTestId('coach-input').textContent ?? '';
-    expect(input).toContain('"vzdalenost_km": 5.4');
+    expect(input).toContain('Vzdálenost: 5,4 km');
     expect(input).not.toMatch(/49\.2|16\.6|Večerní/);
   });
 

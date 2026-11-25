@@ -68,6 +68,7 @@ describe('createWebLlmProvider', () => {
       engine,
       model: MODEL,
       extraBody: { enable_thinking: false },
+      sampling: { temperature: 0.7, top_p: 0.8 },
       onText: (d) => deltas.push(d),
       onStats,
     });
@@ -99,6 +100,8 @@ describe('createWebLlmProvider', () => {
       stream: true,
       stream_options: { include_usage: true },
       max_tokens: 512,
+      temperature: 0.7,
+      top_p: 0.8,
       extra_body: { enable_thinking: false },
     });
   });

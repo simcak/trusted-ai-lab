@@ -12,6 +12,7 @@ export {
   type WebLlmChunk,
   type WebLlmEngine,
   type WebLlmProviderOptions,
+  type WebLlmSampling,
   type WebLlmStats,
   type WebLlmStreamingRequest,
 } from './webllm-provider.ts';

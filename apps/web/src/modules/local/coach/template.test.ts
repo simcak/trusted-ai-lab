@@ -48,8 +48,14 @@ describe('buildCoachRequest', () => {
     expect(req.system).toBe(COACH_SYSTEM_PROMPT);
     expect(req.messages).toHaveLength(1);
     const content = req.messages[0]!.role === 'user' ? req.messages[0]!.content : '';
-    expect(content).toContain('"vzdalenost_km": 5.4');
-    expect(content).toContain('Otázka sportovce: Na co se příště zaměřit?');
+    expect(content).toContain('Vzdálenost: 5,4 km');
+    expect(content).toContain('Maximální tep sportovce: 195 tepů/min (jen odhad z věku)');
+    expect(content).toContain(
+      'Čas v tepových zónách: zóna 2 (lehká) 24 %, zóna 3 (střední) 66 %, zóna 4 (náročná) 10 %',
+    );
+    expect(content).not.toMatch(/[{}"]/);
+    expect(content).toContain('Otázka sportovce k tomuto tréninku: Na co se příště zaměřit?');
+    expect(content.endsWith('Nepiš JSON, nadpisy, odrážky ani hvězdičky.')).toBe(true);
     expect(req.maxTokens).toBe(300);
   });
 });

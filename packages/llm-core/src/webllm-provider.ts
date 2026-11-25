@@ -26,7 +26,14 @@ export interface WebLlmChatMessage {
   content: string;
 }
 
-export interface WebLlmStreamingRequest {
+export interface WebLlmSampling {
+  temperature?: number;
+  top_p?: number;
+  presence_penalty?: number;
+  frequency_penalty?: number;
+}
+
+export interface WebLlmStreamingRequest extends WebLlmSampling {
   messages: WebLlmChatMessage[];
   stream: true;
   stream_options: { include_usage: true };
@@ -66,6 +73,11 @@ export interface WebLlmProviderOptions {
   maxTokens?: number;
   /** WebLLM-specific request fields, e.g. `{ enable_thinking: false }` for Qwen3. */
   extraBody?: WebLlmStreamingRequest['extra_body'];
+  /**
+   * Sampling for this model. Set by the caller because the right values depend on the model and
+   * its mode (`LlmRequest` deliberately has no sampling fields).
+   */
+  sampling?: WebLlmSampling;
   /** Called with every streamed piece of text, so the page can show the answer as it is written. */
   onText?: (delta: string) => void;
   onStats?: (stats: WebLlmStats) => void;
@@ -87,6 +99,7 @@ export function createWebLlmProvider(options: WebLlmProviderOptions): LlmProvide
         stream: true,
         stream_options: { include_usage: true },
         max_tokens: req.maxTokens ?? options.maxTokens ?? DEFAULT_MAX_TOKENS,
+        ...options.sampling,
         ...(options.extraBody && { extra_body: options.extraBody }),
       };
       const interrupt = () => void options.engine.interruptGenerate();

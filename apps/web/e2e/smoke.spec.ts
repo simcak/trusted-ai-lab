@@ -293,7 +293,7 @@ test('local coach analyses the sample week in the browser and sends nothing afte
   await expect(page.getByTestId('route-map')).toBeVisible();
   await expect(page.getByTestId('privacy-status')).toContainText('Skryto');
   await expect(page.getByText('Týdenní zátěž')).toBeVisible();
-  await expect(page.getByTestId('coach-input')).toContainText('"tyden"');
+  await expect(page.getByTestId('coach-input')).toContainText('Tento týden: 3 aktivity');
   await expect(page.getByTestId('coach-template')).toContainText('Za týden: 3 aktivity');
   await expect(page.getByTestId('network-after-file')).toHaveText('0');
 
