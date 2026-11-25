@@ -1,0 +1,30 @@
+.sprite {
+  display: inline-block;
+  flex: none;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.frames {
+  animation: sprite-frames calc(var(--n) / var(--fps) * 1s) steps(var(--n)) infinite;
+}
+
+.frames[data-play='hover'] {
+  animation-play-state: paused;
+}
+
+:global([data-sprite-host]):is(:hover, :focus-within) .frames[data-play='hover'] {
+  animation-play-state: running;
+}
+
+@keyframes sprite-frames {
+  to {
+    transform: translateX(calc(var(--w) * var(--n) * -1px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frames {
+    animation: none;
+  }
+}

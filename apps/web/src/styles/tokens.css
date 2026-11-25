@@ -4,13 +4,17 @@
 
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  /* Pixel font for headings, buttons, chips and labels only — body text stays system-ui. */
+  --font-pixel: 'Pixelify Sans', var(--font-sans);
 
+  --text-xs: 0.8125rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.125rem;
   --text-xl: 1.375rem;
   --text-2xl: 1.75rem;
   --text-3xl: clamp(2rem, 1.4rem + 2.5vw, 2.75rem);
+  --text-4xl: clamp(2.25rem, 1.2rem + 4vw, 3.75rem);
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -24,20 +28,29 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  --content-width: 72rem;
+  --content-width: 76rem;
+  --header-height: 3.5rem;
 
-  /* Light theme — text/background pairs meet WCAG AA (≥ 4.5:1). */
-  --color-bg: #f6f7f9;
+  /* One "pixel" of the UI chrome: stepped borders, bevels and button travel. */
+  --px: 3px;
+
+  /* Light theme — text/background pairs meet WCAG AA (≥ 4.5:1), see tokens.test.ts. */
+  --color-bg: #eef2fb;
+  --color-bg-dot: #dbe2f3;
   --color-surface: #ffffff;
-  --color-surface-muted: #eef1f5;
-  --color-text: #161b26;
-  --color-text-muted: #475467;
-  --color-border: #d0d5dd;
-  --color-accent: #1d4ed8;
-  --color-accent-hover: #1e40af;
-  --color-accent-soft: #e0e9fd;
+  --color-surface-muted: #e6ebf7;
+  --color-text: #15132a;
+  --color-text-muted: #474e70;
+  --color-border: #c3cbe2;
+  --color-frame: #2a2541;
+  --color-frame-hi: #ffffff;
+  --color-frame-shade: #d3d9ec;
+  --color-accent: #2c56d1;
+  --color-accent-hover: #1f3fa8;
+  --color-accent-soft: #dfe8ff;
   --color-on-accent: #ffffff;
-  --color-focus: #1d4ed8;
+  --color-focus: #2c56d1;
+  --color-backdrop: rgb(21 19 42 / 45%);
 
   --color-success: #166534;
   --color-success-soft: #dcfce7;
@@ -45,7 +58,7 @@
   --color-danger-soft: #fee4e2;
   --color-warning: #854d0e;
   --color-warning-soft: #fef3c7;
-  --color-neutral-soft: #eaecf0;
+  --color-neutral-soft: #e6e9f2;
 
   /* Heart-rate zones (module 4): below zone 1, zones 1–5. Used for lines and bars, not text. */
   --zone-0: #98a2b3;
@@ -57,21 +70,86 @@
 
   --shadow-card: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 10%);
   --shadow-card-hover: 0 4px 8px rgb(16 24 40 / 8%), 0 2px 4px rgb(16 24 40 / 6%);
+
+  /*
+   * Pixel-art palette (own, ~35 colours in ramps, dark → light). Sprites use these keys and
+   * look the same in both themes; only the --scene-* values below change with the theme.
+   */
+  --px-ink-0: #14121f;
+  --px-ink-1: #2a2541;
+  --px-steel-0: #3e4466;
+  --px-steel-1: #646d91;
+  --px-steel-2: #949ebf;
+  --px-steel-3: #c5cde3;
+  --px-steel-4: #eef2fb;
+  --px-white: #ffffff;
+  --px-sky-0: #1b3a8f;
+  --px-sky-1: #2e63d8;
+  --px-sky-2: #5c93ff;
+  --px-sky-3: #a9c9ff;
+  --px-leaf-0: #145838;
+  --px-leaf-1: #1f8f57;
+  --px-leaf-2: #4dcc7c;
+  --px-leaf-3: #a9efbb;
+  --px-sun-0: #a3500f;
+  --px-sun-1: #e88a17;
+  --px-sun-2: #ffc43a;
+  --px-sun-3: #ffee99;
+  --px-ember-0: #7a1d2c;
+  --px-ember-1: #d13a3a;
+  --px-ember-2: #ff7c6b;
+  --px-berry-0: #4a1d6e;
+  --px-berry-1: #8b3fc2;
+  --px-berry-2: #c47dff;
+  --px-berry-3: #ecd3ff;
+  --px-skin-0: #7d4a34;
+  --px-skin-1: #c98a60;
+  --px-skin-2: #f3c79c;
+  --px-wood-0: #5a3720;
+  --px-wood-1: #8f5b33;
+  --px-glow-0: #1d8fa6;
+  --px-glow-1: #66f3ff;
+
+  /* Scene colours — day in the light theme. */
+  --scene-sky-0: #5aa6ff;
+  --scene-sky-1: #86c0ff;
+  --scene-sky-2: #b6dbff;
+  --scene-sky-3: #e0f1ff;
+  --scene-orb: #ffe27a;
+  --scene-orb-halo: #fff3b8;
+  --scene-cloud: #ffffff;
+  --scene-cloud-shade: #d4e8ff;
+  --scene-star: #ffffff;
+  --scene-star-opacity: 0;
+  --scene-hill-far: #9bd9b1;
+  --scene-hill-mid: #63bd8a;
+  --scene-hill-near: #3f9a68;
+  --scene-ground: #2f7d53;
+  --scene-ground-dark: #22603f;
+  --scene-path: #ead9a8;
+  --scene-path-dark: #c9b37a;
+  --scene-window: #ffe9a3;
+  --scene-window-glow-opacity: 0.35;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #0f131a;
-    --color-surface: #171c25;
-    --color-surface-muted: #1f2531;
-    --color-text: #e8ebf0;
-    --color-text-muted: #a8b0bd;
-    --color-border: #343b49;
-    --color-accent: #7aa2ff;
-    --color-accent-hover: #a3bfff;
-    --color-accent-soft: #1c2a4d;
+    --color-bg: #0b0e20;
+    --color-bg-dot: #161b38;
+    --color-surface: #151a35;
+    --color-surface-muted: #1e2446;
+    --color-text: #eef1ff;
+    --color-text-muted: #aab2d6;
+    --color-border: #343c6a;
+    --color-frame: #5a64ad;
+    --color-frame-hi: #262d55;
+    --color-frame-shade: #0f1329;
+    --color-accent: #8fb0ff;
+    --color-accent-hover: #b5cbff;
+    --color-accent-soft: #1d2a55;
     --color-on-accent: #0b1020;
-    --color-focus: #a3bfff;
+    --color-focus: #b5cbff;
+    --color-backdrop: rgb(3 5 15 / 65%);
 
     --color-success: #6ee7a0;
     --color-success-soft: #13301f;
@@ -79,7 +157,7 @@
     --color-danger-soft: #3b1714;
     --color-warning: #fcd581;
     --color-warning-soft: #3a2c0b;
-    --color-neutral-soft: #262d3a;
+    --color-neutral-soft: #242a4a;
 
     --zone-0: #667085;
     --zone-1: #7aa2ff;
@@ -90,5 +168,26 @@
 
     --shadow-card: 0 1px 2px rgb(0 0 0 / 40%);
     --shadow-card-hover: 0 4px 12px rgb(0 0 0 / 50%);
+
+    /* Scene colours — night in the dark theme. */
+    --scene-sky-0: #070b1e;
+    --scene-sky-1: #0e1636;
+    --scene-sky-2: #18235a;
+    --scene-sky-3: #2b2f74;
+    --scene-orb: #f2efcf;
+    --scene-orb-halo: #3b417e;
+    --scene-cloud: #2c3366;
+    --scene-cloud-shade: #1f2550;
+    --scene-star: #ffffff;
+    --scene-star-opacity: 1;
+    --scene-hill-far: #1c2b55;
+    --scene-hill-mid: #15224a;
+    --scene-hill-near: #101a3a;
+    --scene-ground: #0d1630;
+    --scene-ground-dark: #091024;
+    --scene-path: #3a3f6e;
+    --scene-path-dark: #2b2f57;
+    --scene-window: #ffc94a;
+    --scene-window-glow-opacity: 1;
   }
 }

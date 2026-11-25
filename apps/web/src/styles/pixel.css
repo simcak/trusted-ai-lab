@@ -1,0 +1,112 @@
+/*
+ * Pixel chrome shared by all pages. Stepped borders use four offset box-shadows instead of
+ * border-image or clip-path, so they follow the theme's CSS variables and keep focus rings
+ * and popovers visible.
+ */
+
+.px-frame {
+  --edge: var(--color-frame);
+  margin: var(--px);
+  background: var(--color-surface);
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(-1 * var(--px)) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    inset 0 var(--px) 0 0 var(--color-frame-hi),
+    inset 0 calc(-1 * var(--px)) 0 0 var(--color-frame-shade);
+}
+
+/* A sunken well inside a frame: text areas, screens, output. */
+.px-inset {
+  background: var(--color-surface-muted);
+  box-shadow:
+    inset var(--px) var(--px) 0 0 var(--color-frame-shade),
+    inset calc(-1 * var(--px)) calc(-1 * var(--px)) 0 0 var(--color-frame-hi);
+}
+
+.px-chip {
+  --edge: var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 2px;
+  padding: 0.1rem var(--space-2);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-pixel);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  box-shadow:
+    0 -2px 0 0 var(--edge),
+    0 2px 0 0 var(--edge),
+    -2px 0 0 0 var(--edge),
+    2px 0 0 0 var(--edge);
+}
+
+.px-label {
+  font-family: var(--font-pixel);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Project accent ramps (gallery card, display frame). Values are pixel-palette keys. */
+[data-accent='sun'] {
+  --accent-0: var(--px-sun-0);
+  --accent-1: var(--px-sun-1);
+  --accent-2: var(--px-sun-2);
+  --accent-3: var(--px-sun-3);
+}
+
+[data-accent='berry'] {
+  --accent-0: var(--px-berry-0);
+  --accent-1: var(--px-berry-1);
+  --accent-2: var(--px-berry-2);
+  --accent-3: var(--px-berry-3);
+}
+
+[data-accent='sky'] {
+  --accent-0: var(--px-sky-0);
+  --accent-1: var(--px-sky-1);
+  --accent-2: var(--px-sky-2);
+  --accent-3: var(--px-sky-3);
+}
+
+[data-accent='leaf'] {
+  --accent-0: var(--px-leaf-0);
+  --accent-1: var(--px-leaf-1);
+  --accent-2: var(--px-leaf-2);
+  --accent-3: var(--px-leaf-3);
+}
+
+[data-accent='steel'] {
+  --accent-0: var(--px-steel-0);
+  --accent-1: var(--px-steel-1);
+  --accent-2: var(--px-steel-2);
+  --accent-3: var(--px-steel-3);
+}
+
+/* New route content wipes in from top in pixel steps. */
+@keyframes px-enter {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0.4;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .px-enter {
+    animation: none !important;
+  }
+}
+
+.px-enter {
+  /* No fill mode: once done, nothing clips focus rings or frame shadows at the edges. */
+  animation: px-enter 360ms steps(6);
+}

@@ -8,12 +8,22 @@ se neinstalují, protože kompromitované releasy bývají odhaleny a staženy o
 
 ## Runtime (jde do prohlížeče)
 
-| Balíček              | Verze  | Licence | Vydáno     | Účel                                     |
-| -------------------- | ------ | ------- | ---------- | ---------------------------------------- |
-| `react`, `react-dom` | 19.3.1 | MIT     | 2026-10-14 | UI                                       |
-| `react-router`       | 8.5.2  | MIT     | 2026-11-18 | `HashRouter` (GitHub Pages nemá rewrite) |
-| `zod`                | 4.6.7  | MIT     | 2026-10-12 | Validace dat, tras, nahrávek a ceníku    |
-| `fit-file-parser`    | 6.2.10 | MIT     | 2026-11-17 | Čtení souborů FIT v modulu 4             |
+| Balíček                     | Verze  | Licence | Vydáno     | Účel                                     |
+| --------------------------- | ------ | ------- | ---------- | ---------------------------------------- |
+| `react`, `react-dom`        | 19.3.1 | MIT     | 2026-10-14 | UI                                       |
+| `react-router`              | 8.5.2  | MIT     | 2026-11-18 | `HashRouter` (GitHub Pages nemá rewrite) |
+| `zod`                       | 4.6.7  | MIT     | 2026-10-12 | Validace dat, tras, nahrávek a ceníku    |
+| `fit-file-parser`           | 6.2.10 | MIT     | 2026-11-17 | Čtení souborů FIT v modulu 4             |
+| `@fontsource/pixelify-sans` | 5.3.0  | OFL-1.1 | 2026-07-19 | Pixelové písmo pro nadpisy a popisky UI  |
+
+**Písmo Pixelify Sans** (autoři: The Pixelify Sans Project, [github.com/eifetx/Pixelify-Sans](https://github.com/eifetx/Pixelify-Sans))
+je pod SIL Open Font License 1.1. To je licence pro písma, ne pro kód: dovoluje písmo přibalit k webu
+i komerčnímu softwaru, jen ho nesmíte prodávat samostatně a musí zůstat přiložená licence (je v balíčku).
+Proto výjimka z pravidla MIT/Apache/BSD (rozhodnuto ve fázi 4b). Soubory woff2 (latin + latin-ext,
+váhy 400 a 600) servíruje vlastní web, z cizího CDN se nic nenačítá. Pokrytí češtiny (ěščřžýáíéůúťďň,
+velká písmena, „“ a –) je ověřené vykreslením znak po znaku proti záložnímu písmu (2026-11-25).
+
+Pixel art (sprity, scény, ikony) je nakreslený v kódu (`apps/web/src/pixel/`), bez cizích assetů.
 
 `packages/pii-cz` nemá žádné runtime závislosti. `packages/intake-rules` používá jen `zod` (schéma ceníku).
 `packages/agent-runtime` používá `zod` a workspace balíčky `llm-core` a `pii-cz`.
