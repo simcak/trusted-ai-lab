@@ -14,10 +14,12 @@
   },
   "dependencies": {
     "@huggingface/transformers": "4.3.2",
+    "@mlc-ai/web-llm": "0.2.89",
     "@trusted-ai-lab/agent-runtime": "workspace:*",
     "@trusted-ai-lab/intake-rules": "workspace:*",
     "@trusted-ai-lab/llm-core": "workspace:*",
     "@trusted-ai-lab/pii-cz": "workspace:*",
+    "fit-file-parser": "6.2.10",
     "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
     "react": "19.3.1",
     "react-dom": "19.3.1",

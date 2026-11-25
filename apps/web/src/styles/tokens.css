@@ -47,6 +47,14 @@
   --color-warning-soft: #fef3c7;
   --color-neutral-soft: #eaecf0;
 
+  /* Heart-rate zones (module 4): below zone 1, zones 1–5. Used for lines and bars, not text. */
+  --zone-0: #98a2b3;
+  --zone-1: #5b9cf5;
+  --zone-2: #1f9d63;
+  --zone-3: #d4a106;
+  --zone-4: #ea6c14;
+  --zone-5: #d92d20;
+
   --shadow-card: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 10%);
   --shadow-card-hover: 0 4px 8px rgb(16 24 40 / 8%), 0 2px 4px rgb(16 24 40 / 6%);
 }
@@ -72,6 +80,13 @@
     --color-warning: #fcd581;
     --color-warning-soft: #3a2c0b;
     --color-neutral-soft: #262d3a;
+
+    --zone-0: #667085;
+    --zone-1: #7aa2ff;
+    --zone-2: #4fd18b;
+    --zone-3: #f5c542;
+    --zone-4: #ff9447;
+    --zone-5: #ff6b5e;
 
     --shadow-card: 0 1px 2px rgb(0 0 0 / 40%);
     --shadow-card-hover: 0 4px 12px rgb(0 0 0 / 50%);

@@ -15,7 +15,7 @@ export const MODULES: readonly ModuleMeta[] = [
   { id: 'intake', number: 1, path: '/intake', phase: 2, status: 'ready' },
   { id: 'pii', number: 2, path: '/pii', phase: 1, status: 'ready' },
   { id: 'agent', number: 3, path: '/agent', phase: 3, status: 'ready' },
-  { id: 'local', number: 4, path: '/local', phase: 4, status: 'planned' },
+  { id: 'local', number: 4, path: '/local', phase: 4, status: 'ready' },
 ];
 
 export function getModule(id: ModuleId): ModuleMeta {

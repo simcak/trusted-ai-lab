@@ -11,6 +11,12 @@ import type {
 import type { RuleId, RunStatus, ScenarioId } from '@trusted-ai-lab/agent-runtime';
 import type { LlmErrorCode, ProviderId } from '@trusted-ai-lab/llm-core';
 import type { PiiType, ReasonCode } from '@trusted-ai-lab/pii-cz';
+import type { TrimpCoefficient } from '../modules/local/activity/heart-rate.ts';
+import type { MetadataKind, ParseErrorCode, Sport } from '../modules/local/activity/types.ts';
+import type { LoadErrorKind } from '../modules/local/coach/engine.ts';
+import type { CoachModelKey } from '../modules/local/coach/model.ts';
+import type { ModuleId } from '../modules/registry.ts';
+import type { NetworkPhase } from '../modules/local/network/network-monitor.ts';
 
 /**
  * All user-facing Czech texts. Components must not hard-code UI strings.
@@ -174,7 +180,7 @@ const intakeFields: { [K in FactField]: FieldTexts<K> } = {
     options: { standard: 'Stačí obecně', high: 'Ano, každý' },
   },
   errorTolerance: {
-    legend: 'Tolerance chyb',
+    legend: 'Kolik chyb snesete',
     short: 'Tolerance chyb',
     options: { low: 'Nízká (chyba je drahá)', medium: 'Střední', high: 'Vysoká' },
   },
@@ -221,11 +227,12 @@ const intakePatterns: Record<PatternId, { label: string; summary: string }> = {
   'classic-ml': {
     label: 'Klasické strojové učení',
     summary:
-      'Model natrénovaný na vašich označených datech. Je levný v provozu, rychlý a jeho přesnost jde změřit.',
+      'Model natrénovaný na vašich historických příkladech. Je levný, rychlý a jeho přesnost jde změřit.',
   },
   llm: {
     label: 'Jazykový model (jedno volání)',
-    summary: 'Jedno volání modelu se strukturovaným výstupem, bez vyhledávání a bez nástrojů.',
+    summary:
+      'Jedno zavolání jazykového modelu s pevně daným tvarem odpovědi, bez vyhledávání a bez nástrojů.',
   },
   rag: {
     label: 'RAG (vyhledávání + jazykový model)',
@@ -234,7 +241,7 @@ const intakePatterns: Record<PatternId, { label: string; summary: string }> = {
   },
   agent: {
     label: 'Agent',
-    summary: 'Model volá nástroje v několika krocích. Každý krok hlídá samostatná vrstva pravidel.',
+    summary: 'Model sám volá nástroje v několika krocích. Každý krok hlídají pravidla v kódu.',
   },
   'human-in-the-loop': {
     label: 'Člověk ve smyčce',
@@ -262,15 +269,16 @@ const intakeDataClasses: Record<DataSensitivity, string> = {
 const intakeControls: Record<ControlId, string> = {
   pseudonymization: 'Pseudonymizace před voláním modelu',
   'local-processing': 'Zpracování jen ve vlastním prostředí nebo na zařízení',
-  'provider-terms': 'Smlouva s poskytovatelem modelu: bez tréninku na datech, region, uchování',
+  'provider-terms':
+    'Smlouva s poskytovatelem modelu: data se nepoužijí k tréninku a je jasné, kde se zpracují a jak dlouho se uchovají',
   'permission-aware-retrieval': 'Vyhledávání respektuje přístupová práva',
   'prompt-injection-defense': 'Ochrana proti prompt injection',
-  'agent-guardrails': 'Guardrails agenta: povolené nástroje, rozpočet, audit',
+  'agent-guardrails': 'Pojistky agenta: povolené nástroje, limity, záznam kroků',
   'action-approval': 'Schválení akcí člověkem',
   'human-intervention': 'Právo na lidský zásah a napadení rozhodnutí',
   dpia: 'Posouzení vlivu na ochranu osobních údajů (DPIA)',
   'human-oversight': 'Navržený lidský dohled',
-  logging: 'Automatické logy událostí',
+  logging: 'Automatický záznam událostí (logy)',
   fria: 'Posouzení dopadu na základní práva (FRIA)',
   evals: 'Měření kvality na pevné sadě příkladů (evaly)',
 };
@@ -350,6 +358,92 @@ const agentErrors: Record<LlmErrorCode | 'drift' | 'aborted', string> = {
   aborted: 'Běh byl přerušen.',
 };
 
+/** Terms explained on module pages (chips under the header). Plain language, two sentences. */
+const glossaryTerms = {
+  llm: {
+    term: 'Jazykový model (LLM)',
+    text: 'Program natrénovaný na obrovském množství textu, který odhaduje, jaké slovo má následovat. Díky tomu umí psát, shrnovat a odpovídat, ale umí se i plést.',
+  },
+  slm: {
+    term: 'Malý jazykový model',
+    text: 'Jazykový model s jednotkami miliard parametrů místo stovek. Vejde se do běžného počítače, je rychlejší a nic nestojí, ale je méně chytrý.',
+  },
+  token: {
+    term: 'Token',
+    text: 'Kousek textu, se kterým model pracuje, zhruba část slova. U modelů v cloudu se platí podle počtu tokenů.',
+  },
+  rag: {
+    term: 'RAG',
+    text: 'Vyhledávání + jazykový model. Systém nejdřív najde v dokumentech pasáže k dotazu a model odpovídá jen z nich, s odkazem na zdroj.',
+  },
+  agent: {
+    term: 'Agent',
+    text: 'AI, která neodpovídá jen textem, ale sama volá nástroje (vyhledávání, výpočet, e-mail) v několika krocích po sobě.',
+  },
+  guardrails: {
+    term: 'Guardrails (pojistky)',
+    text: 'Pravidla v kódu kolem AI, která hlídají, co model smí udělat. Nejsou v promptu, takže je model nemůže přemluvit ani obejít.',
+  },
+  promptInjection: {
+    term: 'Prompt injection',
+    text: 'Skrytý pokyn v datech, třeba v dokumentu nebo na webu, kterým se útočník snaží AI přimět udělat něco, co nemá.',
+  },
+  hitl: {
+    term: 'Člověk ve smyčce',
+    text: 'Důležité rozhodnutí nebo akci potvrzuje člověk. AI jen připraví návrh nebo podklady.',
+  },
+  aiAct: {
+    term: 'AI Act',
+    text: 'Nařízení EU o umělé inteligenci. Dělí AI systémy podle rizika a podle toho jim ukládá povinnosti, některé praktiky úplně zakazuje.',
+  },
+  adr: {
+    term: 'ADR',
+    text: 'Architecture Decision Record: krátký dokument, který zapisuje, co se rozhodlo, proč a které možnosti se zamítly.',
+  },
+  personalData: {
+    term: 'Osobní údaje',
+    text: 'Cokoli, podle čeho jde poznat konkrétního člověka: jméno, rodné číslo, telefon, adresa, ale i poloha. Chrání je GDPR.',
+  },
+  pseudonymization: {
+    term: 'Pseudonymizace',
+    text: 'Nahrazení osobních údajů zástupnými symboly, třeba <OSOBA_1>. Kdo nemá mapu symbolů, nepozná, o koho jde.',
+  },
+  ner: {
+    term: 'NER',
+    text: 'Rozpoznávání pojmenovaných entit: malý model, který v textu hledá jména osob, míst a firem.',
+  },
+  eval: {
+    term: 'Eval',
+    text: 'Měření kvality na pevné sadě příkladů se známou správnou odpovědí. Ukáže, jak často systém trefí a jestli se změnou nezhoršil.',
+  },
+  trace: {
+    term: 'Trace',
+    text: 'Záznam všech kroků jednoho běhu: co šlo do modelu, co vrátil a co rozhodla pravidla. Slouží ke kontrole a hledání chyb.',
+  },
+  replay: {
+    term: 'Přehrání nahrávky',
+    text: 'Odpovědi modelu se nahrály dopředu a stránka je přehrává. Proto funguje bez klíče, zdarma a pokaždé stejně.',
+  },
+  byok: {
+    term: 'Vlastní klíč (BYOK)',
+    text: 'Bring Your Own Key: zadáte vlastní API klíč a stránka volá skutečný model. Platíte vy a klíč zůstává jen v paměti stránky.',
+  },
+  webgpu: {
+    term: 'WebGPU',
+    text: 'Rozhraní, přes které smí webová stránka počítat na grafické kartě. Díky němu běží jazykový model přímo v prohlížeči.',
+  },
+  privacyZone: {
+    term: 'Privacy zone',
+    text: 'Okruh kolem začátku a konce trasy, který se skryje, aby z nahrané aktivity nešlo poznat, kde bydlíte.',
+  },
+  trimp: {
+    term: 'TRIMP',
+    text: 'Training impulse: jedno číslo pro zátěž tréninku. Násobí délku tréninku jeho intenzitou podle tepu.',
+  },
+} as const satisfies Record<string, { term: string; text: string }>;
+
+export type TermId = keyof typeof glossaryTerms;
+
 export const cs = {
   app: {
     name: 'Bezpečná AI v praxi',
@@ -360,14 +454,14 @@ export const cs = {
   },
 
   landing: {
-    lead: 'Čtyři interaktivní ukázky toho, jak architekt rozhoduje, jestli a jak nasadit AI tam, kde jde o citlivá data.',
+    lead: 'Čtyři interaktivní ukázky, jak AI používat chytře a bezpečně, i tam, kde jde o osobní údaje.',
     sublead:
-      'Vše běží přímo v prohlížeči: bez instalace, bez API klíče a bez backendu. Výstupy modelů jsou předem nahrané, takže stránka funguje i bez připojení k AI službám.',
-    storyHeading: 'Čtyři otázky v pořadí, v jakém si je klade architekt',
+      'Všechno běží přímo v prohlížeči: bez instalace, bez účtu a zdarma. Odpovědi velkých modelů v cloudu jsou předem nahrané, takže stránka funguje pokaždé stejně.',
+    storyHeading: 'Čtyři otázky, které si položit, než AI nasadíte',
     proofLabel: 'Co tím dokazuji',
     openModule: (title: string) => `Otevřít modul ${title}`,
-    moreHeading: 'Jak to je postavené',
-    docsLink: 'Architektonická rozhodnutí a dokumentace',
+    moreHeading: 'Jak je to postavené',
+    docsLink: 'Technická rozhodnutí a dokumentace',
     githubLink: 'Zdrojový kód na GitHubu',
   },
 
@@ -381,9 +475,9 @@ export const cs = {
       title: 'Intake',
       question: 'Má to vůbec být AI?',
       summary:
-        'Byznys popíše záměr a pravidlový engine navrhne architekturu: vhodný vzor, míru rizika a odhad nákladů.',
+        'Popíšete nápad a pravidla navrhnou, jak ho postavit: jestli vůbec s AI, jak je to riskantní a kolik to bude stát.',
       proof:
-        'Umím říct „tady AI nepotřebujete“ a každé doporučení zdůvodnit konkrétním pravidlem, které jde otestovat.',
+        'Umím říct „tady AI nepotřebujete“ a každé doporučení zdůvodnit pravidlem, které jde otestovat.',
       willDo: [
         'Formulář pro popis záměru: typ dat, uživatelé, dopad na lidi, nároky na vysvětlitelnost, objem a latence.',
         'Doporučený vzor (bez AI, klasický software, strojové učení, RAG, agent, člověk ve smyčce) včetně zamítnutých alternativ a důvodů.',
@@ -397,9 +491,9 @@ export const cs = {
       title: 'Ochrana dat',
       question: 'Co nesmí odejít do modelu?',
       summary:
-        'Knihovna pii-cz najde české osobní údaje a nahradí je dřív, než text odejde do jazykového modelu.',
+        'Kód najde v textu české osobní údaje, třeba rodné číslo nebo číslo účtu, a schová je dřív, než text odejde do jazykového modelu.',
       proof:
-        'Rozumím ochraně osobních údajů až na úroveň kódu: validace kontrolních součtů místo pouhých regulárních výrazů a měřená přesnost.',
+        'Rozumím ochraně osobních údajů až na úroveň kódu: kontroluji i kontrolní součty, ne jen tvar čísla, a přesnost měřím.',
       willDo: [
         'Detekce rodného čísla, IČO, DIČ, čísla účtu, IBAN, telefonu, e-mailu, adresy a jmen, vždy s validací, ne jen podle tvaru.',
         'Tři režimy: začernění, konzistentní pseudonymizace a vratná pseudonymizace (mapa zůstává jen v paměti prohlížeče).',
@@ -412,9 +506,9 @@ export const cs = {
       title: 'Agent pod kontrolou',
       question: 'Jak AI bezpečně jedná?',
       summary:
-        'Agent hledá ve fiktivních fondech a počítá poplatky. Každý jeho krok ale hlídá samostatná vrstva pravidel.',
+        'AI asistent sám hledá ve fiktivních fondech a počítá poplatky. Každý jeho krok ale hlídají pravidla v kódu, která model nemůže obejít.',
       proof:
-        'Umím navrhnout guardrails jako samostatnou, testovatelnou vrstvu: povolené nástroje, rozpočty, schvalování člověkem a auditní stopu.',
+        'Umím navrhnout pojistky (guardrails) jako samostatnou, testovatelnou vrstvu: povolené nástroje, limity, schválení člověkem a záznam všech kroků.',
       willDo: [
         'Vlastní agent loop bez frameworku, nejvýš 6 kroků, nad 8 fiktivními fondy.',
         'Policy engine: povolené nástroje podle role, validace argumentů, rozpočet kroků a tokenů, detekce smyček.',
@@ -428,9 +522,9 @@ export const cs = {
       title: 'Lokálně',
       question: 'Co když data nesmí opustit zařízení?',
       summary:
-        'Trenérský asistent rozebere sportovní aktivitu a malý jazykový model výsledky vysvětlí přímo v prohlížeči.',
+        'Rozbor tréninku z hodinek a malý jazykový model, který ho vysvětlí. Všechno běží ve vašem počítači, data nikam neodcházejí.',
       proof:
-        'Umím navrhnout řešení, kde citlivá data zařízení vůbec neopustí, a umím to také doložit.',
+        'Umím navrhnout řešení, kde citlivá data zařízení vůbec neopustí, a umím to i doložit.',
       willDo: [
         'Nahrání souboru GPX, TCX nebo FIT a zpracování výhradně v prohlížeči.',
         'Privacy zone: oříznutí začátku a konce trasy, kde bývá adresa bydliště, a odstranění metadat zařízení.',
@@ -443,12 +537,12 @@ export const cs = {
 
   intake: {
     notice:
-      'Bez jazykového modelu: doporučení skládají pravidla, každé s důvodem a odkazem na zdroj. Nic se nikam neodesílá.',
+      'Tady žádná AI není: doporučení skládají pravidla, každé s důvodem a odkazem na zdroj. Nic se nikam neodesílá.',
     presetsLabel: 'Ukázkové záměry',
     presets: intakePresets,
     formHeading: 'Popište záměr',
     descriptionLabel: 'Popis záměru',
-    descriptionHint: 'Pravidla text nečtou, jen ho převezmou do ADR.',
+    descriptionHint: 'Pravidla text nečtou, jen ho vloží do staženého dokumentu (ADR).',
     fields: intakeFields,
     groups: { work: 'Úloha a data', impact: 'Dopad a provoz' },
 
@@ -605,7 +699,7 @@ export const cs = {
     ner: {
       heading: 'Volitelně: NER model pro jména',
       intro:
-        'Pravidla hledají jména podle slovníku, oslovení a koncovek. Malý model pro rozpoznávání pojmenovaných entit (NER) může doplnit jména, která pravidla minou. Používá se jen pro jména osob.',
+        'Pravidla hledají jména podle slovníku, oslovení a koncovek. Malý model pro rozpoznávání jmen (NER) může doplnit ta, která pravidla minou. Používá se jen pro jména osob.',
       load: (size: string) => `Načíst NER model (${size})`,
       downloadNote: (runtime: string) =>
         `Stáhne se až po kliknutí: soubory modelu z huggingface.co a běhové prostředí ONNX Runtime pro WebAssembly z tohoto webu (${runtime} nekomprimovaně, při přenosu obvykle méně). Text, který analyzujete, zůstává v prohlížeči.`,
@@ -778,16 +872,16 @@ export const cs = {
 
   agent: {
     notice:
-      'Odpovědi modelu jsou nahrané. Agent loop, pravidla, nástroje i pseudonymizace běží živě ve vašem prohlížeči. Fondy jsou fiktivní a nic se nikam neodesílá.',
+      'Odpovědi modelu jsou předem nahrané. Všechno ostatní (smyčka agenta, pravidla, nástroje i pseudonymizace) běží živě ve vašem prohlížeči. Fondy jsou fiktivní a nic se nikam neodesílá.',
     run: {
       heading: 'Spusťte scénář',
       intro:
-        'Vyberte scénář a pusťte ho se zapnutými i vypnutými guardrails. Se stejným modelem a stejným promptem se liší jen vrstva pravidel.',
+        'Vyberte scénář a pusťte ho s pojistkami zapnutými, pak vypnutými. Model i prompt jsou stejné, liší se jen vrstva pravidel.',
       scenarioLegend: 'Scénář',
-      guardrailsLegend: 'Guardrails',
+      guardrailsLegend: 'Pojistky (guardrails)',
       guardrailsOn: 'Zapnuté',
       guardrailsOff: 'Vypnuté',
-      persona: 'Persona',
+      persona: 'Role',
       personas: { klient: 'klient', poradce: 'poradce' },
       userMessage: 'Dotaz uživatele',
       start: 'Spustit',
@@ -822,7 +916,7 @@ export const cs = {
       draftSubject: 'Předmět',
       roles: { klient: 'klient', kolega: 'kolega', compliance: 'compliance' },
       errors: agentErrors,
-      traceTitle: 'Trace běhu',
+      traceTitle: 'Záznam kroků (trace)',
     },
     approval: {
       heading: 'Schválení akce',
@@ -850,7 +944,7 @@ export const cs = {
       sourceLink: 'Dokumentace Anthropic: aplikace v prohlížeči',
       keyLabel: 'API klíč Anthropic',
       queryLabel: 'Dotaz',
-      personaLegend: 'Persona',
+      personaLegend: 'Role',
       model: (model: string) => `Model: ${model}`,
       start: 'Spustit s vlastním klíčem',
       forget: 'Zapomenout klíč',
@@ -858,18 +952,271 @@ export const cs = {
     rules: {
       heading: 'Pravidla',
       intro:
-        'Policy engine je samostatná vrstva, ne text v promptu. Každé rozhodnutí je v trace s pravidlem a důvodem.',
+        'Pravidla jsou samostatná vrstva v kódu, ne prosba v promptu. Každé rozhodnutí je v záznamu kroků (trace) s pravidlem a důvodem.',
       items: agentRules,
     },
     limits: {
       heading: 'Co demo neumí',
       items: [
         'Heuristiky pro prompt injection a investiční doporučení zachytí zjevné případy, ne všechny. Proto na nich nestojí akce s dopadem: ty hlídá allowlist a schválení člověkem.',
-        'Persona je přepínač. V produkci ji určí identita a role přihlášeného uživatele.',
+        'Roli tady přepínáte ručně. Ve skutečné aplikaci by ji určilo přihlášení uživatele.',
         'Nahrávky vznikly jedním modelem v jednom čase. Jiný model nebo jiná verze se může chovat jinak.',
         'Koncept e-mailu se nikam neodesílá a demo nemá žádný nástroj, který by mohl něco odeslat.',
       ],
     },
+  },
+
+  local: {
+    notice:
+      'Všechno běží ve vašem prohlížeči. Soubor nikam neodchází a panel Síťová aktivita dole to dokládá.',
+    pick: {
+      heading: '1. Vyberte aktivitu',
+      intro:
+        'Zkuste ukázku, nebo nahrajte vlastní záznam z hodinek či sportovní aplikace (GPX, TCX nebo FIT).',
+      samplesLabel: 'Ukázky',
+      samples: {
+        run: { title: 'Večerní běh', detail: 'GPX · 6 km' },
+        ride: { title: 'Vyjížďka na kole', detail: 'TCX · 25 km' },
+        intervals: { title: 'Intervaly', detail: 'FIT · 6 × 2 min' },
+      },
+      week: 'Celý týden (všechny tři)',
+      syntheticNote:
+        'Ukázky jsou syntetické: smyšlený sportovec, smyšlené hodinky a trasy, které nesledují ulice.',
+      drop: 'Přetáhněte sem soubor, nebo',
+      browse: 'ho vyberte z počítače',
+      dropHint:
+        'Můžete jich vybrat i víc najednou. Soubor čte jen tato stránka, nikam se nenahrává.',
+      loadedLabel: 'Načtené aktivity',
+      remove: (name: string) => `Odebrat ${name}`,
+      reading: 'Čtu soubor…',
+      errors: {
+        unknown_format: 'Tohle není soubor GPX, TCX ani FIT.',
+        invalid_file: 'Soubor se nepodařilo přečíst. Možná je poškozený.',
+        no_points: 'V souboru nejsou body s časem.',
+        too_large: 'Soubor je větší než 50 MB.',
+      } satisfies Record<ParseErrorCode, string>,
+      errorFor: (file: string, message: string) => `${file}: ${message}`,
+      untitled: 'Aktivita',
+    },
+    sports: { run: 'běh', ride: 'kolo', other: 'jiný sport' } satisfies Record<Sport, string>,
+    privacy: {
+      heading: '2. Ochrana polohy',
+      intro:
+        'Začátek a konec trasy často prozradí, kde bydlíte. Proto je stránka ořízne hned po načtení, dřív než cokoli spočítá.',
+      radius: 'Velikost privacy zone',
+      radiusValue: (m: number) => (m === 0 ? 'vypnuto' : `${m} m`),
+      trimmed: (start: string, end: string) =>
+        `Skryto ${start} na začátku a ${end} na konci trasy.`,
+      off: 'Privacy zone je vypnutá. Mapa i výpočty používají celou trasu.',
+      allInside: 'Celá aktivita leží uvnitř zóny, nezbylo nic. Zónu zmenšete.',
+      noGps: 'Soubor nemá polohu GPS, není co skrývat.',
+      mapLabel: (name: string) =>
+        `Trasa: ${name}. Vybledlé úseky jsou skryté, barva čáry ukazuje tepovou zónu.`,
+      hidden: 'skryto',
+      dropped: 'Ze souboru stránka zahodila:',
+      droppedNone: 'Soubor neobsahoval žádné údaje o zařízení.',
+      metadata: {
+        device: 'název zařízení',
+        manufacturer: 'výrobce',
+        serialNumber: 'sériové číslo',
+        softwareVersion: 'verzi firmwaru',
+        application: 'aplikaci, která soubor vytvořila',
+        author: 'jméno autora',
+      } satisfies Record<MetadataKind, string>,
+    },
+    metrics: {
+      heading: '3. Co spočítal kód',
+      intro:
+        'Tahle čísla počítají obyčejné funkce v JavaScriptu, žádná AI. Jsou přesná, opakovatelná a dají se otestovat.',
+      distance: { label: 'Vzdálenost', hint: 'Součet vzdáleností mezi body GPS.' },
+      moving: {
+        label: 'Čas v pohybu',
+        hint: (total: string) => `Bez zastávek. Celkem i se zastávkami ${total}.`,
+      },
+      pace: { label: 'Průměrné tempo', hint: 'Kolik minut v průměru trval jeden kilometr.' },
+      speed: { label: 'Průměrná rychlost', hint: 'Počítá se z času v pohybu.' },
+      climb: { label: 'Stoupání', hint: 'Součet všech stoupání. Změny pod 3 m jsou šum.' },
+      hr: { label: 'Průměrný tep', hint: (max: number) => `Nejvyšší tep ${max} za minutu.` },
+      trimp: {
+        label: 'TRIMP',
+        hint: 'Jedno číslo pro zátěž tréninku: délka × intenzita. Srovnávejte hlavně své vlastní tréninky.',
+      },
+      none: '—',
+      noHr: 'Soubor nemá tep, zóny a TRIMP proto chybí.',
+    },
+    hr: {
+      heading: 'Tepové zóny',
+      intro:
+        'Zóny jsou pásma podle procent maximálního tepu (50–60–70–80–90 %). Zóna 2 je klidná vytrvalost, zóna 5 je naplno.',
+      settings: 'Vaše hodnoty',
+      sampleValues: 'Předvyplněno hodnotami smyšleného sportovce z ukázek. Zadejte své.',
+      maxHr: 'Maximální tep',
+      useAge: 'Maximální tep neznám, odhadněte ho z věku',
+      age: 'Věk',
+      estimate: (value: number) => `Odhad 220 − věk = ${value} tepů za minutu.`,
+      estimateWarning:
+        'Je to jen hrubý odhad. Skutečné maximum se u jednotlivce může výrazně lišit, zóny pak berte orientačně.',
+      restHr: 'Klidový tep',
+      restHint: 'Změřte ho ráno po probuzení, ještě vleže.',
+      coefficient: 'Vzorec TRIMP',
+      coefficients: { male: 'pro muže', female: 'pro ženy' } satisfies Record<
+        TrimpCoefficient,
+        string
+      >,
+      coefficientHint: 'Banister kalibroval vzorec zvlášť pro muže a pro ženy.',
+      bpm: 'tepů/min',
+      zonesLabel: 'Čas v zónách',
+      zone: (n: number) => (n === 0 ? 'pod zónou 1' : `zóna ${n}`),
+      zoneNames: ['odpočinek', 'velmi lehká', 'lehká', 'střední', 'náročná', 'maximální'],
+      sources:
+        'Zdroje: zóny podle Edwards (1993), TRIMP podle Banister (1991) a Morton, Fitz-Clarke a Banister (1990), obojí jak je popisuje Shaw a kol. (2020). Vzorec 220 − věk zavedl Fox a kol. (1971), jeho slabiny popsali Robergs a Landwehr (2002).',
+    },
+    week: {
+      heading: 'Týdenní zátěž',
+      intro: 'TRIMP po dnech za posledních 7 dní, které nahrané aktivity pokrývají.',
+      total: (sum: number) => `Celkem TRIMP ${sum}.`,
+      acwrLabel: 'ACWR (poměr zátěže tohoto týdne k průměru posledních 4 týdnů)',
+      acwrInsufficient: (days: number) =>
+        `ACWR potřebuje aspoň 4 týdny záznamů. Teď pokrývají ${days} ${days === 1 ? 'den' : days < 5 ? 'dny' : 'dní'}.`,
+      acwrValue: (ratio: string) => `ACWR ${ratio}`,
+      acwrNote:
+        'Pozor, ACWR je sporný ukazatel (Gabbett 2016, kritika Impellizzeri a kol. 2020). Berte ho jako zajímavost, ne jako verdikt.',
+      chartLabel: 'TRIMP po dnech',
+    },
+    payload: {
+      heading: '4. Co uvidí AI',
+      intro:
+        'Model nedostane váš soubor. Dostane jen tento souhrn: žádné souřadnice, žádné časy, žádné zařízení ani název aktivity. Souhrn skládá kód z ověřeného schématu, nic jiného se do něj nedostane.',
+      file: 'Váš soubor',
+      fileDetail: (points: string) => `${points} bodů trasy`,
+      model: 'Model dostane',
+      modelDetail: 'souhrnná čísla, žádná poloha ani čas',
+      jsonLabel: 'Přesně tohle jde do modelu (u vlastní otázky se přidá ještě ona)',
+      promptLabel: 'Pokyny pro model (systémový prompt)',
+    },
+    coach: {
+      heading: '5. AI trenér',
+      intro:
+        'Malý jazykový model se jednou stáhne do prohlížeče a pak běží na grafické kartě vašeho počítače. Bez účtu, bez API klíče, zdarma.',
+      checking: 'Zjišťuji, jestli prohlížeč umí WebGPU…',
+      gpu: (label: string) => `Model poběží na grafice: ${label}.`,
+      gpuUnknown: 'Prohlížeč umí WebGPU, model poběží na grafické kartě.',
+      unsupported: {
+        no_api: 'Váš prohlížeč neumí WebGPU, takže tady jazykový model nespustíme.',
+        no_adapter: 'Prohlížeč WebGPU zná, ale nenašel použitelnou grafickou kartu.',
+      },
+      unsupportedHint:
+        'Zkuste aktuální Chrome nebo Edge na počítači. Zatím níže vidíte shrnutí, které složila pravidla v kódu.',
+      modelLegend: 'Velikost modelu',
+      models: {
+        small: { label: 'Menší', detail: '0,6 miliardy parametrů · rychlejší, horší čeština' },
+        large: { label: 'Větší', detail: '1,7 miliardy parametrů · pomalejší, lepší čeština' },
+      } satisfies Record<CoachModelKey, { label: string; detail: string }>,
+      download: (size: string) => `Stáhnout a spustit (${size})`,
+      start: 'Spustit (už je stažený)',
+      downloadNote: 'Stahuje se jen jednou, pak zůstane uložený v prohlížeči. Doporučujeme Wi-Fi.',
+      loading: 'Načítám model…',
+      progress: (percent: number) => `${percent} %`,
+      ready: (name: string) => `${name} běží ve vašem prohlížeči.`,
+      selectFirst: 'Nejdřív vyberte aktivitu.',
+      explain: 'Vysvětlit trénink',
+      stop: 'Zastavit',
+      writing: 'Píšu…',
+      speed: (tokensPerSecond: string) => `${tokensPerSecond} tokenů za sekundu`,
+      answerLabel: 'AI trenér',
+      questionLabel: (question: string) => `Otázka: ${question}`,
+      caution: 'Malý model se může mýlit. Platí čísla výše, ta spočítal kód.',
+      templateLabel: 'Shrnutí z pravidel (bez AI)',
+      askHeading: 'Zeptejte se trenéra',
+      askLabel: 'Vaše otázka',
+      askPlaceholder: 'Například: Jak se příště zlepšit?',
+      ask: 'Zeptat se',
+      suggestions: ['Byl to náročný trénink?', 'Na co se příště zaměřit?', 'Co znamená zóna 4?'],
+      askHint:
+        'Otázka jde jen do modelu ve vašem prohlížeči. Jména, telefony a podobné údaje ještě předtím zakryje knihovna pii-cz z modulu 2.',
+      redacted: (count: number) => `Před předáním modelu zakryto osobních údajů: ${count}.`,
+      delete: 'Smazat model z prohlížeče',
+      deleted: 'Model je smazaný. Příště se stáhne znovu.',
+      errors: {
+        webgpu: 'Prohlížeč neumí WebGPU.',
+        shader_f16: 'Grafika nepodporuje potřebnou funkci. Zkuste to prosím znovu.',
+        memory: 'Grafická karta nemá na tento model dost paměti. Zkuste menší model.',
+        storage: 'V prohlížeči není dost místa na uložení modelu.',
+        network: 'Stahování se přerušilo. Zkontrolujte připojení a zkuste to znovu.',
+        unknown: 'Model se nepodařilo spustit.',
+        generation: 'Model při psaní narazil na chybu. Zkuste to znovu.',
+      } satisfies Record<LoadErrorKind | 'generation', string>,
+      credits: (version: string) =>
+        `Modely Qwen3 (licence Apache-2.0) přes knihovnu WebLLM ${version}. Váhy i knihovny jsou připnuté na konkrétní verzi.`,
+    },
+    template: {
+      overview: (sport: string, km: string | null, minutes: number, moving: number | null) =>
+        km === null
+          ? `Trénink (${sport}) trval ${minutes} min.`
+          : `Trénink (${sport}): ${km} km za ${minutes} min${moving !== null && moving < minutes ? `, z toho ${moving} min v pohybu` : ''}.`,
+      pace: (pace: string) => `Průměrné tempo ${pace} min/km.`,
+      speed: (speed: string) => `Průměrná rychlost ${speed} km/h.`,
+      climb: (m: number) => `Stoupání celkem ${m} m.`,
+      dominantZone: (percent: number, zone: number, name: string) =>
+        `Nejvíc času (${percent} %) bylo srdce v zóně ${zone}, tedy ${name} intenzita.`,
+      highIntensity: (percent: number) =>
+        `Ve vysoké intenzitě (zóny 4 a 5) uběhlo ${percent} % času.`,
+      noHighIntensity: 'Do zón 4 a 5 se trénink nedostal, šlo o klidnější zátěž.',
+      trimp: (value: number) =>
+        `TRIMP vyšel ${value}. Srovnávejte ho hlavně se svými dalšími tréninky.`,
+      estimated: 'Maximální tep je odhad z věku, zóny proto berte orientačně.',
+      week: (count: number, sum: number) =>
+        `Za týden: ${count} ${count < 5 ? 'aktivity' : 'aktivit'}, TRIMP celkem ${sum}.`,
+      noHr: 'Bez tepu nejde říct, jak náročný trénink byl.',
+    },
+    network: {
+      heading: '6. Síťová aktivita',
+      intro:
+        'Tohle je důkaz. Prohlížeč zapisuje každý síťový požadavek stránky a tady je vidíte všechny.',
+      counterLabel: 'Od výběru souboru odešlo požadavků',
+      beforeFile: 'Zatím jste nevybrali žádnou aktivitu.',
+      zero: 'Nula. Vaše data neopustila zařízení.',
+      nonZero: 'Po výběru souboru proběhly požadavky. Jsou vypsané níže, ať vidíte, kam šly.',
+      phases: {
+        page: 'Načtení stránky',
+        model: 'Stažení modelu',
+        afterFile: 'Po výběru souboru',
+      } satisfies Record<NetworkPhase, string>,
+      phaseHints: {
+        page: 'Kód a styly tohoto webu.',
+        model: 'Jen stahování modelu do prohlížeče. Spouští ho až vaše kliknutí.',
+        afterFile: 'Tady by se objevilo cokoli, co by mohlo odnést vaše data.',
+      } satisfies Record<NetworkPhase, string>,
+      requests: (count: number) =>
+        `${count} ${count === 1 ? 'požadavek' : count >= 2 && count <= 4 ? 'požadavky' : 'požadavků'}`,
+      listLabel: 'Seznam požadavků',
+      worker: 'model',
+      caveat:
+        'Měření používá PerformanceObserver. Nevidí úplně všechno, třeba požadavky rozšíření prohlížeče. Ověřte si to i sami: klávesa F12 → karta Síť (Network).',
+    },
+    limits: {
+      heading: 'Co tohle demo neumí',
+      items: [
+        'Privacy zone ořezává jen začátek a konec. Když trasa uprostřed projde kolem domova, ten úsek zůstane.',
+        'Pevný kruh jde na veřejně sdílené mapě zpětně dopočítat ze dvou míst, kde trasa „začíná“. V produkci by se střed zóny náhodně posouval.',
+        'Metriky jsou zjednodušené: prahy pro pohyb a stoupání jsou zvolené, ne změřené, a vzdálenost se počítá na kouli.',
+        'Malý model píše česky s chybami a může si vymýšlet. Neslouží jako trenér ani lékař.',
+      ],
+    },
+    traceSummary: 'Pod kapotou: záznam kroků',
+    traceTitle: 'Záznam kroků',
+  },
+
+  glossary: {
+    label: 'Pojmy:',
+    close: 'Zavřít',
+    terms: glossaryTerms,
+    byModule: {
+      intake: ['llm', 'rag', 'agent', 'hitl', 'aiAct', 'adr'],
+      pii: ['personalData', 'pseudonymization', 'ner', 'eval'],
+      agent: ['agent', 'guardrails', 'promptInjection', 'token', 'trace', 'replay', 'byok'],
+      local: ['slm', 'webgpu', 'token', 'privacyZone', 'trimp'],
+    } satisfies Record<ModuleId, TermId[]>,
   },
 
   placeholder: {
@@ -884,7 +1231,7 @@ export const cs = {
   },
 
   trace: {
-    defaultTitle: 'Trace',
+    defaultTitle: 'Záznam kroků (trace)',
     empty: 'Zatím žádné události.',
     copy: 'Zkopírovat trace jako JSON',
     copied: 'Trace je zkopírovaný do schránky.',

@@ -7,5 +7,8 @@ CLAUDE.md
 # Generated data (written by scripts, verified by --check in CI)
 packages/pii-cz/src/data/
 data/pii/corpus.json
+data/activities/*.gpx
+data/activities/*.tcx
+data/activities/manifest.json
 evals/pii/*.json
 evals/agent/recordings/

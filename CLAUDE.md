@@ -12,6 +12,9 @@ ve finanční firmě. Repo musí jít **otevřít z odkazu bez instalace, bez AP
 s nulovými provozními náklady** a nesmí spadnout při prezentaci.
 
 Publikum: HR (musí to pochopit za 30 s), Head of IT, bezpečák/compliance, technický partner.
+Od fáze 4 (rozhodl autor): **primárně dospělí studenti (maturanti)**, dále rodina, přátelé, kolegové
+a zaměstnavatelé. Web má ukázat, co se dá s AI udělat a jak ji používat. Texty **vykají**, jsou krátké
+a odborné pojmy vysvětluje slovníček pod hlavičkou modulu.
 
 Repo neukazuje „chatbota", ale **architektonické uvažování**: jak se rozhodne, zda AI
 použít, jak se chrání data, jak se AI řídí, když jedná, a kdy data nesmí opustit zařízení.
@@ -341,3 +344,18 @@ udělal jinak"** 9) disclaimer, licence.
 - **Claude Code přidává do kontextu vlastní věci:** nástroj `StructuredOutput` s popisem „final response“, sekci prostředí (dočasná složka, platforma, datum) a e-mail přihlášeného účtu. Kvůli popisu „final response“ model ve dvou bězích ze 24 tvrdil, že nástroje nemá, a nic nezavolal. Přenosový text proto výslovně říká, že `toolCalls` nástroje opravdu spustí, a nahrálo se znovu všech 12 běhů, ne jen ty dva. Skript odmítne zapsat nahrávku, ve které je jakákoli e-mailová adresa (syntetická data žádnou nemají).
 - **Prompt chce prostý text bez Markdownu.** Chat na stránce Markdown nevykresluje a první zkušební odpověď obsahovala tabulku.
 - **Ruční fixture náhled trace z fáze 0 je odstraněný.** `.env.example` je výjimka z `.env*` v `.gitignore`.
+
+### 2026-11-25 — fáze 4
+
+- **Publikum a jazyk celého webu** (rozhodl autor, viz §1). Změnily se jen texty v `cs.ts`, struktura a funkce zůstaly. Do modelu nejde nic z `cs.ts`, takže nahrávky agenta platí dál. Pojmy vysvětluje `cs.glossary` a komponenta `TermList` v `ModuleHeader` (nativní `popover`, bez knihovny). Zdůvodnění pravidel v `intake-rules` zůstalo beze změny (cituje je ADR).
+- **Dva lokální modely ze stejné rodiny** (rozhodl autor): Qwen3-1.7B (výchozí, ≈ 0,99 GB) a Qwen3-0.6B (≈ 0,36 GB). Blog Qwen3 výslovně uvádí češtinu a licence je Apache-2.0. Zamítnuté: Phi-4-mini (2,2 GB), Gemma 4 E2B (2,8 GB), Qwen3.5 (češtinu nejmenuje), Llama 3.2 a SmolLM3 (češtinu neuvádějí). Zdůvodnění je v `coach/model.ts`, ADR-008 přijde ve fázi 5. Váhy jsou připnuté na revizi HF (`…/resolve/<sha>/`), knihovny WebGPU na commit `binary-mlc-llm-libs` (OQ-30, OQ-31). Bez `shader-f16` se bere varianta `q4f32_1`. Velikosti jsou z HF API k 2026-11-24.
+- **Qwen3 bez přemýšlení:** `extra_body.enable_thinking: false`, vzorkování podle karty modelu pro tento režim (temperature 0.7, top_p 0.8, presence_penalty 1.5). Doporučení z balíčku MLC (0.6 / 0.95) patří k režimu s přemýšlením.
+- **WebLLM běží jen ve Web Workeru** za vlastním malým protokolem (`coach/worker-protocol.ts`). Stránka WebLLM neimportuje, knihovna (2,2 MB gzip) se stáhne jednou a až po kliknutí. Worker hlásí vlastní resource timing, protože `PerformanceObserver` stránky požadavky workeru nevidí.
+- **`WebLlmProvider` v `llm-core`** (podcesta `./webllm`) bere engine přes strukturální rozhraní, takže `llm-core` na WebLLM nezávisí. Streamuje přes `onText`, rychlost hlásí `onStats`, vzorkování nastavuje volající přes `sampling` (`LlmRequest` vzorkování dál nemá). Nástroje nepodporuje.
+- **Model dostává agregáty jako řádky `název: hodnota jednotka`**, ne surový JSON. Řádky skládá kód jen ze zod schématu `CoachInputSchema`. Při zkušebním běhu Qwen3-0.6B s JSON vstupem model JSON opakoval, psal Markdown a pletl jednotky. Panel „Co uvidí AI“ ukazuje přesně odeslanou zprávu. Stránka odpověď zobrazuje jako prostý text (`plainAnswer`), trace nese surový výstup. Otázka trenérovi projde `redact` z `pii-cz`. Jedno volání = souhrn + otázka, bez historie.
+- **Privacy zone je v `pii-cz` (`geo.ts`)**, protože poloha je osobní údaj. Ořízne začátek trasy do prvního bodu ve vzdálenosti ≥ R od startu a totéž od konce. Zahazují se celé body (i s tepem) a běží to před vším ostatním: metriky se počítají z oříznuté trasy. `haversineMeters` sdílí `pii-cz` i metriky.
+- **FIT čte `fit-file-parser` (MIT).** `@garmin/fitsdk` má vlastní licenci Garmin. GPX a TCX čte `DOMParser`. Parsery přebírají jen čas, polohu, výšku, tep a kadenci a hlásí, která metadata zahodily (jen druh, ne hodnotu).
+- **Ukázkové aktivity** generuje `data/activities/generate.ts` (vlastní PRNG, `FitEncoder`, chyba GPS jako AR(1), aby stání nevypadalo jako chůze). `manifest.json` nese parametry, podle kterých testy ověřují parsery. CI je kontroluje přes `--check` v `pnpm evals:check`. Na webu jsou v samostatném chunku, který se stáhne už při otevření stránky. Požadavek se počítá podle okamžiku, kdy začal, takže výběr ukázky nic neodešle.
+- **Panel Síťová aktivita** řadí požadavky do fází: načtení stránky, stažení modelu (okno od kliknutí do připravení modelu, jen hosty modelu a vlastní web) a po výběru souboru, kde má být nula. Stav cache a mazání modelu jdou přímo přes Cache API, bez stažení WebLLM.
+- **Prahy metrik** (pohyb ≥ 0,5 m/s, mezera ≤ 30 s, hystereze výšky 3 m) jsou designové volby, ne měření. Zóny (Edwards 1993), TRIMP (Banister 1991, konstanty 0,64/1,92 a 0,86/1,67), 220 − věk (Fox 1971, kritika Robergs a Landwehr 2002) a ACWR (Gabbett 2016, kritika Impellizzeri a kol. 2020) jsou ověřené a citované v kódu i na stránce. ACWR se počítá jen při ≥ 28 dnech dat.
+- **Bez WebGPU** stránka řekne proč a ukáže shrnutí z pravidel (`template.ts`). Shrnutí je vidět vždy, i vedle odpovědi modelu. E2E testy WebGPU skrývají, aby byl výsledek deterministický. Skutečný model se v CI netestuje (OQ-27).

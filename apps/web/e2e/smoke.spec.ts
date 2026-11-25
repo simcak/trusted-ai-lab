@@ -272,3 +272,52 @@ test('BYOK sends the browser-access header only after the click and keeps the ke
   expect(stored.href).not.toContain('test-key');
   await expect(page.getByTestId('trace-panel')).not.toContainText('test-key');
 });
+
+/** Headless Chromium may or may not expose WebGPU; hiding it makes the fallback deterministic. */
+const hideWebGpu = () =>
+  Object.defineProperty(Navigator.prototype, 'gpu', { get: () => undefined, configurable: true });
+
+test('local coach analyses the sample week in the browser and sends nothing after the choice', async ({
+  page,
+}) => {
+  await page.addInitScript(hideWebGpu);
+  await page.goto('./#/local');
+  await expect(page.getByTestId('webgpu-unsupported')).toBeVisible();
+  await page.waitForLoadState('networkidle');
+
+  const after: string[] = [];
+  page.on('request', (req) => after.push(req.url()));
+  await page.getByRole('button', { name: /Celý týden/ }).click();
+
+  await expect(page.getByTestId('metrics')).toContainText('5,4 km');
+  await expect(page.getByTestId('route-map')).toBeVisible();
+  await expect(page.getByTestId('privacy-status')).toContainText('Skryto');
+  await expect(page.getByText('Týdenní zátěž')).toBeVisible();
+  await expect(page.getByTestId('coach-input')).toContainText('Tento týden: 3 aktivity');
+  await expect(page.getByTestId('coach-template')).toContainText('Za týden: 3 aktivity');
+  await expect(page.getByTestId('network-after-file')).toHaveText('0');
+
+  await page.getByRole('button', { name: /Intervaly FIT/ }).click();
+  await expect(page.getByTestId('metrics')).toContainText('7,1 km');
+  expect(after).toEqual([]);
+});
+
+test('local coach reads an uploaded GPX without any request and never loads the model unasked', async ({
+  page,
+}) => {
+  await page.addInitScript(hideWebGpu);
+  const requests: string[] = [];
+  page.on('request', (req) => requests.push(new URL(req.url()).pathname));
+  await page.goto('./#/local');
+  await page.waitForLoadState('networkidle');
+  const before = requests.length;
+
+  await page
+    .getByTestId('activity-file')
+    .setInputFiles(resolve(import.meta.dirname, '../../../data/activities/vecerni-beh.gpx'));
+  await expect(page.getByTestId('metrics')).toContainText('5,4 km');
+  await expect(page.getByTestId('network-after-file')).toHaveText('0');
+
+  expect(requests.slice(before)).toEqual([]);
+  expect(requests.filter((p) => /llm\.worker|web-llm/.test(p))).toEqual([]);
+});

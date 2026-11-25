@@ -6,6 +6,7 @@
  *   pseudonymize(text, findings);           // „<OSOBA_1>", consistent within the text
  *   const session = createPseudonymizer();  // reversible: map kept in memory only
  *   session.reidentify(modelAnswer);
+ *   applyPrivacyZone(track, 400);           // GPS: trims the start and end of a route
  */
 export * from './types.ts';
 export { detect, detectAsync, detectCandidates, mergeFindings, RULE_DETECTORS } from './detect.ts';
@@ -56,5 +57,15 @@ export {
   isValidPsc,
   parsePhone,
 } from './validators/contact.ts';
+
+export {
+  applyPrivacyZone,
+  EARTH_RADIUS_M,
+  hasLatLon,
+  haversineMeters,
+  type LatLon,
+  type MaybeLatLon,
+  type PrivacyZoneResult,
+} from './geo.ts';
 
 export const VERSION = '0.1.0';
