@@ -3,7 +3,8 @@ import type { TrackPoint } from './types.ts';
 
 /**
  * Lower bounds of zones 1–5 as a fraction of maximum heart rate (50–60–70–80–90–100 %), the
- * five-zone split used by Edwards' TRIMP and most sport watches.
+ * five zones of Edwards' summated heart-rate zones (Edwards 1993), as described e.g. by
+ * Shaw et al. 2020, Front. Physiol., doi:10.3389/fphys.2020.00480.
  */
 export const ZONE_LOWER_BOUNDS = [0.5, 0.6, 0.7, 0.8, 0.9] as const;
 export const ZONE_COUNT = ZONE_LOWER_BOUNDS.length;
@@ -26,8 +27,9 @@ export function timeInZones(points: readonly TrackPoint[], maxHr: number): numbe
 }
 
 /**
- * The well-known "220 − age" (Fox, Naughton & Haskell 1971). A rough population estimate: for
- * one person the real maximum can differ a lot (Robergs & Landwehr 2002).
+ * The well-known "220 − age" (Fox et al. 1971). A rough population estimate without statistical
+ * backing: for one person the real maximum can differ a lot (Robergs & Landwehr 2002,
+ * J. Exerc. Physiol. online 5(2):1–10).
  */
 export function estimateMaxHr(age: number): number {
   return 220 - age;
@@ -35,7 +37,10 @@ export function estimateMaxHr(age: number): number {
 
 export type TrimpCoefficient = 'male' | 'female';
 
-/** Banister's weighting factor a·e^(b·HRr) (Morton, Fitz-Clarke & Banister 1990). */
+/**
+ * Banister's weighting factor a·e^(b·HRr) (Banister 1991; Morton, Fitz-Clarke & Banister 1990,
+ * J. Appl. Physiol. 69(3):1171–1177). Constants as given by Shaw et al. 2020 (see above).
+ */
 export const BANISTER: Record<TrimpCoefficient, { a: number; b: number }> = {
   male: { a: 0.64, b: 1.92 },
   female: { a: 0.86, b: 1.67 },

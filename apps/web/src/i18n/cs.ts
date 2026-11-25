@@ -1069,7 +1069,7 @@ export const cs = {
       zone: (n: number) => (n === 0 ? 'pod zónou 1' : `zóna ${n}`),
       zoneNames: ['odpočinek', 'velmi lehká', 'lehká', 'střední', 'náročná', 'maximální'],
       sources:
-        'Zdroje: TRIMP podle Morton, Fitz-Clarke a Banister (1990). Vzorec 220 − věk podle Fox a kol. (1971), jeho slabiny popsali Robergs a Landwehr (2002).',
+        'Zdroje: zóny podle Edwards (1993), TRIMP podle Banister (1991) a Morton, Fitz-Clarke a Banister (1990), obojí jak je popisuje Shaw a kol. (2020). Vzorec 220 − věk zavedl Fox a kol. (1971), jeho slabiny popsali Robergs a Landwehr (2002).',
     },
     week: {
       heading: 'Týdenní zátěž',

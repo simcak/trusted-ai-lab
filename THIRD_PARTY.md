@@ -1,7 +1,7 @@
 # Závislosti třetích stran
 
 Před přidáním závislosti se ověřuje licence (povolené MIT / Apache-2.0 / BSD) a aktivní údržba.
-Licence ověřena z metadat npm registru; „Vydáno" = datum vydání použité verze. Stav k 2026-11-24.
+Licence ověřena z metadat npm registru; „Vydáno" = datum vydání použité verze. Stav k 2026-11-25.
 
 Instalace navíc hlídá `minimumReleaseAge` (3 dny) v `pnpm-workspace.yaml`. Verze mladší než 3 dny
 se neinstalují, protože kompromitované releasy bývají odhaleny a staženy obvykle během pár dní.
@@ -13,9 +13,14 @@ se neinstalují, protože kompromitované releasy bývají odhaleny a staženy o
 | `react`, `react-dom` | 19.3.1 | MIT     | 2026-10-14 | UI                                       |
 | `react-router`       | 8.5.2  | MIT     | 2026-11-18 | `HashRouter` (GitHub Pages nemá rewrite) |
 | `zod`                | 4.6.7  | MIT     | 2026-10-12 | Validace dat, tras, nahrávek a ceníku    |
+| `fit-file-parser`    | 6.2.10 | MIT     | 2026-11-17 | Čtení souborů FIT v modulu 4             |
 
 `packages/pii-cz` nemá žádné runtime závislosti. `packages/intake-rules` používá jen `zod` (schéma ceníku).
 `packages/agent-runtime` používá `zod` a workspace balíčky `llm-core` a `pii-cz`.
+
+`fit-file-parser` je v chunku stránky `#/local` (ne v úvodním bundlu). Tranzitivně přináší `buffer`
+6.0.3 (MIT) s `base64-js` 1.5.1 (MIT) a `ieee754` 1.2.1 (BSD-3-Clause). Oficiální `@garmin/fitsdk`
+se nepoužívá: má vlastní licenci Garmin („FIT Protocol License Agreement“), ne MIT/Apache/BSD.
 
 ### Volitelný NER v prohlížeči (lazy chunk, stahuje se až po kliknutí)
 
@@ -49,15 +54,30 @@ Tranzitivně: `@opentelemetry/api` 1.10.0 (Apache-2.0), `json-schema-to-ts` 3.1.
 díla, mimo seznam MIT/Apache/BSD). `standardwebhooks` a `fast-sha256` slouží k ověřování webhooků,
 které BYOK ani nahrávání nepoužívají.
 
+### Lokální jazykový model v prohlížeči (modul 4, stahuje se až po kliknutí)
+
+| Balíček           | Verze  | Licence    | Vydáno     | Účel                                                |
+| ----------------- | ------ | ---------- | ---------- | --------------------------------------------------- |
+| `@mlc-ai/web-llm` | 0.2.89 | Apache-2.0 | 2026-11-17 | Běh jazykového modelu na grafické kartě přes WebGPU |
+
+WebLLM se importuje jen ve Web Workeru (`apps/web/src/modules/local/coach/llm.worker.ts`). Stránka
+ho sama neimportuje, takže se knihovna stáhne jednou (worker chunk 6,1 MB, 2,2 MB gzip) a až po
+kliknutí na „Stáhnout a spustit“. Tranzitivně: `@mlc-ai/web-runtime` 0.28.0-dev2 (Apache-2.0,
+vydáno 2026-11-09, **dev build**, viz OQ-31), `@mlc-ai/web-tokenizers` 0.1.6 (Apache-2.0),
+`@mlc-ai/web-xgrammar` 0.1.27 (Apache-2.0), `loglevel` 1.9.2 (MIT). Jen typy (do bundlu nejdou):
+`@types/chrome` 0.0.266 (MIT) a `@webgpu/types` 0.1.74 (BSD-3-Clause).
+
 ### Model, data a reference (nejsou npm balíčky)
 
-| Co                                                                                                                                                                      | Licence / podmínky                                                                                                                                                             | Použití                                                                                            |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| NER model [`onnx-community/small-e-czech-finetuned-ner-wikiann-ONNX`](https://huggingface.co/onnx-community/small-e-czech-finetuned-ner-wikiann-ONNX), revize `0c3c43a` | ONNX repozitář licenci neuvádí; původní [`richielo/small-e-czech-finetuned-ner-wikiann`](https://huggingface.co/richielo/small-e-czech-finetuned-ner-wikiann) je **CC BY 4.0** | Volitelná detekce jmen. Stahuje se z Hugging Face, necommituje se. Atribuce je na stránce `#/pii`. |
-| Základní model [`Seznam/small-e-czech`](https://huggingface.co/Seznam/small-e-czech)                                                                                    | CC BY 4.0 („allowing commercial use")                                                                                                                                          | Základ NER modelu                                                                                  |
-| Dataset [WikiAnn](https://huggingface.co/datasets/unimelb-nlp/wikiann) (trénovací data NER)                                                                             | na Hugging Face uvedeno „unknown" (viz OQ-12)                                                                                                                                  | Jen trénink modelu třetí stranou; v repu není                                                      |
-| [MV ČR – Seznam jmen](https://mv.gov.cz/seznam-jmen), CSV `opendata-seznamjmenk2026-06-30` (11 782 jmen)                                                                | U souboru licence neuvedena; [katalog otevřených dat MV](https://mv.gov.cz/opendata/catalogue) uvádí „bez licenčních omezení" (viz OQ-11)                                      | Slovník křestních jmen v `packages/pii-cz/src/data/first-names.json`                               |
-| [ČNB – Číselník kódů bank](https://www.cnb.cz/cs/platebni-styk/ucty-kody-bank/) č. 255, platný od 1. 10. 2026 (47 kódů)                                                 | veřejný číselník ČNB                                                                                                                                                           | `packages/pii-cz/src/data/bank-codes.json`                                                         |
+| Co                                                                                                                                                                                                                                                  | Licence / podmínky                                                                                                                                                             | Použití                                                                                            |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| NER model [`onnx-community/small-e-czech-finetuned-ner-wikiann-ONNX`](https://huggingface.co/onnx-community/small-e-czech-finetuned-ner-wikiann-ONNX), revize `0c3c43a`                                                                             | ONNX repozitář licenci neuvádí; původní [`richielo/small-e-czech-finetuned-ner-wikiann`](https://huggingface.co/richielo/small-e-czech-finetuned-ner-wikiann) je **CC BY 4.0** | Volitelná detekce jmen. Stahuje se z Hugging Face, necommituje se. Atribuce je na stránce `#/pii`. |
+| Základní model [`Seznam/small-e-czech`](https://huggingface.co/Seznam/small-e-czech)                                                                                                                                                                | CC BY 4.0 („allowing commercial use")                                                                                                                                          | Základ NER modelu                                                                                  |
+| Dataset [WikiAnn](https://huggingface.co/datasets/unimelb-nlp/wikiann) (trénovací data NER)                                                                                                                                                         | na Hugging Face uvedeno „unknown" (viz OQ-12)                                                                                                                                  | Jen trénink modelu třetí stranou; v repu není                                                      |
+| [MV ČR – Seznam jmen](https://mv.gov.cz/seznam-jmen), CSV `opendata-seznamjmenk2026-06-30` (11 782 jmen)                                                                                                                                            | U souboru licence neuvedena; [katalog otevřených dat MV](https://mv.gov.cz/opendata/catalogue) uvádí „bez licenčních omezení" (viz OQ-11)                                      | Slovník křestních jmen v `packages/pii-cz/src/data/first-names.json`                               |
+| Modely [`mlc-ai/Qwen3-0.6B-q4f16_1-MLC`](https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC) a [`mlc-ai/Qwen3-1.7B-q4f16_1-MLC`](https://huggingface.co/mlc-ai/Qwen3-1.7B-q4f16_1-MLC) (+ varianty `q4f32_1`), revize připnuté v `coach/model.ts` | MLC repozitáře licenci neuvádějí; původní [Qwen3-0.6B](https://huggingface.co/Qwen/Qwen3-0.6B) a [Qwen3-1.7B](https://huggingface.co/Qwen/Qwen3-1.7B) jsou **Apache-2.0**      | Lokální trenér na `#/local`. Stahuje se z Hugging Face až po kliknutí, necommituje se              |
+| Zkompilované knihovny WebGPU z [`mlc-ai/binary-mlc-llm-libs`](https://github.com/mlc-ai/binary-mlc-llm-libs), commit `5b7251f`, `v0_2_87/base`                                                                                                      | repozitář licenci neuvádí (projekt MLC LLM je Apache-2.0), viz OQ-30                                                                                                           | Stahuje se z `raw.githubusercontent.com` spolu s modelem                                           |
+| [ČNB – Číselník kódů bank](https://www.cnb.cz/cs/platebni-styk/ucty-kody-bank/) č. 255, platný od 1. 10. 2026 (47 kódů)                                                                                                                             | veřejný číselník ČNB                                                                                                                                                           | `packages/pii-cz/src/data/bank-codes.json`                                                         |
 
 ### Zdroje modulu Intake (citované, nic se nestahuje za běhu)
 
@@ -92,7 +112,8 @@ datem stažení (2026-11-23).
 | `globals`                          | 17.14.0 | MIT        | 2026-11-01 | Definice globálních proměnných pro ESLint  |
 | `prettier`                         | 3.10.1  | MIT        | 2026-11-12 | Formátování                                |
 | `@types/react`, `@types/react-dom` | 19.3.0  | MIT        | 2026-09-09 | Typy                                       |
-| `@types/node`                      | 24.19.2 | MIT        | 2026-10-09 | Typy pro Node 24                           |
+| `@types/node`                      | 26.6.6  | MIT        | 2026-10-28 | Typy pro Node 24                           |
+| `fit-file-parser`                  | 6.2.10  | MIT        | 2026-11-17 | `FitEncoder` v generátoru ukázek (FIT)     |
 | `@faker-js/faker`                  | 10.6.0  | MIT        | 2026-08-14 | Generátor syntetického korpusu PII (cs_CZ) |
 
 ### Lokální NER eval (Node, jen `pnpm eval:pii:ner`)

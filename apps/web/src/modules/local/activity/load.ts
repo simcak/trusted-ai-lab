@@ -50,9 +50,10 @@ export type AcwrResult =
   | { status: 'insufficient'; spanDays: number };
 
 /**
- * Acute:chronic workload ratio, rolling and "coupled" (Gabbett 2016): load of the last 7 days
- * divided by the weekly average of the last 28 days, both ending with the latest activity.
- * A disputed indicator (Impellizzeri et al. 2020): shown for curiosity, not as a verdict.
+ * Acute:chronic workload ratio, rolling and "coupled" (Gabbett 2016, Br J Sports Med
+ * 50(5):273–280): load of the last 7 days divided by the weekly average of the last 28 days,
+ * both ending with the latest activity. A disputed indicator (Impellizzeri et al. 2020, IJSPP
+ * 15:907–913, doi:10.1123/ijspp.2019-0864): shown for curiosity, not as a verdict.
  */
 export function acwr(entries: readonly LoadEntry[], timeZone?: string): AcwrResult {
   const byDay = loadByDay(entries, timeZone);
