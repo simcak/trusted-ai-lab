@@ -10,8 +10,7 @@
 
 **Stav:** rozpracováno. Hotové jsou všechny čtyři moduly: Intake, Ochrana dat, Agent pod kontrolou a Lokálně (lokální jazykový model v prohlížeči). Plný README přijde ve fázi 5.
 
-- Živé demo: <https://simcak.github.io/trusted-ai-lab/> (dostupné po prvním nasazení)
-- [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/simcak/trusted-ai-lab)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/simcak/trusted-ai-lab)
 
 ## Jak spustit lokálně
 
