@@ -8,20 +8,22 @@
   position: absolute;
   left: var(--space-4);
   top: -100px;
-  z-index: 10;
+  z-index: 20;
   padding: var(--space-2) var(--space-4);
   background: var(--color-surface);
   border: 2px solid var(--color-focus);
-  border-radius: var(--radius-md);
 }
 
 .skipLink:focus {
-  top: var(--space-4);
+  top: var(--space-2);
 }
 
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 var(--px) 0 0 var(--color-frame);
 }
 
 .headerInner,
@@ -35,16 +37,16 @@
 
 .headerInner {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3) var(--space-6);
-  padding-block: var(--space-3);
+  gap: var(--space-4);
+  min-height: var(--header-height);
 }
 
 .brand {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   color: var(--color-text);
   text-decoration: none;
 }
@@ -54,60 +56,31 @@
 }
 
 .brandName {
-  font-weight: 700;
+  font-family: var(--font-pixel);
   font-size: var(--text-lg);
-}
-
-.brandTagline {
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
 }
 
 .nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-2);
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  gap: var(--space-2);
 }
 
 .navLink {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
   padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-md);
   color: var(--color-text);
-  font-size: var(--text-sm);
-  font-weight: 500;
+  font-family: var(--font-pixel);
   text-decoration: none;
 }
 
 .navLink:hover {
-  background: var(--color-surface-muted);
   color: var(--color-text);
-}
-
-.navLinkActive {
-  background: var(--color-accent-soft);
-  color: var(--color-accent-hover);
-}
-
-.navNumber {
-  display: inline-grid;
-  place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 50%;
   background: var(--color-surface-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
 }
 
 .main {
   flex: 1;
-  padding-block: var(--space-7);
+  padding-block: var(--space-5) var(--space-7);
 }
 
 .main:focus {
@@ -116,15 +89,16 @@
 
 .footer {
   background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  box-shadow: 0 calc(-1 * var(--px)) 0 0 var(--color-frame);
 }
 
 .footerInner {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  align-items: flex-start;
   gap: var(--space-4) var(--space-6);
-  padding-block: var(--space-5);
+  padding-block: var(--space-4);
   font-size: var(--text-sm);
 }
 
@@ -134,4 +108,15 @@
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+@media (max-width: 30rem) {
+  .brandName {
+    font-size: var(--text-base);
+  }
+
+  /* The logo already leads to the gallery. */
+  .wideOnly {
+    display: none;
+  }
 }

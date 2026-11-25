@@ -1,0 +1,119 @@
+.card {
+  --edge: var(--color-frame);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - var(--px) * 2);
+  margin: var(--px);
+  background: var(--color-surface);
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(-1 * var(--px)) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    calc(var(--px) * 2) calc(var(--px) * 3) 0 0 var(--accent-1);
+  transition: transform 120ms steps(3);
+}
+
+.card:is(:hover, :focus-within) {
+  transform: translate(calc(-1 * var(--px)), calc(-2 * var(--px)));
+}
+
+/* Thumbnail: dithered accent sky with the project's sprite. */
+.thumb {
+  display: grid;
+  place-items: center;
+  height: 8.5rem;
+  background-color: var(--accent-3);
+  background-image:
+    linear-gradient(
+      to bottom,
+      transparent 70%,
+      color-mix(in srgb, var(--accent-2) 70%, transparent) 70%
+    ),
+    radial-gradient(color-mix(in srgb, var(--accent-2) 55%, transparent) 1px, transparent 1.5px);
+  background-size:
+    100% 100%,
+    6px 6px;
+  box-shadow: 0 var(--px) 0 0 var(--edge);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-4) var(--space-4);
+}
+
+.title {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-xl);
+}
+
+.link {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+/* The whole card is the link's target area. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.link:focus-visible {
+  outline: none;
+}
+
+.card:has(.link:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: calc(var(--px) * 2 + 3px);
+}
+
+.question {
+  margin-bottom: var(--space-2);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.text {
+  flex: 1;
+  margin-bottom: var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.soon {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  padding: var(--space-2) var(--space-4);
+  border: 2px dashed var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.soon p {
+  margin: 0;
+}
+
+.soon strong {
+  font-family: var(--font-pixel);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

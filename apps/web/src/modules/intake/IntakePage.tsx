@@ -8,8 +8,7 @@ import {
   type PresetId,
 } from '@trusted-ai-lab/intake-rules';
 import { useMemo, useState } from 'react';
-import { ModuleHeader } from '../../components/ModuleHeader/ModuleHeader.tsx';
-import { StoryNav } from '../../components/StoryNav/StoryNav.tsx';
+import { ProjectShell } from '../../components/ProjectShell/ProjectShell.tsx';
 import { cs } from '../../i18n/cs.ts';
 import { adrFileName, adrName, toAdrMarkdown } from './adr.ts';
 import { downloadText } from './download.ts';
@@ -54,47 +53,43 @@ export default function IntakePage() {
   };
 
   return (
-    <article className={styles.page}>
-      <ModuleHeader id="intake">
-        <p className={styles.notice}>{t.notice}</p>
-      </ModuleHeader>
+    <ProjectShell id="intake">
+      <div className={styles.page}>
+        <div className={styles.workspace}>
+          <div className={styles.presets} role="group" aria-label={t.presetsLabel}>
+            <span className={styles.groupLabel}>{t.presetsLabel}</span>
+            {PRESET_IDS.map((id) => (
+              <button
+                key={id}
+                type="button"
+                className="button button--secondary"
+                aria-pressed={preset === id}
+                onClick={() => choosePreset(id)}
+              >
+                {t.presets[id].label}
+              </button>
+            ))}
+          </div>
 
-      <div className={styles.workspace}>
-        <div className={styles.presets} role="group" aria-label={t.presetsLabel}>
-          <span className={styles.groupLabel}>{t.presetsLabel}</span>
-          {PRESET_IDS.map((id) => (
-            <button
-              key={id}
-              type="button"
-              className="button button--secondary"
-              aria-pressed={preset === id}
-              onClick={() => choosePreset(id)}
-            >
-              {t.presets[id].label}
-            </button>
-          ))}
-        </div>
+          <section className={styles.formColumn} aria-labelledby="intake-form-heading">
+            <h2 id="intake-form-heading">{t.formHeading}</h2>
+            <IntakeForm
+              input={input}
+              onField={(field: FactField, value) => update({ [field]: value })}
+              onDescription={(description) => update({ description })}
+            />
+          </section>
 
-        <section className={styles.formColumn} aria-labelledby="intake-form-heading">
-          <h2 id="intake-form-heading">{t.formHeading}</h2>
-          <IntakeForm
+          <IntakeResult
             input={input}
-            onField={(field: FactField, value) => update({ [field]: value })}
-            onDescription={(description) => update({ description })}
+            result={result}
+            cost={cost}
+            pricing={PRICING}
+            today={todayIso()}
+            onDownload={download}
           />
-        </section>
-
-        <IntakeResult
-          input={input}
-          result={result}
-          cost={cost}
-          pricing={PRICING}
-          today={todayIso()}
-          onDownload={download}
-        />
+        </div>
       </div>
-
-      <StoryNav id="intake" />
-    </article>
+    </ProjectShell>
   );
 }

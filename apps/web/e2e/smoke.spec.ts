@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, type Page } from '@playwright/test';
 
 /** Fails any test that logs a console error or throws an uncaught exception. */
 const test = base.extend<{ consoleErrors: string[] }>({
@@ -25,7 +25,7 @@ const modules = [
   { hash: '#/local', title: 'Lokálně', question: 'Co když data nesmí opustit zařízení?' },
 ];
 
-test('landing shows four module cards in story order', async ({ page }) => {
+test('landing shows the project gallery', async ({ page }) => {
   await page.goto('./');
   await expect(page.getByRole('heading', { level: 1, name: 'Bezpečná AI v praxi' })).toBeVisible();
 
@@ -40,7 +40,7 @@ test('landing shows four module cards in story order', async ({ page }) => {
 
 test('clicking a card opens the module', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('link', { name: 'Otevřít modul Intake' }).click();
+  await page.getByRole('link', { name: 'Otevřít projekt Intake' }).click();
   await expect(page).toHaveURL(/#\/intake$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Intake' })).toBeVisible();
 });
@@ -54,6 +54,46 @@ for (const m of modules) {
     await expect(page).toHaveTitle(`${m.title} · Bezpečná AI v praxi`);
   });
 }
+
+test('hero scene: pause stops the motion, reduced motion shows a still frame', async ({
+  browser,
+}) => {
+  const running = (page: Page) =>
+    page.evaluate(
+      () =>
+        document
+          .getAnimations()
+          .filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations === Infinity)
+          .length,
+    );
+
+  const normal = await browser.newPage();
+  await normal.goto('./');
+  await expect.poll(() => running(normal)).toBeGreaterThan(0);
+  await normal.getByRole('button', { name: 'Pozastavit animaci' }).click();
+  await expect.poll(() => running(normal)).toBe(0);
+  await normal.close();
+
+  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  const reduced = await context.newPage();
+  await reduced.goto('./');
+  await expect(reduced.getByRole('button', { name: 'Přehrát animaci' })).toBeVisible();
+  expect(await running(reduced)).toBe(0);
+  await context.close();
+});
+
+test('every route renders in the dark theme', async ({ browser }) => {
+  const context = await browser.newContext({ colorScheme: 'dark' });
+  const page = await context.newPage();
+  const errors: string[] = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  for (const hash of ['', ...modules.map((m) => m.hash)]) {
+    await page.goto(`./${hash}`);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  }
+  expect(errors).toEqual([]);
+  await context.close();
+});
 
 test('unknown route shows the not-found page', async ({ page }) => {
   await page.goto('./#/neexistuje');
@@ -102,10 +142,7 @@ test('intake recommends from presets, links to the modules and exports an ADR wi
   expect(adr.startsWith('# ADR: Klientský chatbot\n')).toBe(true);
   expect(adr).toContain('RAG (vyhledávání + jazykový model)');
 
-  await page
-    .getByTestId('intake-controls')
-    .getByRole('link', { name: '→ Modul 2: Ochrana dat' })
-    .click();
+  await page.getByTestId('intake-controls').getByRole('link', { name: '→ Ochrana dat' }).click();
   await expect(page).toHaveURL(/#\/pii$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Ochrana dat' })).toBeVisible();
 

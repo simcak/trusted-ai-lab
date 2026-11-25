@@ -1,7 +1,6 @@
 import { createNerDetector, type AsyncDetector, type Mode } from '@trusted-ai-lab/pii-cz';
 import { useState } from 'react';
-import { ModuleHeader } from '../../components/ModuleHeader/ModuleHeader.tsx';
-import { StoryNav } from '../../components/StoryNav/StoryNav.tsx';
+import { ProjectShell } from '../../components/ProjectShell/ProjectShell.tsx';
 import { cs } from '../../i18n/cs.ts';
 import { NER_MODEL } from '../../../../../evals/pii/ner-model.ts';
 import { EvalResults } from './EvalResults.tsx';
@@ -42,72 +41,68 @@ export default function PiiPage() {
 
   const t = cs.pii;
   return (
-    <article className={styles.page}>
-      <ModuleHeader id="pii">
-        <p className={styles.notice}>{t.privacyNote}</p>
-      </ModuleHeader>
+    <ProjectShell id="pii">
+      <div className={styles.page}>
+        <PiiPlayground
+          text={text}
+          analysed={analysed}
+          sample={sample}
+          mode={mode}
+          ner={{
+            state: nerState,
+            enabled: nerEnabled,
+            analysing: analysed.pluginPending,
+          }}
+          onText={(value) => {
+            setText(value);
+            setSample(null);
+          }}
+          onSample={(id) => {
+            setText(SAMPLES[id]);
+            setSample(id);
+          }}
+          onMode={setMode}
+          onNerLoad={() => void loadNer()}
+          onNerToggle={setNerEnabled}
+        />
 
-      <PiiPlayground
-        text={text}
-        analysed={analysed}
-        sample={sample}
-        mode={mode}
-        ner={{
-          state: nerState,
-          enabled: nerEnabled,
-          analysing: analysed.pluginPending,
-        }}
-        onText={(value) => {
-          setText(value);
-          setSample(null);
-        }}
-        onSample={(id) => {
-          setText(SAMPLES[id]);
-          setSample(id);
-        }}
-        onMode={setMode}
-        onNerLoad={() => void loadNer()}
-        onNerToggle={setNerEnabled}
-      />
+        <ReversibleDemo text={analysed.text} findings={analysed.findings} />
 
-      <ReversibleDemo text={analysed.text} findings={analysed.findings} />
+        <EvalResults />
 
-      <EvalResults />
+        <section className={styles.section} aria-labelledby="limits-heading">
+          <h2 id="limits-heading">{t.limits.heading}</h2>
+          <ul className={styles.list}>
+            {t.limits.items.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
 
-      <section className={styles.section} aria-labelledby="limits-heading">
-        <h2 id="limits-heading">{t.limits.heading}</h2>
-        <ul className={styles.list}>
-          {t.limits.items.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </section>
-
-      <section className={styles.section} aria-labelledby="managed-heading">
-        <h2 id="managed-heading">{t.managed.heading}</h2>
-        <div className={styles.compare}>
-          {[t.managed.own, t.managed.managedService].map((option) => (
-            <div key={option.heading} className={styles.compareCard}>
-              <h3>{option.heading}</h3>
-              <h4 className={styles.groupLabel}>{t.managed.prosLabel}</h4>
-              <ul className={styles.pros}>
-                {option.pros.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <h4 className={styles.groupLabel}>{t.managed.consLabel}</h4>
-              <ul className={styles.cons}>
-                {option.cons.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <p>{t.managed.recommendation}</p>
-      </section>
-
-      <StoryNav id="pii" />
-    </article>
+        <section className={styles.section} aria-labelledby="managed-heading">
+          <h2 id="managed-heading">{t.managed.heading}</h2>
+          <div className={styles.compare}>
+            {[t.managed.own, t.managed.managedService].map((option) => (
+              <div key={option.heading} className={styles.compareCard}>
+                <h3>{option.heading}</h3>
+                <h4 className={styles.groupLabel}>{t.managed.prosLabel}</h4>
+                <ul className={styles.pros}>
+                  {option.pros.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+                <h4 className={styles.groupLabel}>{t.managed.consLabel}</h4>
+                <ul className={styles.cons}>
+                  {option.cons.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <p>{t.managed.recommendation}</p>
+        </section>
+      </div>
+    </ProjectShell>
   );
 }

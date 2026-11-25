@@ -1,67 +1,14 @@
-.terms {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-}
-
-.label {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
-
 .list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  display: grid;
+  gap: var(--space-3);
   margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
-.term {
-  padding: var(--space-1) var(--space-3);
-  border: 1px dashed var(--color-accent);
-  border-radius: 999px;
-  background: var(--color-accent-soft);
-  color: var(--color-text);
-  font: inherit;
-  font-size: var(--text-sm);
-  cursor: help;
+.list dt {
+  font-family: var(--font-pixel);
+  font-size: var(--text-base);
 }
 
-.term:hover {
-  border-style: solid;
-}
-
-.popover {
-  max-width: min(28rem, calc(100vw - 2rem));
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: var(--shadow-card-hover);
-}
-
-.popover::backdrop {
-  background: rgb(0 0 0 / 15%);
-}
-
-.popover p {
-  margin: var(--space-2) 0 var(--space-3);
-  line-height: 1.6;
-}
-
-.close {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--color-accent);
-  font: inherit;
-  font-size: var(--text-sm);
-  text-decoration: underline;
-  cursor: pointer;
+.list dd {
+  margin: 0;
 }

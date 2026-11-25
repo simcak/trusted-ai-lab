@@ -1,45 +1,31 @@
-import { ModuleCard } from '../components/ModuleCard/ModuleCard.tsx';
-import { DOCS_URL, REPO_URL } from '../config.ts';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.ts';
 import { cs } from '../i18n/cs.ts';
 import { MODULES } from '../modules/registry.ts';
+import { HeroScene } from './landing/HeroScene.tsx';
+import { ComingSoon, ProjectCard } from './landing/ProjectCard.tsx';
 import styles from './Landing.module.css';
 
 export function Landing() {
   useDocumentTitle();
   return (
     <div className={styles.landing}>
-      <header className={styles.hero}>
-        <h1>{cs.app.name}</h1>
-        <p className={styles.lead}>{cs.landing.lead}</p>
-        <p className={styles.sublead}>{cs.landing.sublead}</p>
-      </header>
+      <HeroScene />
 
-      <section aria-labelledby="story-heading">
-        <h2 id="story-heading" className={styles.sectionHeading}>
-          {cs.landing.storyHeading}
-        </h2>
-        <ol className={styles.grid}>
-          {MODULES.map((m) => (
+      <section id="projects" className={styles.projects} aria-labelledby="projects-heading">
+        <header className={styles.projectsHeader}>
+          <h2 id="projects-heading" tabIndex={-1}>
+            {cs.landing.galleryHeading}
+          </h2>
+          <p>{cs.landing.galleryLead}</p>
+        </header>
+        <ul className={styles.grid}>
+          {MODULES.filter((m) => m.status === 'ready').map((m) => (
             <li key={m.id}>
-              <ModuleCard module={m} />
+              <ProjectCard project={m} />
             </li>
           ))}
-        </ol>
-      </section>
-
-      <section aria-labelledby="more-heading" className={styles.more}>
-        <h2 id="more-heading" className={styles.sectionHeading}>
-          {cs.landing.moreHeading}
-        </h2>
-        <ul>
-          <li>
-            <a href={DOCS_URL}>{cs.landing.docsLink}</a>
-          </li>
-          <li>
-            <a href={REPO_URL}>{cs.landing.githubLink}</a>
-          </li>
         </ul>
+        <ComingSoon />
       </section>
     </div>
   );

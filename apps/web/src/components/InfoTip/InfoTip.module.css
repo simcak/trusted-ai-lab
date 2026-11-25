@@ -1,0 +1,87 @@
+.iconButton {
+  --edge: var(--color-frame);
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 2px;
+  padding: 0;
+  border: 0;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+  font-family: var(--font-pixel);
+  font-size: var(--text-sm);
+  line-height: 1;
+  cursor: help;
+  box-shadow:
+    0 -2px 0 0 var(--edge),
+    0 2px 0 0 var(--edge),
+    -2px 0 0 0 var(--edge),
+    2px 0 0 0 var(--edge);
+}
+
+.iconButton:hover {
+  background: var(--color-accent-soft);
+}
+
+.panel {
+  --edge: var(--color-frame);
+  max-width: min(26rem, calc(100vw - 2rem));
+  max-height: min(70vh, 34rem);
+  overflow: auto;
+  padding: var(--space-4) var(--space-5);
+  border: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(-1 * var(--px)) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    var(--px) calc(var(--px) * 2) 0 var(--px) rgb(0 0 0 / 18%);
+}
+
+@supports (anchor-name: --a) {
+  .panel {
+    inset: auto;
+    margin: var(--space-2);
+    position-area: bottom span-right;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
+  }
+}
+
+.panel:popover-open {
+  animation: tip-in 160ms steps(3);
+}
+
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.panel p {
+  margin: 0 0 var(--space-2);
+}
+
+.title {
+  font-family: var(--font-pixel);
+  font-size: var(--text-base);
+}
+
+.close {
+  margin-top: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

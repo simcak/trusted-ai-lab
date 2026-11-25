@@ -1,7 +1,6 @@
 import { createTraceLog } from '@trusted-ai-lab/llm-core';
 import { useMemo, useState, useSyncExternalStore } from 'react';
-import { ModuleHeader } from '../../components/ModuleHeader/ModuleHeader.tsx';
-import { StoryNav } from '../../components/StoryNav/StoryNav.tsx';
+import { ProjectShell } from '../../components/ProjectShell/ProjectShell.tsx';
 import { TracePanel } from '../../components/TracePanel/TracePanel.tsx';
 import { cs } from '../../i18n/cs.ts';
 import { acwr, weekLoad, dayKey, type LoadEntry } from './activity/load.ts';
@@ -106,79 +105,77 @@ export default function LocalPage() {
   }
 
   return (
-    <article className={styles.page}>
-      <ModuleHeader id="local">
-        <p className={styles.notice}>{t.notice}</p>
-      </ModuleHeader>
-
-      <ActivityPicker
-        activities={acts.activities}
-        selectedKey={selected?.key}
-        errors={acts.errors}
-        reading={acts.reading}
-        onSamples={(ids) => void acts.addSamples(ids)}
-        onFiles={(files) => void acts.addFiles(files)}
-        onSelect={acts.select}
-        onRemove={acts.remove}
-      />
-
-      {selected && zone && (
-        <PrivacyPanel
-          original={selected.parsed}
-          label={selected.label}
-          protectedActivity={zone}
-          radius={radius}
-          maxHr={settings.maxHr}
-          onRadius={setRadius}
+    <ProjectShell id="local">
+      <div className={styles.page}>
+        <ActivityPicker
+          activities={acts.activities}
+          selectedKey={selected?.key}
+          errors={acts.errors}
+          reading={acts.reading}
+          onSamples={(ids) => void acts.addSamples(ids)}
+          onFiles={(files) => void acts.addFiles(files)}
+          onSelect={acts.select}
+          onRemove={acts.remove}
         />
-      )}
 
-      {metrics && (
-        <section className={styles.section} aria-labelledby="metrics-heading">
-          <h2 id="metrics-heading">{t.metrics.heading}</h2>
-          <p>{t.metrics.intro}</p>
-          <MetricsGrid metrics={metrics} />
-          <HeartRatePanel
-            form={hrForm}
-            onForm={setHrForm}
-            zonesS={metrics.zonesS}
-            isSample={
-              selected?.sample !== undefined && !hrForm.useAge && hrForm.maxHr === INITIAL_HR.maxHr
-            }
+        {selected && zone && (
+          <PrivacyPanel
+            original={selected.parsed}
+            label={selected.label}
+            protectedActivity={zone}
+            radius={radius}
+            maxHr={settings.maxHr}
+            onRadius={setRadius}
           />
-          {week.entries.length > 1 && <WeekLoad days={week.days} acwr={week.acwr} />}
+        )}
+
+        {metrics && (
+          <section className={styles.section} aria-labelledby="metrics-heading">
+            <h2 id="metrics-heading">{t.metrics.heading}</h2>
+            <p>{t.metrics.intro}</p>
+            <MetricsGrid metrics={metrics} />
+            <HeartRatePanel
+              form={hrForm}
+              onForm={setHrForm}
+              zonesS={metrics.zonesS}
+              isSample={
+                selected?.sample !== undefined &&
+                !hrForm.useAge &&
+                hrForm.maxHr === INITIAL_HR.maxHr
+              }
+            />
+            {week.entries.length > 1 && <WeekLoad days={week.days} acwr={week.acwr} />}
+          </section>
+        )}
+
+        {selected && input && (
+          <PayloadPreview
+            points={selected.parsed.points.length}
+            fileBytes={selected.fileBytes}
+            input={input}
+          />
+        )}
+
+        <CoachPanel coach={traced} input={input} template={template} />
+
+        <NetworkPanel snapshot={snapshot} />
+
+        <section className={styles.section} aria-labelledby="limits-heading">
+          <h2 id="limits-heading">{t.limits.heading}</h2>
+          <ul className={styles.list}>
+            {t.limits.items.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </section>
-      )}
 
-      {selected && input && (
-        <PayloadPreview
-          points={selected.parsed.points.length}
-          fileBytes={selected.fileBytes}
-          input={input}
-        />
-      )}
-
-      <CoachPanel coach={traced} input={input} template={template} />
-
-      <NetworkPanel snapshot={snapshot} />
-
-      <section className={styles.section} aria-labelledby="limits-heading">
-        <h2 id="limits-heading">{t.limits.heading}</h2>
-        <ul className={styles.list}>
-          {t.limits.items.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </section>
-
-      {events.length > 0 && (
-        <details className={styles.details}>
-          <summary>{t.traceSummary}</summary>
-          <TracePanel events={events} title={t.traceTitle} headingLevel={3} />
-        </details>
-      )}
-
-      <StoryNav id="local" />
-    </article>
+        {events.length > 0 && (
+          <details className={styles.details}>
+            <summary>{t.traceSummary}</summary>
+            <TracePanel events={events} title={t.traceTitle} headingLevel={3} />
+          </details>
+        )}
+      </div>
+    </ProjectShell>
   );
 }

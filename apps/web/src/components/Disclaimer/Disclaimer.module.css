@@ -1,5 +1,5 @@
 .disclaimer {
-  max-width: 44rem;
+  max-width: 48rem;
   color: var(--color-text-muted);
 }
 
@@ -7,11 +7,15 @@
   font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
   color: var(--color-text);
 }
 
 .list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-4);
   margin: 0;
-  padding-left: var(--space-5);
+  padding: 0;
+  list-style: none;
 }

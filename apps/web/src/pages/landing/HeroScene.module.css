@@ -1,0 +1,248 @@
+.hero {
+  display: grid;
+  grid-template-areas:
+    'intro'
+    'stage'
+    'dialog';
+}
+
+.intro {
+  grid-area: intro;
+  padding-bottom: var(--space-4);
+}
+
+.intro h1 {
+  margin-bottom: var(--space-2);
+  font-size: clamp(2rem, 1.3rem + 2.2vw, 3rem);
+  line-height: 1.05;
+}
+
+.lead {
+  max-width: 36rem;
+  margin-bottom: var(--space-3);
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage {
+  --edge: var(--color-frame);
+  grid-area: stage;
+  position: relative;
+  overflow: hidden;
+  height: clamp(12rem, 54vw, min(64vh, 38rem));
+  margin: var(--px);
+  background: var(--scene-sky-0);
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(-1 * var(--px)) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge);
+}
+
+.world {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 400 / 180;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.places {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.places li {
+  position: absolute;
+  top: 89.5%;
+  transform: translateX(-50%);
+  padding: 0 0.45em;
+  background: var(--px-ink-1);
+  color: var(--px-white);
+  font-family: var(--font-pixel);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+/* RPG-style text box, the same in both themes. */
+.dialog {
+  --edge: var(--px-steel-3);
+  grid-area: dialog;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-5);
+  margin: calc(var(--px) * 3) var(--px) var(--px);
+  padding: var(--space-4) var(--space-5);
+  background: var(--px-ink-1);
+  color: var(--px-white);
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(-1 * var(--px)) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    inset 0 0 0 var(--px) var(--px-ink-0);
+}
+
+.captions {
+  position: relative;
+  flex: 1 1 20rem;
+  min-height: 2.6em;
+  font-family: var(--font-pixel);
+  font-size: var(--text-xl);
+  line-height: 1.3;
+}
+
+.captions p {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+}
+
+.later {
+  opacity: 0;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.dialog :global(.button--secondary) {
+  --face: var(--px-ink-1);
+  --ink: var(--px-white);
+  --edge: var(--px-steel-2);
+  --bevel-hi: var(--px-steel-0);
+  --bevel-lo: var(--px-ink-0);
+}
+
+.dialog :global(.button--secondary):hover:not(:disabled) {
+  --face: var(--px-steel-0);
+  --ink: var(--px-white);
+}
+
+/* Ambient loops: stars, clouds, server LEDs, blinking eyes. */
+.stars {
+  opacity: var(--scene-star-opacity);
+}
+
+.twinkle {
+  animation: twinkle 3.2s steps(1) infinite;
+}
+
+@keyframes twinkle {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.cloud {
+  animation: drift 120s linear infinite;
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(calc(-40px - var(--x0)));
+  }
+  to {
+    transform: translateX(calc(440px - var(--x0)));
+  }
+}
+
+.led {
+  animation: led 1.6s steps(1) infinite;
+}
+
+@keyframes led {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.eyelid {
+  opacity: 0;
+  animation: blink 4.6s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%,
+  93% {
+    opacity: 0;
+  }
+  94%,
+  97% {
+    opacity: 1;
+  }
+}
+
+.windowGlow {
+  opacity: calc(var(--scene-window-glow-opacity) * 0.25);
+}
+
+.domeFill {
+  fill-opacity: 0.14;
+}
+
+.hero[data-paused] * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .twinkle,
+  .cloud,
+  .led,
+  .eyelid {
+    animation: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .captions {
+    font-size: var(--text-lg);
+  }
+
+  .dialog {
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+@media (min-width: 48rem) {
+  .hero {
+    grid-template-areas:
+      'stage'
+      'dialog';
+  }
+
+  .intro {
+    --edge: var(--color-frame);
+    grid-area: stage;
+    z-index: 1;
+    align-self: start;
+    justify-self: start;
+    max-width: 40rem;
+    margin: calc(var(--space-4) + var(--px));
+    padding: var(--space-3) var(--space-5) var(--space-4);
+    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+    box-shadow:
+      0 calc(-1 * var(--px)) 0 0 var(--edge),
+      0 var(--px) 0 0 var(--edge),
+      calc(-1 * var(--px)) 0 0 0 var(--edge),
+      var(--px) 0 0 0 var(--edge);
+  }
+}
