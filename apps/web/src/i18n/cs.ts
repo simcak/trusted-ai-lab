@@ -15,6 +15,7 @@ import type { TrimpCoefficient } from '../modules/local/activity/heart-rate.ts';
 import type { MetadataKind, ParseErrorCode, Sport } from '../modules/local/activity/types.ts';
 import type { LoadErrorKind } from '../modules/local/coach/engine.ts';
 import type { CoachModelKey } from '../modules/local/coach/model.ts';
+import type { ModuleId } from '../modules/registry.ts';
 import type { NetworkPhase } from '../modules/local/network/network-monitor.ts';
 
 /**
@@ -179,7 +180,7 @@ const intakeFields: { [K in FactField]: FieldTexts<K> } = {
     options: { standard: 'Stačí obecně', high: 'Ano, každý' },
   },
   errorTolerance: {
-    legend: 'Tolerance chyb',
+    legend: 'Kolik chyb snesete',
     short: 'Tolerance chyb',
     options: { low: 'Nízká (chyba je drahá)', medium: 'Střední', high: 'Vysoká' },
   },
@@ -226,11 +227,12 @@ const intakePatterns: Record<PatternId, { label: string; summary: string }> = {
   'classic-ml': {
     label: 'Klasické strojové učení',
     summary:
-      'Model natrénovaný na vašich označených datech. Je levný v provozu, rychlý a jeho přesnost jde změřit.',
+      'Model natrénovaný na vašich historických příkladech. Je levný, rychlý a jeho přesnost jde změřit.',
   },
   llm: {
     label: 'Jazykový model (jedno volání)',
-    summary: 'Jedno volání modelu se strukturovaným výstupem, bez vyhledávání a bez nástrojů.',
+    summary:
+      'Jedno zavolání jazykového modelu s pevně daným tvarem odpovědi, bez vyhledávání a bez nástrojů.',
   },
   rag: {
     label: 'RAG (vyhledávání + jazykový model)',
@@ -239,7 +241,7 @@ const intakePatterns: Record<PatternId, { label: string; summary: string }> = {
   },
   agent: {
     label: 'Agent',
-    summary: 'Model volá nástroje v několika krocích. Každý krok hlídá samostatná vrstva pravidel.',
+    summary: 'Model sám volá nástroje v několika krocích. Každý krok hlídají pravidla v kódu.',
   },
   'human-in-the-loop': {
     label: 'Člověk ve smyčce',
@@ -267,15 +269,16 @@ const intakeDataClasses: Record<DataSensitivity, string> = {
 const intakeControls: Record<ControlId, string> = {
   pseudonymization: 'Pseudonymizace před voláním modelu',
   'local-processing': 'Zpracování jen ve vlastním prostředí nebo na zařízení',
-  'provider-terms': 'Smlouva s poskytovatelem modelu: bez tréninku na datech, region, uchování',
+  'provider-terms':
+    'Smlouva s poskytovatelem modelu: data se nepoužijí k tréninku a je jasné, kde se zpracují a jak dlouho se uchovají',
   'permission-aware-retrieval': 'Vyhledávání respektuje přístupová práva',
   'prompt-injection-defense': 'Ochrana proti prompt injection',
-  'agent-guardrails': 'Guardrails agenta: povolené nástroje, rozpočet, audit',
+  'agent-guardrails': 'Pojistky agenta: povolené nástroje, limity, záznam kroků',
   'action-approval': 'Schválení akcí člověkem',
   'human-intervention': 'Právo na lidský zásah a napadení rozhodnutí',
   dpia: 'Posouzení vlivu na ochranu osobních údajů (DPIA)',
   'human-oversight': 'Navržený lidský dohled',
-  logging: 'Automatické logy událostí',
+  logging: 'Automatický záznam událostí (logy)',
   fria: 'Posouzení dopadu na základní práva (FRIA)',
   evals: 'Měření kvality na pevné sadě příkladů (evaly)',
 };
@@ -355,6 +358,92 @@ const agentErrors: Record<LlmErrorCode | 'drift' | 'aborted', string> = {
   aborted: 'Běh byl přerušen.',
 };
 
+/** Terms explained on module pages (chips under the header). Plain language, two sentences. */
+const glossaryTerms = {
+  llm: {
+    term: 'Jazykový model (LLM)',
+    text: 'Program natrénovaný na obrovském množství textu, který odhaduje, jaké slovo má následovat. Díky tomu umí psát, shrnovat a odpovídat, ale umí se i plést.',
+  },
+  slm: {
+    term: 'Malý jazykový model',
+    text: 'Jazykový model s jednotkami miliard parametrů místo stovek. Vejde se do běžného počítače, je rychlejší a nic nestojí, ale je méně chytrý.',
+  },
+  token: {
+    term: 'Token',
+    text: 'Kousek textu, se kterým model pracuje, zhruba část slova. U modelů v cloudu se platí podle počtu tokenů.',
+  },
+  rag: {
+    term: 'RAG',
+    text: 'Vyhledávání + jazykový model. Systém nejdřív najde v dokumentech pasáže k dotazu a model odpovídá jen z nich, s odkazem na zdroj.',
+  },
+  agent: {
+    term: 'Agent',
+    text: 'AI, která neodpovídá jen textem, ale sama volá nástroje (vyhledávání, výpočet, e-mail) v několika krocích po sobě.',
+  },
+  guardrails: {
+    term: 'Guardrails (pojistky)',
+    text: 'Pravidla v kódu kolem AI, která hlídají, co model smí udělat. Nejsou v promptu, takže je model nemůže přemluvit ani obejít.',
+  },
+  promptInjection: {
+    term: 'Prompt injection',
+    text: 'Skrytý pokyn v datech, třeba v dokumentu nebo na webu, kterým se útočník snaží AI přimět udělat něco, co nemá.',
+  },
+  hitl: {
+    term: 'Člověk ve smyčce',
+    text: 'Důležité rozhodnutí nebo akci potvrzuje člověk. AI jen připraví návrh nebo podklady.',
+  },
+  aiAct: {
+    term: 'AI Act',
+    text: 'Nařízení EU o umělé inteligenci. Dělí AI systémy podle rizika a podle toho jim ukládá povinnosti, některé praktiky úplně zakazuje.',
+  },
+  adr: {
+    term: 'ADR',
+    text: 'Architecture Decision Record: krátký dokument, který zapisuje, co se rozhodlo, proč a které možnosti se zamítly.',
+  },
+  personalData: {
+    term: 'Osobní údaje',
+    text: 'Cokoli, podle čeho jde poznat konkrétního člověka: jméno, rodné číslo, telefon, adresa, ale i poloha. Chrání je GDPR.',
+  },
+  pseudonymization: {
+    term: 'Pseudonymizace',
+    text: 'Nahrazení osobních údajů zástupnými symboly, třeba <OSOBA_1>. Kdo nemá mapu symbolů, nepozná, o koho jde.',
+  },
+  ner: {
+    term: 'NER',
+    text: 'Rozpoznávání pojmenovaných entit: malý model, který v textu hledá jména osob, míst a firem.',
+  },
+  eval: {
+    term: 'Eval',
+    text: 'Měření kvality na pevné sadě příkladů se známou správnou odpovědí. Ukáže, jak často systém trefí a jestli se změnou nezhoršil.',
+  },
+  trace: {
+    term: 'Trace',
+    text: 'Záznam všech kroků jednoho běhu: co šlo do modelu, co vrátil a co rozhodla pravidla. Slouží ke kontrole a hledání chyb.',
+  },
+  replay: {
+    term: 'Přehrání nahrávky',
+    text: 'Odpovědi modelu se nahrály dopředu a stránka je přehrává. Proto funguje bez klíče, zdarma a pokaždé stejně.',
+  },
+  byok: {
+    term: 'Vlastní klíč (BYOK)',
+    text: 'Bring Your Own Key: zadáte vlastní API klíč a stránka volá skutečný model. Platíte vy a klíč zůstává jen v paměti stránky.',
+  },
+  webgpu: {
+    term: 'WebGPU',
+    text: 'Rozhraní, přes které smí webová stránka počítat na grafické kartě. Díky němu běží jazykový model přímo v prohlížeči.',
+  },
+  privacyZone: {
+    term: 'Privacy zone',
+    text: 'Okruh kolem začátku a konce trasy, který se skryje, aby z nahrané aktivity nešlo poznat, kde bydlíte.',
+  },
+  trimp: {
+    term: 'TRIMP',
+    text: 'Training impulse: jedno číslo pro zátěž tréninku. Násobí délku tréninku jeho intenzitou podle tepu.',
+  },
+} as const satisfies Record<string, { term: string; text: string }>;
+
+export type TermId = keyof typeof glossaryTerms;
+
 export const cs = {
   app: {
     name: 'Bezpečná AI v praxi',
@@ -365,14 +454,14 @@ export const cs = {
   },
 
   landing: {
-    lead: 'Čtyři interaktivní ukázky toho, jak architekt rozhoduje, jestli a jak nasadit AI tam, kde jde o citlivá data.',
+    lead: 'Čtyři interaktivní ukázky, jak AI používat chytře a bezpečně, i tam, kde jde o osobní údaje.',
     sublead:
-      'Vše běží přímo v prohlížeči: bez instalace, bez API klíče a bez backendu. Výstupy modelů jsou předem nahrané, takže stránka funguje i bez připojení k AI službám.',
-    storyHeading: 'Čtyři otázky v pořadí, v jakém si je klade architekt',
+      'Všechno běží přímo v prohlížeči: bez instalace, bez účtu a zdarma. Odpovědi velkých modelů v cloudu jsou předem nahrané, takže stránka funguje pokaždé stejně.',
+    storyHeading: 'Čtyři otázky, které si položit, než AI nasadíte',
     proofLabel: 'Co tím dokazuji',
     openModule: (title: string) => `Otevřít modul ${title}`,
-    moreHeading: 'Jak to je postavené',
-    docsLink: 'Architektonická rozhodnutí a dokumentace',
+    moreHeading: 'Jak je to postavené',
+    docsLink: 'Technická rozhodnutí a dokumentace',
     githubLink: 'Zdrojový kód na GitHubu',
   },
 
@@ -386,9 +475,9 @@ export const cs = {
       title: 'Intake',
       question: 'Má to vůbec být AI?',
       summary:
-        'Byznys popíše záměr a pravidlový engine navrhne architekturu: vhodný vzor, míru rizika a odhad nákladů.',
+        'Popíšete nápad a pravidla navrhnou, jak ho postavit: jestli vůbec s AI, jak je to riskantní a kolik to bude stát.',
       proof:
-        'Umím říct „tady AI nepotřebujete“ a každé doporučení zdůvodnit konkrétním pravidlem, které jde otestovat.',
+        'Umím říct „tady AI nepotřebujete“ a každé doporučení zdůvodnit pravidlem, které jde otestovat.',
       willDo: [
         'Formulář pro popis záměru: typ dat, uživatelé, dopad na lidi, nároky na vysvětlitelnost, objem a latence.',
         'Doporučený vzor (bez AI, klasický software, strojové učení, RAG, agent, člověk ve smyčce) včetně zamítnutých alternativ a důvodů.',
@@ -402,9 +491,9 @@ export const cs = {
       title: 'Ochrana dat',
       question: 'Co nesmí odejít do modelu?',
       summary:
-        'Knihovna pii-cz najde české osobní údaje a nahradí je dřív, než text odejde do jazykového modelu.',
+        'Kód najde v textu české osobní údaje, třeba rodné číslo nebo číslo účtu, a schová je dřív, než text odejde do jazykového modelu.',
       proof:
-        'Rozumím ochraně osobních údajů až na úroveň kódu: validace kontrolních součtů místo pouhých regulárních výrazů a měřená přesnost.',
+        'Rozumím ochraně osobních údajů až na úroveň kódu: kontroluji i kontrolní součty, ne jen tvar čísla, a přesnost měřím.',
       willDo: [
         'Detekce rodného čísla, IČO, DIČ, čísla účtu, IBAN, telefonu, e-mailu, adresy a jmen, vždy s validací, ne jen podle tvaru.',
         'Tři režimy: začernění, konzistentní pseudonymizace a vratná pseudonymizace (mapa zůstává jen v paměti prohlížeče).',
@@ -417,9 +506,9 @@ export const cs = {
       title: 'Agent pod kontrolou',
       question: 'Jak AI bezpečně jedná?',
       summary:
-        'Agent hledá ve fiktivních fondech a počítá poplatky. Každý jeho krok ale hlídá samostatná vrstva pravidel.',
+        'AI asistent sám hledá ve fiktivních fondech a počítá poplatky. Každý jeho krok ale hlídají pravidla v kódu, která model nemůže obejít.',
       proof:
-        'Umím navrhnout guardrails jako samostatnou, testovatelnou vrstvu: povolené nástroje, rozpočty, schvalování člověkem a auditní stopu.',
+        'Umím navrhnout pojistky (guardrails) jako samostatnou, testovatelnou vrstvu: povolené nástroje, limity, schválení člověkem a záznam všech kroků.',
       willDo: [
         'Vlastní agent loop bez frameworku, nejvýš 6 kroků, nad 8 fiktivními fondy.',
         'Policy engine: povolené nástroje podle role, validace argumentů, rozpočet kroků a tokenů, detekce smyček.',
@@ -433,9 +522,9 @@ export const cs = {
       title: 'Lokálně',
       question: 'Co když data nesmí opustit zařízení?',
       summary:
-        'Trenérský asistent rozebere sportovní aktivitu a malý jazykový model výsledky vysvětlí přímo v prohlížeči.',
+        'Rozbor tréninku z hodinek a malý jazykový model, který ho vysvětlí. Všechno běží ve vašem počítači, data nikam neodcházejí.',
       proof:
-        'Umím navrhnout řešení, kde citlivá data zařízení vůbec neopustí, a umím to také doložit.',
+        'Umím navrhnout řešení, kde citlivá data zařízení vůbec neopustí, a umím to i doložit.',
       willDo: [
         'Nahrání souboru GPX, TCX nebo FIT a zpracování výhradně v prohlížeči.',
         'Privacy zone: oříznutí začátku a konce trasy, kde bývá adresa bydliště, a odstranění metadat zařízení.',
@@ -448,12 +537,12 @@ export const cs = {
 
   intake: {
     notice:
-      'Bez jazykového modelu: doporučení skládají pravidla, každé s důvodem a odkazem na zdroj. Nic se nikam neodesílá.',
+      'Tady žádná AI není: doporučení skládají pravidla, každé s důvodem a odkazem na zdroj. Nic se nikam neodesílá.',
     presetsLabel: 'Ukázkové záměry',
     presets: intakePresets,
     formHeading: 'Popište záměr',
     descriptionLabel: 'Popis záměru',
-    descriptionHint: 'Pravidla text nečtou, jen ho převezmou do ADR.',
+    descriptionHint: 'Pravidla text nečtou, jen ho vloží do staženého dokumentu (ADR).',
     fields: intakeFields,
     groups: { work: 'Úloha a data', impact: 'Dopad a provoz' },
 
@@ -610,7 +699,7 @@ export const cs = {
     ner: {
       heading: 'Volitelně: NER model pro jména',
       intro:
-        'Pravidla hledají jména podle slovníku, oslovení a koncovek. Malý model pro rozpoznávání pojmenovaných entit (NER) může doplnit jména, která pravidla minou. Používá se jen pro jména osob.',
+        'Pravidla hledají jména podle slovníku, oslovení a koncovek. Malý model pro rozpoznávání jmen (NER) může doplnit ta, která pravidla minou. Používá se jen pro jména osob.',
       load: (size: string) => `Načíst NER model (${size})`,
       downloadNote: (runtime: string) =>
         `Stáhne se až po kliknutí: soubory modelu z huggingface.co a běhové prostředí ONNX Runtime pro WebAssembly z tohoto webu (${runtime} nekomprimovaně, při přenosu obvykle méně). Text, který analyzujete, zůstává v prohlížeči.`,
@@ -783,16 +872,16 @@ export const cs = {
 
   agent: {
     notice:
-      'Odpovědi modelu jsou nahrané. Agent loop, pravidla, nástroje i pseudonymizace běží živě ve vašem prohlížeči. Fondy jsou fiktivní a nic se nikam neodesílá.',
+      'Odpovědi modelu jsou předem nahrané. Všechno ostatní (smyčka agenta, pravidla, nástroje i pseudonymizace) běží živě ve vašem prohlížeči. Fondy jsou fiktivní a nic se nikam neodesílá.',
     run: {
       heading: 'Spusťte scénář',
       intro:
-        'Vyberte scénář a pusťte ho se zapnutými i vypnutými guardrails. Se stejným modelem a stejným promptem se liší jen vrstva pravidel.',
+        'Vyberte scénář a pusťte ho s pojistkami zapnutými, pak vypnutými. Model i prompt jsou stejné, liší se jen vrstva pravidel.',
       scenarioLegend: 'Scénář',
-      guardrailsLegend: 'Guardrails',
+      guardrailsLegend: 'Pojistky (guardrails)',
       guardrailsOn: 'Zapnuté',
       guardrailsOff: 'Vypnuté',
-      persona: 'Persona',
+      persona: 'Role',
       personas: { klient: 'klient', poradce: 'poradce' },
       userMessage: 'Dotaz uživatele',
       start: 'Spustit',
@@ -827,7 +916,7 @@ export const cs = {
       draftSubject: 'Předmět',
       roles: { klient: 'klient', kolega: 'kolega', compliance: 'compliance' },
       errors: agentErrors,
-      traceTitle: 'Trace běhu',
+      traceTitle: 'Záznam kroků (trace)',
     },
     approval: {
       heading: 'Schválení akce',
@@ -855,7 +944,7 @@ export const cs = {
       sourceLink: 'Dokumentace Anthropic: aplikace v prohlížeči',
       keyLabel: 'API klíč Anthropic',
       queryLabel: 'Dotaz',
-      personaLegend: 'Persona',
+      personaLegend: 'Role',
       model: (model: string) => `Model: ${model}`,
       start: 'Spustit s vlastním klíčem',
       forget: 'Zapomenout klíč',
@@ -863,14 +952,14 @@ export const cs = {
     rules: {
       heading: 'Pravidla',
       intro:
-        'Policy engine je samostatná vrstva, ne text v promptu. Každé rozhodnutí je v trace s pravidlem a důvodem.',
+        'Pravidla jsou samostatná vrstva v kódu, ne prosba v promptu. Každé rozhodnutí je v záznamu kroků (trace) s pravidlem a důvodem.',
       items: agentRules,
     },
     limits: {
       heading: 'Co demo neumí',
       items: [
         'Heuristiky pro prompt injection a investiční doporučení zachytí zjevné případy, ne všechny. Proto na nich nestojí akce s dopadem: ty hlídá allowlist a schválení člověkem.',
-        'Persona je přepínač. V produkci ji určí identita a role přihlášeného uživatele.',
+        'Roli tady přepínáte ručně. Ve skutečné aplikaci by ji určilo přihlášení uživatele.',
         'Nahrávky vznikly jedním modelem v jednom čase. Jiný model nebo jiná verze se může chovat jinak.',
         'Koncept e-mailu se nikam neodesílá a demo nemá žádný nástroj, který by mohl něco odeslat.',
       ],
@@ -997,12 +1086,12 @@ export const cs = {
     payload: {
       heading: '4. Co uvidí AI',
       intro:
-        'Model nedostane váš soubor. Dostane jen tento souhrn: žádné souřadnice, žádné časy, žádné zařízení ani název aktivity.',
+        'Model nedostane váš soubor. Dostane jen tento souhrn: žádné souřadnice, žádné časy, žádné zařízení ani název aktivity. Souhrn skládá kód z ověřeného schématu, nic jiného se do něj nedostane.',
       file: 'Váš soubor',
       fileDetail: (points: string) => `${points} bodů trasy`,
       model: 'Model dostane',
-      modelDetail: (count: number) => `${count} souhrnných údajů, žádná poloha ani čas`,
-      jsonLabel: 'Přesně tohle jde do modelu',
+      modelDetail: 'souhrnná čísla, žádná poloha ani čas',
+      jsonLabel: 'Přesně tohle jde do modelu (u vlastní otázky se přidá ještě ona)',
       promptLabel: 'Pokyny pro model (systémový prompt)',
     },
     coach: {
@@ -1118,6 +1207,18 @@ export const cs = {
     traceTitle: 'Záznam kroků',
   },
 
+  glossary: {
+    label: 'Pojmy:',
+    close: 'Zavřít',
+    terms: glossaryTerms,
+    byModule: {
+      intake: ['llm', 'rag', 'agent', 'hitl', 'aiAct', 'adr'],
+      pii: ['personalData', 'pseudonymization', 'ner', 'eval'],
+      agent: ['agent', 'guardrails', 'promptInjection', 'token', 'trace', 'replay', 'byok'],
+      local: ['slm', 'webgpu', 'token', 'privacyZone', 'trimp'],
+    } satisfies Record<ModuleId, TermId[]>,
+  },
+
   placeholder: {
     moduleOf: (n: number, total: number) => `Modul ${n} ze ${total}`,
     notice: 'Tento modul se připravuje. Níže je popsané, co bude umět.',
@@ -1130,7 +1231,7 @@ export const cs = {
   },
 
   trace: {
-    defaultTitle: 'Trace',
+    defaultTitle: 'Záznam kroků (trace)',
     empty: 'Zatím žádné události.',
     copy: 'Zkopírovat trace jako JSON',
     copied: 'Trace je zkopírovaný do schránky.',
