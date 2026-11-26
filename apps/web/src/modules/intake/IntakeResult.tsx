@@ -140,7 +140,7 @@ function DataCard({ input, result }: { input: IntakeInput; result: Result }) {
                 {t.data.controls[control]}
                 {meta && (
                   <Link to={meta.path} className={styles.moduleLink}>
-                    → {t.data.moduleLink(meta.number, cs.modules[meta.id].title)}
+                    → {t.data.moduleLink(cs.modules[meta.id].title)}
                   </Link>
                 )}
               </li>

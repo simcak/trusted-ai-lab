@@ -1,42 +1,26 @@
-import { useId } from 'react';
 import { cs, type TermId } from '../../i18n/cs.ts';
+import { InfoTip } from '../InfoTip/InfoTip.tsx';
 import styles from './TermList.module.css';
 
 /**
- * "Terms used here" as small buttons; each opens a short explanation in a native popover
- * (light dismiss, Esc, no library). Keeps the module texts short for people new to AI.
+ * "Terms used here" behind one button: a popover with each term and a one-line explanation,
+ * so the display itself stays free of jargon for people new to AI.
  */
 export function TermList({ terms }: { terms: readonly TermId[] }) {
-  const id = useId();
   if (terms.length === 0) return null;
   return (
-    <div className={styles.terms}>
-      <span className={styles.label}>{cs.glossary.label}</span>
-      <ul className={styles.list}>
+    <InfoTip label={cs.glossary.label} text={cs.glossary.label} title={cs.glossary.label}>
+      <dl className={styles.list}>
         {terms.map((term) => {
           const entry = cs.glossary.terms[term];
-          const popoverId = `${id}-${term}`;
           return (
-            <li key={term}>
-              <button type="button" className={styles.term} popoverTarget={popoverId}>
-                {entry.term}
-              </button>
-              <div id={popoverId} popover="auto" className={styles.popover} role="note">
-                <strong>{entry.term}</strong>
-                <p>{entry.text}</p>
-                <button
-                  type="button"
-                  className={styles.close}
-                  popoverTarget={popoverId}
-                  popoverTargetAction="hide"
-                >
-                  {cs.glossary.close}
-                </button>
-              </div>
-            </li>
+            <div key={term}>
+              <dt>{entry.term}</dt>
+              <dd>{entry.text}</dd>
+            </div>
           );
         })}
-      </ul>
-    </div>
+      </dl>
+    </InfoTip>
   );
 }

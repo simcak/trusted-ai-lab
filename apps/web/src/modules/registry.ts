@@ -1,30 +1,62 @@
-/** The four modules in story order (CLAUDE.md §1). Texts live in i18n/cs.ts under the same id. */
+import type { SpriteDef } from '../pixel/pixel-art.ts';
+import { agentThumb, intakeThumb, localThumb, piiThumb } from '../pixel/sprites/projects.ts';
+
+/**
+ * Projects in the gallery, in display order. A pure gallery: no numbering, each project
+ * stands on its own. Texts live in i18n/cs.ts under `modules[id]`.
+ */
 export type ModuleId = 'intake' | 'pii' | 'agent' | 'local';
+export type TagId = 'privacy' | 'local' | 'llm' | 'agents' | 'decisions' | 'aiAct';
+/** Pixel-palette ramp used for the project's card and display frame (see styles/pixel.css). */
+export type Accent = 'sun' | 'berry' | 'sky' | 'leaf';
 
 export interface ModuleMeta {
   id: ModuleId;
-  number: number;
   path: `/${string}`;
-  /** Development phase in which the module gets implemented. */
-  phase: number;
-  /** `ready` once the module is implemented; `planned` shows the placeholder. */
+  /** `ready` once implemented; `planned` would show as a locked card. */
   status: 'ready' | 'planned';
+  tags: readonly TagId[];
+  accent: Accent;
+  thumb: SpriteDef;
 }
 
 export const MODULES: readonly ModuleMeta[] = [
-  { id: 'intake', number: 1, path: '/intake', phase: 2, status: 'ready' },
-  { id: 'pii', number: 2, path: '/pii', phase: 1, status: 'ready' },
-  { id: 'agent', number: 3, path: '/agent', phase: 3, status: 'ready' },
-  { id: 'local', number: 4, path: '/local', phase: 4, status: 'ready' },
+  {
+    id: 'intake',
+    path: '/intake',
+    status: 'ready',
+    tags: ['decisions', 'aiAct'],
+    accent: 'sun',
+    thumb: intakeThumb,
+  },
+  {
+    id: 'pii',
+    path: '/pii',
+    status: 'ready',
+    tags: ['privacy', 'llm'],
+    accent: 'berry',
+    thumb: piiThumb,
+  },
+  {
+    id: 'agent',
+    path: '/agent',
+    status: 'ready',
+    tags: ['agents', 'llm'],
+    accent: 'sky',
+    thumb: agentThumb,
+  },
+  {
+    id: 'local',
+    path: '/local',
+    status: 'ready',
+    tags: ['local', 'privacy'],
+    accent: 'leaf',
+    thumb: localThumb,
+  },
 ];
 
 export function getModule(id: ModuleId): ModuleMeta {
   const meta = MODULES.find((m) => m.id === id);
   if (!meta) throw new Error(`Unknown module "${id}"`);
   return meta;
-}
-
-export function getNeighbours(id: ModuleId): { prev?: ModuleMeta; next?: ModuleMeta } {
-  const index = MODULES.findIndex((m) => m.id === id);
-  return { prev: MODULES[index - 1], next: MODULES[index + 1] };
 }

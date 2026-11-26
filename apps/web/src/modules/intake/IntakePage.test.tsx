@@ -45,25 +45,25 @@ describe('IntakePage', () => {
     ).toBeTruthy();
   });
 
-  it('links the controls to the modules that demonstrate them', () => {
+  it('links the controls to the projects that demonstrate them', () => {
     renderPage();
     fireEvent.click(presetButton('client-chatbot'));
     const controls = within(screen.getByTestId('intake-controls'));
     expect(
       controls
-        .getByRole('link', { name: `→ ${t.data.moduleLink(2, cs.modules.pii.title)}` })
+        .getByRole('link', { name: `→ ${t.data.moduleLink(cs.modules.pii.title)}` })
         .getAttribute('href'),
     ).toBe('/pii');
     expect(
       controls
-        .getByRole('link', { name: `→ ${t.data.moduleLink(3, cs.modules.agent.title)}` })
+        .getByRole('link', { name: `→ ${t.data.moduleLink(cs.modules.agent.title)}` })
         .getAttribute('href'),
     ).toBe('/agent');
 
     fireEvent.click(presetButton('mail-triage'));
     expect(
       within(screen.getByTestId('intake-controls'))
-        .getByRole('link', { name: `→ ${t.data.moduleLink(4, cs.modules.local.title)}` })
+        .getByRole('link', { name: `→ ${t.data.moduleLink(cs.modules.local.title)}` })
         .getAttribute('href'),
     ).toBe('/local');
   });

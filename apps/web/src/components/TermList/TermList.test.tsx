@@ -4,15 +4,15 @@ import { cs } from '../../i18n/cs.ts';
 import { TermList } from './TermList.tsx';
 
 describe('TermList', () => {
-  it('offers each term as a button that opens its explanation', () => {
+  it('opens all terms with their explanations from one button', () => {
     render(<TermList terms={['rag', 'token']} />);
-    const button = screen.getByRole('button', { name: cs.glossary.terms.rag.term });
+    const button = screen.getByRole('button', { name: cs.glossary.label });
     const targetId = button.getAttribute('popovertarget');
     expect(targetId).toBeTruthy();
     const popover = document.getElementById(targetId!);
     expect(popover?.getAttribute('popover')).toBe('auto');
     expect(popover?.textContent).toContain(cs.glossary.terms.rag.text);
-    expect(screen.getByRole('button', { name: cs.glossary.terms.token.term })).toBeTruthy();
+    expect(popover?.textContent).toContain(cs.glossary.terms.token.term);
   });
 
   it('lists terms for every module', () => {

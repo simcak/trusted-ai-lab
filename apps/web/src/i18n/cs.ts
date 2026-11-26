@@ -447,27 +447,48 @@ export type TermId = keyof typeof glossaryTerms;
 export const cs = {
   app: {
     name: 'Bezpečná AI v praxi',
-    tagline: 'Od nápadu k bezpečnému nasazení',
+    tagline: 'Laboratoř bezpečné AI',
     skipToContent: 'Přeskočit na obsah',
-    mainNav: 'Moduly',
+    mainNav: 'Hlavní navigace',
+    gallery: 'Projekty',
     loading: 'Načítám…',
   },
 
   landing: {
-    lead: 'Čtyři interaktivní ukázky, jak AI používat chytře a bezpečně, i tam, kde jde o osobní údaje.',
-    sublead:
-      'Všechno běží přímo v prohlížeči: bez instalace, bez účtu a zdarma. Odpovědi velkých modelů v cloudu jsou předem nahrané, takže stránka funguje pokaždé stejně.',
-    storyHeading: 'Čtyři otázky, které si položit, než AI nasadíte',
-    proofLabel: 'Co tím dokazuji',
-    openModule: (title: string) => `Otevřít modul ${title}`,
-    moreHeading: 'Jak je to postavené',
-    docsLink: 'Technická rozhodnutí a dokumentace',
-    githubLink: 'Zdrojový kód na GitHubu',
+    lead: 'Interaktivní ukázky, jak používat AI chytře a bezpečně: s ohledem na soukromí, lokálně a pod kontrolou pravidel.',
+    facts: ['Běží v prohlížeči', 'Bez účtu a API klíče', 'Zdarma'],
+    hero: {
+      captions: [
+        'Vítejte v laboratoři bezpečné AI.',
+        'Osobní údaje zakryjeme dřív, než odejdou do AI.',
+        'Odpověď hlídají pravidla. Podvržené pokyny neprojdou.',
+        'A citlivá data zůstanou u vás.',
+      ],
+      places: { device: 'Vaše zařízení', guard: 'Ochrana', model: 'AI model' },
+      description:
+        'Animace: dopis s osobními údaji vyjde z domu. Ochrana mu údaje zakryje a pošle ho k AI. Odpověď cestou zpět zkontroluje, odrazí podvržený pokyn a údaje zase doplní. Citlivá data zůstávají doma.',
+      pause: 'Pozastavit animaci',
+      play: 'Přehrát animaci',
+      cta: 'Vybrat projekt',
+    },
+    galleryHeading: 'Projekty',
+    galleryLead:
+      'Každý projekt odpovídá na jednu otázku, kterou si položit, než AI nasadíte. Další přibudou.',
+    openProject: (title: string) => `Otevřít projekt ${title}`,
+    tagsLabel: 'Štítky',
+    comingSoon: {
+      title: 'Další projekty',
+      text: 'Připravuji další ukázky.',
+    },
   },
 
-  status: {
-    planned: (phase: number) => `Připravuje se – fáze ${phase}`,
-    ready: 'Hotovo',
+  tags: {
+    privacy: 'Soukromí',
+    local: 'Lokální AI',
+    llm: 'Bezpečné LLM',
+    agents: 'Agenti',
+    decisions: 'Rozhodování',
+    aiAct: 'AI Act',
   },
 
   modules: {
@@ -478,14 +499,10 @@ export const cs = {
         'Popíšete nápad a pravidla navrhnou, jak ho postavit: jestli vůbec s AI, jak je to riskantní a kolik to bude stát.',
       proof:
         'Umím říct „tady AI nepotřebujete“ a každé doporučení zdůvodnit pravidlem, které jde otestovat.',
-      willDo: [
-        'Formulář pro popis záměru: typ dat, uživatelé, dopad na lidi, nároky na vysvětlitelnost, objem a latence.',
-        'Doporučený vzor (bez AI, klasický software, strojové učení, RAG, agent, člověk ve smyčce) včetně zamítnutých alternativ a důvodů.',
-        'Klasifikace dat a požadované kontroly s odkazy na další moduly.',
-        'Orientační kategorie podle AI Act s odkazem na konkrétní články.',
-        'Odhad nákladů jako rozsah a export rozhodnutí (ADR) v Markdownu.',
-        'Bez jazykového modelu: pravidla jsou deterministická, vysvětlitelná a pokrytá testy.',
-      ],
+      notice:
+        'Tady žádná AI není: doporučení skládají pravidla, každé s důvodem a odkazem na zdroj. Nic se nikam neodesílá.',
+      card: 'Popište nápad a zjistěte, jestli na něj vůbec potřebujete AI.',
+      chips: ['Bez AI', 'Nic se neodesílá'],
     },
     pii: {
       title: 'Ochrana dat',
@@ -494,13 +511,9 @@ export const cs = {
         'Kód najde v textu české osobní údaje, třeba rodné číslo nebo číslo účtu, a schová je dřív, než text odejde do jazykového modelu.',
       proof:
         'Rozumím ochraně osobních údajů až na úroveň kódu: kontroluji i kontrolní součty, ne jen tvar čísla, a přesnost měřím.',
-      willDo: [
-        'Detekce rodného čísla, IČO, DIČ, čísla účtu, IBAN, telefonu, e-mailu, adresy a jmen, vždy s validací, ne jen podle tvaru.',
-        'Tři režimy: začernění, konzistentní pseudonymizace a vratná pseudonymizace (mapa zůstává jen v paměti prohlížeče).',
-        'Zvýraznění nálezů v textu s typem a důvodem detekce.',
-        'Vyhodnocení na syntetickém korpusu: precision, recall a F1 po typech a ukázky chyb.',
-        'Poctivé srovnání, kdy stačí vlastní knihovna a kdy je lepší spravovaná služba.',
-      ],
+      notice: 'Vše na této stránce běží jen v prohlížeči. Text, který napíšete, nikam neodchází.',
+      card: 'Vložte text a sledujte, jak se rodná čísla a účty schovají dřív, než odejdou do AI.',
+      chips: ['Běží jen ve vašem prohlížeči'],
     },
     agent: {
       title: 'Agent pod kontrolou',
@@ -509,14 +522,10 @@ export const cs = {
         'AI asistent sám hledá ve fiktivních fondech a počítá poplatky. Každý jeho krok ale hlídají pravidla v kódu, která model nemůže obejít.',
       proof:
         'Umím navrhnout pojistky (guardrails) jako samostatnou, testovatelnou vrstvu: povolené nástroje, limity, schválení člověkem a záznam všech kroků.',
-      willDo: [
-        'Vlastní agent loop bez frameworku, nejvýš 6 kroků, nad 8 fiktivními fondy.',
-        'Policy engine: povolené nástroje podle role, validace argumentů, rozpočet kroků a tokenů, detekce smyček.',
-        'Vše, co jde do modelu, projde pseudonymizací z modulu Ochrana dat.',
-        'Akce s dopadem (koncept e-mailu) vyžaduje schválení člověkem. Nic se neodesílá.',
-        'Šest nahraných scénářů včetně prompt injection, každý se zapnutými i vypnutými guardrails.',
-        'Časová osa trace: každé volání modelu a nástroje i každé rozhodnutí pravidel s důvodem.',
-      ],
+      notice:
+        'Odpovědi modelu jsou předem nahrané. Všechno ostatní (smyčka agenta, pravidla, nástroje i pseudonymizace) běží živě ve vašem prohlížeči. Fondy jsou fiktivní a nic se nikam neodesílá.',
+      card: 'Pusťte AI asistenta a sledujte, jak ho hlídají pravidla, i když se ho někdo snaží zmást.',
+      chips: ['Nahrané odpovědi modelu', 'Fiktivní fondy'],
     },
     local: {
       title: 'Lokálně',
@@ -525,19 +534,14 @@ export const cs = {
         'Rozbor tréninku z hodinek a malý jazykový model, který ho vysvětlí. Všechno běží ve vašem počítači, data nikam neodcházejí.',
       proof:
         'Umím navrhnout řešení, kde citlivá data zařízení vůbec neopustí, a umím to i doložit.',
-      willDo: [
-        'Nahrání souboru GPX, TCX nebo FIT a zpracování výhradně v prohlížeči.',
-        'Privacy zone: oříznutí začátku a konce trasy, kde bývá adresa bydliště, a odstranění metadat zařízení.',
-        'Metriky: vzdálenost, tempo, převýšení, tepové zóny, TRIMP a týdenní zátěž.',
-        'Malý lokální model (WebLLM) dostane jen agregované metriky, nikdy surové GPS body.',
-        'Panel síťové aktivity, který ukáže, že po nahrání souboru neodešel žádný požadavek.',
-      ],
+      notice:
+        'Všechno běží ve vašem prohlížeči. Soubor nikam neodchází a panel Síťová aktivita dole to dokládá.',
+      card: 'Nahrajte trénink z hodinek a nechte si ho vysvětlit AI, která běží jen u vás.',
+      chips: ['Běží jen u vás'],
     },
   },
 
   intake: {
-    notice:
-      'Tady žádná AI není: doporučení skládají pravidla, každé s důvodem a odkazem na zdroj. Nic se nikam neodesílá.',
     presetsLabel: 'Ukázkové záměry',
     presets: intakePresets,
     formHeading: 'Popište záměr',
@@ -569,7 +573,7 @@ export const cs = {
       classes: intakeDataClasses,
       controls: intakeControls,
       none: 'Žádné zvláštní kontroly.',
-      moduleLink: (number: number, title: string) => `Modul ${number}: ${title}`,
+      moduleLink: (title: string) => title,
     },
 
     cost: {
@@ -646,8 +650,6 @@ export const cs = {
   pii: {
     types: piiTypes,
     reasons: piiReasons,
-    privacyNote:
-      'Vše na této stránce běží jen v prohlížeči. Text, který napíšete, nikam neodchází.',
 
     playground: {
       heading: 'Vyzkoušejte',
@@ -871,8 +873,6 @@ export const cs = {
   },
 
   agent: {
-    notice:
-      'Odpovědi modelu jsou předem nahrané. Všechno ostatní (smyčka agenta, pravidla, nástroje i pseudonymizace) běží živě ve vašem prohlížeči. Fondy jsou fiktivní a nic se nikam neodesílá.',
     run: {
       heading: 'Spusťte scénář',
       intro:
@@ -967,8 +967,6 @@ export const cs = {
   },
 
   local: {
-    notice:
-      'Všechno běží ve vašem prohlížeči. Soubor nikam neodchází a panel Síťová aktivita dole to dokládá.',
     pick: {
       heading: '1. Vyberte aktivitu',
       intro:
@@ -1208,7 +1206,7 @@ export const cs = {
   },
 
   glossary: {
-    label: 'Pojmy:',
+    label: 'Pojmy',
     close: 'Zavřít',
     terms: glossaryTerms,
     byModule: {
@@ -1219,15 +1217,15 @@ export const cs = {
     } satisfies Record<ModuleId, TermId[]>,
   },
 
-  placeholder: {
-    moduleOf: (n: number, total: number) => `Modul ${n} ze ${total}`,
-    notice: 'Tento modul se připravuje. Níže je popsané, co bude umět.',
-    willDoHeading: 'Co modul bude dělat',
-    proofHeading: 'Co tím dokazuji',
-    storyNav: 'Navigace mezi moduly',
-    prev: 'Předchozí modul',
-    next: 'Další modul',
-    backHome: 'Zpět na úvod',
+  shell: {
+    backToGallery: 'Projekty',
+    backToGalleryLabel: 'Zpět na projekty',
+    terms: 'Pojmy',
+    howItWorks: 'Jak to funguje',
+    drawerClose: 'Zavřít',
+    whatItDoes: 'Co to dělá',
+    proof: 'Co tím ukazuji',
+    goodToKnow: 'Dobré vědět',
   },
 
   trace: {

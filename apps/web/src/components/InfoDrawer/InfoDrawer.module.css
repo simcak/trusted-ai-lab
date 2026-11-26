@@ -1,0 +1,71 @@
+.drawer {
+  --edge: var(--color-frame);
+  inset: 0 0 0 auto;
+  width: min(36rem, 100vw);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: calc(-1 * var(--px)) 0 0 0 var(--edge);
+}
+
+.drawer[open] {
+  animation: drawer-in 220ms steps(5);
+}
+
+.drawer::backdrop {
+  background: var(--color-backdrop);
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(40%);
+    opacity: 0;
+  }
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--accent-3, var(--color-accent-soft));
+  color: var(--px-ink-0);
+  box-shadow: 0 var(--px) 0 0 var(--edge);
+}
+
+.header h2 {
+  margin: 0;
+  font-size: var(--text-xl);
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+.body > section + section {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 2px dashed var(--color-border);
+}
+
+.body h3 {
+  font-size: var(--text-lg);
+}
+
+.body p:last-child {
+  margin-bottom: 0;
+}

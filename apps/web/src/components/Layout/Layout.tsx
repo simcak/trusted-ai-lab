@@ -1,12 +1,14 @@
 import type { MouseEvent, ReactNode } from 'react';
-import { Link, NavLink } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { DOCS_URL, LICENSE_URL, REPO_URL } from '../../config.ts';
 import { cs } from '../../i18n/cs.ts';
-import { MODULES } from '../../modules/registry.ts';
+import { Sprite } from '../../pixel/Sprite.tsx';
+import { shield } from '../../pixel/sprites/icons.ts';
 import { Disclaimer } from '../Disclaimer/Disclaimer.tsx';
 import styles from './Layout.module.css';
 
 export function Layout({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
   return (
     <div className={styles.shell}>
       <a className={styles.skipLink} href="#main" onClick={focusMain}>
@@ -15,32 +17,22 @@ export function Layout({ children }: { children: ReactNode }) {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Link to="/" className={styles.brand}>
+            <Sprite sprite={shield} scale={2} />
             <span className={styles.brandName}>{cs.app.name}</span>
-            <span className={styles.brandTagline}>{cs.app.tagline}</span>
           </Link>
-          <nav aria-label={cs.app.mainNav}>
-            <ol className={styles.nav}>
-              {MODULES.map((m) => (
-                <li key={m.id}>
-                  <NavLink
-                    to={m.path}
-                    className={({ isActive }) =>
-                      isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
-                    }
-                  >
-                    <span className={styles.navNumber} aria-hidden="true">
-                      {m.number}
-                    </span>
-                    {cs.modules[m.id].title}
-                  </NavLink>
-                </li>
-              ))}
-            </ol>
+          <nav aria-label={cs.app.mainNav} className={styles.nav}>
+            <Link to="/" className={`${styles.navLink} ${styles.wideOnly}`}>
+              {cs.app.gallery}
+            </Link>
+            <a href={REPO_URL} className={styles.navLink}>
+              {cs.footer.github}
+            </a>
           </nav>
         </div>
       </header>
 
-      <main id="main" tabIndex={-1} className={styles.main}>
+      {/* Keyed by route so each page wipes in; search-param changes keep the page mounted. */}
+      <main key={pathname} id="main" tabIndex={-1} className={`${styles.main} px-enter`}>
         {children}
       </main>
 
