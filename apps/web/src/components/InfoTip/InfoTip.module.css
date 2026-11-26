@@ -40,6 +40,13 @@
 
 .panel {
   --edge: var(--color-frame);
+  /* Popovers may sit inside styled text (a highlighted finding): reset what text inherits. */
+  font-family: var(--font-sans);
+  font-weight: 400;
+  white-space: normal;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
   max-width: min(26rem, calc(100vw - 2rem));
   max-height: min(70vh, 34rem);
   overflow: auto;

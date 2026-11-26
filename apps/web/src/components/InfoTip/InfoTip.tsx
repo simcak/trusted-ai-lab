@@ -11,6 +11,8 @@ interface Props {
   text?: ReactNode;
   /** Icon of a text-less button: "?" for explanations, a bulb for good-to-know hints. */
   icon?: 'question' | 'bulb';
+  /** Leave the button unstyled (only `className`), e.g. a label inside highlighted text. */
+  bare?: boolean;
   title?: string;
   children: ReactNode;
   className?: string;
@@ -27,6 +29,7 @@ export function InfoTip({
   label,
   text,
   icon = 'question',
+  bare = false,
   title,
   children,
   className,
@@ -39,10 +42,14 @@ export function InfoTip({
     <>
       <button
         type="button"
-        className={`${text ? 'button button--secondary' : styles.iconButton} ${className ?? ''}`}
+        className={
+          bare
+            ? className
+            : `${text ? 'button button--secondary' : styles.iconButton} ${className ?? ''}`
+        }
         data-icon={text ? undefined : icon}
         popoverTarget={id}
-        aria-label={text ? undefined : label}
+        aria-label={text && !bare ? undefined : label}
         style={{ anchorName: anchor }}
       >
         {text ?? (icon === 'bulb' ? <Sprite sprite={bulb} scale={2} /> : '?')}

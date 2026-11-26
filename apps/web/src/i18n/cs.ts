@@ -524,6 +524,7 @@ export const cs = {
         'U desetimístného rodného čísla se kontroluje i dělitelnost 11. Samotný tvar nestačí.',
         'Stejná osoba dostane vždy stejný zástupný symbol, i když se jméno skloňuje.',
         'Syntetická data výkon nadhodnocují. Skutečné texty jsou pestřejší.',
+        'Klikněte na zvýrazněný údaj a uvidíte, proč ho knihovna našla.',
       ],
     },
     agent: {
@@ -674,35 +675,53 @@ export const cs = {
     types: piiTypes,
     reasons: piiReasons,
 
-    playground: {
-      heading: 'Vyzkoušejte',
-      intro: 'Vyberte ukázku nebo napište vlastní text a zvolte, co se má s nalezenými údaji stát.',
-      samplesLabel: 'Ukázkové texty (syntetická data)',
+    machine: {
+      label: 'Ukázka ochrany osobních údajů',
+      samplesLabel: 'Text (syntetická data)',
       samples: {
         'client-email': 'E-mail klienta',
         'advisor-note': 'Poznámka poradce',
         contract: 'Úryvek smlouvy',
         'hard-cases': 'Těžké případy',
       },
-      textareaLabel: 'Text ke kontrole',
-      modeLegend: 'Co udělat s nálezy',
+      custom: 'Vlastní text',
+      modesLabel: 'Ochrana',
       modes: {
         redact: {
-          label: 'Začernění',
-          hint: 'Každý nález nahradí jeho typ, např. [RODNÉ_ČÍSLO]. Původní hodnotu už nelze vrátit.',
+          label: 'Začernit',
+          example: '[RODNÉ_ČÍSLO]',
+          hint: 'Údaj nahradí jeho typ. Původní hodnotu už nejde vrátit.',
         },
         pseudonymize: {
-          label: 'Pseudonymizace',
-          hint: 'Stejná hodnota dostane vždy stejný zástupný symbol, např. <OSOBA_1>, i ve skloňovaném tvaru. Mapa symbolů se hned zahodí.',
+          label: 'Zaměnit',
+          example: '<OSOBA_1>',
+          hint: 'Stejný údaj dostane vždy stejný symbol, i ve skloňovaném tvaru. Mapa symbolů se hned zahodí.',
         },
         reversible: {
-          label: 'Vratná pseudonymizace',
-          hint: 'Jako pseudonymizace, ale mapa zůstane v paměti stránky. Odpověď modelu jde pak doplnit původními hodnotami. Ukázka je níže.',
+          label: 'Zaměnit a vrátit',
+          example: '<OSOBA_1> → Jan',
+          hint: 'Mapa symbolů zůstane v paměti stránky, takže odpověď AI jde doplnit zpět. Nikam se neposílá a po zavření stránky zmizí.',
         },
       },
-      highlightedHeading: 'Nalezené údaje v textu',
-      outputHeading: 'Co by odešlo do jazykového modelu',
-      findingsHeading: 'Nálezy a proč je knihovna označila',
+      modesTip: 'Co dělají jednotlivé režimy',
+      steps: { input: 'Váš text', masked: 'Co uvidí AI', reply: 'Odpověď AI' },
+      found: (n: number) => `Nalezeno: ${n}`,
+      edit: 'Upravit',
+      done: 'Hotovo',
+      textareaLabel: 'Text ke kontrole',
+      typeCount: (n: number, type: string) => `${n}× ${type}`,
+      why: (type: string) => `${type}: proč?`,
+      reasons: 'Proč',
+      score: 'Skóre',
+      detector: 'Našel',
+      guard: 'Ochrana',
+      ai: 'AI',
+      restoredCaption: 'AI odpověděla se symboly. Váš prohlížeč je nahradil zpět.',
+      none: 'V textu nejsou žádné osobní údaje.',
+      noReply: 'Bez osobních údajů není co vracet.',
+    },
+
+    findings: {
       columns: {
         type: 'Typ',
         text: 'Nalezený text',
@@ -716,13 +735,23 @@ export const cs = {
         'rules+ner': 'pravidla i NER',
       } as Record<string, string>,
       none: 'V textu nebyly nalezeny žádné osobní údaje.',
-      count: (n: number) => `Nálezů: ${n}`,
       minScoreNote: (score: string) =>
         `Zobrazují se nálezy se skóre aspoň ${score}. Skóre vychází z formátu, kontrolních součtů a okolních slov.`,
     },
 
+    details: {
+      findings: (n: number) => `Všechny nálezy (${n})`,
+      eval: 'Jak přesné to je',
+      limits: 'Co detekce neumí',
+      managed: 'Vlastní knihovna, nebo služba?',
+      map: 'Mapa symbolů a záznam kroků',
+      ner: 'AI model na jména (NER)',
+    },
+
     ner: {
-      heading: 'Volitelně: NER model pro jména',
+      toggle: (size: string) => `+ AI na jména (${size})`,
+      toggleOn: 'AI na jména',
+      tip: 'Malý AI model (NER) doplní jména, která pravidla minou. Stáhne se až po kliknutí a běží jen ve vašem prohlížeči.',
       intro:
         'Pravidla hledají jména podle slovníku, oslovení a koncovek. Malý model pro rozpoznávání jmen (NER) může doplnit ta, která pravidla minou. Používá se jen pro jména osob.',
       load: (size: string) => `Načíst NER model (${size})`,
@@ -742,18 +771,10 @@ export const cs = {
     },
 
     reversible: {
-      heading: 'Vratná pseudonymizace: do modelu a zpět',
-      intro:
-        'Do jazykového modelu odejde jen text se zástupnými symboly. Jeho odpověď se pak doplní původními hodnotami lokálně, v prohlížeči. Mapa symbolů nikdy neopustí stránku.',
-      steps: {
-        original: '1. Původní text',
-        masked: '2. Odchází do modelu',
-        reply: '3. Odpověď modelu',
-        restored: '4. Doplněno lokálně',
-      },
       simulatedBadge: 'Simulovaná odpověď: šablona v kódu, ne výstup jazykového modelu',
+      simulatedTip: 'Proč simulovaná',
       simulatedNote:
-        'Tady jde jen o cestu dat. Skutečné volání modelu se stejnou ochranou ukazuje modul Agent pod kontrolou:',
+        'Tady jde jen o cestu dat. Skutečné volání modelu se stejnou ochranou ukazuje Agent pod kontrolou:',
       simulatedNoteLink: 'scénář Rodné číslo v dotazu',
       mapHeading: 'Mapa zástupných symbolů (jen v paměti této stránky)',
       mapColumns: { placeholder: 'Symbol', type: 'Typ', original: 'Původní hodnota' },
@@ -762,7 +783,6 @@ export const cs = {
         `Odpověď obsahuje symboly, které tato stránka nevydala: ${list}. Zůstaly beze změny.`,
       limitation:
         'Omezení: doplní se tvar z původního textu, takže pád nemusí sedět (např. „Dobrý den, Jan Dvořák“ místo „Dobrý den, pane Dvořáku“).',
-      empty: 'V textu nejsou osobní údaje, není co pseudonymizovat. Vyberte některou ukázku výše.',
       traceTitle: 'Trace: co se stalo (bez osobních údajů)',
       reply: {
         greeting: (person?: string) => (person ? `Dobrý den, ${person},` : 'Dobrý den,'),
@@ -786,7 +806,6 @@ export const cs = {
     },
 
     eval: {
-      heading: 'Jak přesná je detekce',
       intro:
         'Čísla pocházejí z evalu nad syntetickým korpusem (soubor evals/pii/results.json). Vytváří je skript, ne člověk, a CI kontroluje, že odpovídají aktuálnímu kódu.',
       warning:
@@ -850,7 +869,6 @@ export const cs = {
     },
 
     limits: {
-      heading: 'Co detekce neumí',
       items: [
         'Jména psaná malými písmeny nebo bez diakritiky („jana novakova“) pravidla nenajdou.',
         'Vzácná jména mimo seznam MV ČR najde jen podle kontextu (oslovení, podpis, koncovka).',
@@ -861,7 +879,6 @@ export const cs = {
     },
 
     managed: {
-      heading: 'Kdy použít tohle a kdy spravovanou službu',
       prosLabel: 'Výhody',
       consLabel: 'Nevýhody',
       own: {

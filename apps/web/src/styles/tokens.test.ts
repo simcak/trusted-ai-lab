@@ -82,3 +82,21 @@ describe.each(['sun', 'berry', 'sky', 'leaf'])('project colour %s', (ramp) => {
     expect(contrast(dark.get('px-ink-0')!, px(2))).toBeGreaterThanOrEqual(4.5);
   });
 });
+
+/*
+ * Ochrana dat colours findings by category (modules/pii/pii.module.css): light theme puts text
+ * on ramp 3 and white on ramp 0, dark theme ink on ramp 2. Ember has no ramp 3 (a tint is mixed).
+ */
+describe.each(['berry', 'ember', 'sun', 'sky'])('PII category colour %s', (ramp) => {
+  const px = (step: number) => light.get(`px-${ramp}-${step}`);
+
+  it('chips are readable in both themes', () => {
+    expect(contrast(light.get('px-white')!, px(0)!)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(light.get('px-ink-0')!, px(2)!)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('text on the light tint meets WCAG AA', () => {
+    const tint = px(3);
+    if (tint) expect(contrast(light.get('color-text')!, tint)).toBeGreaterThanOrEqual(4.5);
+  });
+});

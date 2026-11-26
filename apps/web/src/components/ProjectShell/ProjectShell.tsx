@@ -3,6 +3,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle.ts';
 import { cs } from '../../i18n/cs.ts';
 import { getModule, type ModuleId } from '../../modules/registry.ts';
 import { Sprite } from '../../pixel/Sprite.tsx';
+import { DrawerSection } from '../InfoDrawer/DrawerSection.tsx';
 import { InfoDrawer } from '../InfoDrawer/InfoDrawer.tsx';
 import { InfoTicker } from '../InfoTicker/InfoTicker.tsx';
 import { TermList } from '../TermList/TermList.tsx';
@@ -10,7 +11,7 @@ import styles from './ProjectShell.module.css';
 
 interface Props {
   id: ModuleId;
-  /** Extra "under the hood" sections (measurements, limits, sources…), each a `<section>`. */
+  /** Extra "under the hood" topics (measurements, limits, sources…), each a `DrawerSection`. */
   info?: ReactNode;
   children: ReactNode;
 }
@@ -40,16 +41,14 @@ export function ProjectShell({ id, info, children }: Props) {
         <div className={styles.actions}>
           <TermList terms={cs.glossary.byModule[id]} />
           <InfoDrawer label={cs.shell.underTheHood} title={`${cs.shell.underTheHood}: ${t.title}`}>
-            <section>
-              <h3>{cs.shell.whatItDoes}</h3>
+            <DrawerSection title={cs.shell.whatItDoes} open>
               <p>{t.summary}</p>
               <p>{t.notice}</p>
-            </section>
+            </DrawerSection>
             {info}
-            <section>
-              <h3>{cs.shell.proof}</h3>
+            <DrawerSection title={cs.shell.proof}>
               <p>{t.proof}</p>
-            </section>
+            </DrawerSection>
           </InfoDrawer>
         </div>
       </header>

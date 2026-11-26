@@ -21,8 +21,7 @@ interface Props {
 export function NerPanel({ state, enabled, analysing, onLoad, onToggle }: Props) {
   const t = cs.pii.ner;
   return (
-    <section className={styles.nerPanel} aria-labelledby="ner-heading">
-      <h3 id="ner-heading">{t.heading}</h3>
+    <div className={styles.section}>
       <p>{t.intro}</p>
 
       {state.status === 'idle' && (
@@ -81,6 +80,6 @@ export function NerPanel({ state, enabled, analysing, onLoad, onToggle }: Props)
         </a>
         . {t.revision(NER_MODEL.revision.slice(0, 7))}
       </p>
-    </section>
+    </div>
   );
 }

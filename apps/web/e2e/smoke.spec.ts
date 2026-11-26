@@ -199,19 +199,27 @@ test('pii module detects, pseudonymises and redacts in the browser without any n
   });
   await page.goto('./#/pii');
 
-  const findings = page.getByTestId('pii-findings');
-  await expect(findings.getByText('791112/5013')).toBeVisible();
-  await expect(page.getByTestId('pii-output')).toContainText('<OSOBA_1>');
-  await expect(page.getByTestId('pii-output')).not.toContainText('791112/5013');
-
-  await page.getByText('Začernění', { exact: true }).click();
-  await expect(page.getByTestId('pii-output')).toContainText('[RODNÉ_ČÍSLO]');
-
-  await page.getByRole('button', { name: 'Těžké případy' }).click();
-  await expect(findings.getByText('Petr Nový')).toBeVisible();
-
-  await expect(page.getByTestId('pii-flow-restored')).toContainText('Petr Nový');
+  const highlighted = page.getByTestId('pii-highlighted');
+  const output = page.getByTestId('pii-output');
+  await expect(highlighted.getByText('791112/5013')).toBeVisible();
+  await expect(output).toContainText('<OSOBA_1>');
+  await expect(output).not.toContainText('791112/5013');
+  await expect(page.getByTestId('pii-flow-restored')).toContainText('Jan Dvořák');
   await expect(page.getByTestId('simulated-badge')).toContainText('ne výstup jazykového modelu');
+
+  // Why was it flagged? The type label opens the reasons.
+  await highlighted.getByRole('button', { name: 'Rodné číslo: proč?' }).click();
+  await expect(page.getByRole('note', { name: 'Rodné číslo' })).toContainText('kontrolní součet');
+  await page.keyboard.press('Escape');
+
+  await page.locator('label', { hasText: 'Začernit' }).click();
+  await expect(output).toContainText('[RODNÉ_ČÍSLO]');
+  await expect(page.getByTestId('pii-flow-restored')).toHaveCount(0);
+
+  await page.locator('label', { hasText: 'Zaměnit a vrátit' }).click();
+  await page.getByRole('button', { name: 'Těžké případy' }).click();
+  await expect(highlighted.getByText('Petr Nový').first()).toBeVisible();
+  await expect(page.getByTestId('pii-flow-restored')).toContainText('Petr Nový');
 
   // The NER model and its runtime are loaded only after an explicit click.
   expect(external).toEqual([]);
@@ -229,6 +237,8 @@ test('pii eval table shows the numbers from evals/pii/results.json', async ({ pa
     maximumFractionDigits: 1,
   });
   await page.goto('./#/pii');
+  await page.getByRole('button', { name: 'Pod kapotou' }).click();
+  await page.getByText('Jak přesné to je', { exact: true }).click();
   await expect(page.getByTestId('synthetic-warning')).toContainText('nadhodnocují');
 
   const total = page.getByTestId('pii-eval-table').getByRole('row', { name: /Celkem/ });
