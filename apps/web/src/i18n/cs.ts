@@ -449,8 +449,8 @@ export const cs = {
     name: 'Bezpečná AI v praxi',
     tagline: 'Laboratoř bezpečné AI',
     skipToContent: 'Přeskočit na obsah',
-    mainNav: 'Hlavní navigace',
-    gallery: 'Projekty',
+    home: 'Bezpečná AI v praxi: úvod',
+    projectsNav: 'Projekty',
     loading: 'Načítám…',
   },
 
@@ -469,7 +469,6 @@ export const cs = {
         'Animace: dopis s osobními údaji vyjde z domu. Ochrana mu údaje zakryje a pošle ho k AI. Odpověď cestou zpět zkontroluje, odrazí podvržený pokyn a údaje zase doplní. Citlivá data zůstávají doma.',
       pause: 'Pozastavit animaci',
       play: 'Přehrát animaci',
-      cta: 'Vybrat projekt',
     },
     galleryHeading: 'Projekty',
     galleryLead:
@@ -493,7 +492,8 @@ export const cs = {
 
   modules: {
     intake: {
-      title: 'Intake',
+      title: 'Rozcestník',
+      nav: 'Rozcestník',
       question: 'Má to vůbec být AI?',
       summary:
         'Popíšete nápad a pravidla navrhnou, jak ho postavit: jestli vůbec s AI, jak je to riskantní a kolik to bude stát.',
@@ -502,10 +502,16 @@ export const cs = {
       notice:
         'Tady žádná AI není: doporučení skládají pravidla, každé s důvodem a odkazem na zdroj. Nic se nikam neodesílá.',
       card: 'Popište nápad a zjistěte, jestli na něj vůbec potřebujete AI.',
-      chips: ['Bez AI', 'Nic se neodesílá'],
+      tips: [
+        'Tady žádná AI není: doporučení skládají pravidla a nic se neodesílá.',
+        'Někdy je nejlepší odpověď „AI nepotřebujete“. Na výpočet poplatků stačí vzorec.',
+        'Každé doporučení má důvod a pravidlo, které jde otestovat.',
+        'Kategorie podle AI Act je orientační, ne právní posouzení.',
+      ],
     },
     pii: {
       title: 'Ochrana dat',
+      nav: 'Ochrana dat',
       question: 'Co nesmí odejít do modelu?',
       summary:
         'Kód najde v textu české osobní údaje, třeba rodné číslo nebo číslo účtu, a schová je dřív, než text odejde do jazykového modelu.',
@@ -513,10 +519,16 @@ export const cs = {
         'Rozumím ochraně osobních údajů až na úroveň kódu: kontroluji i kontrolní součty, ne jen tvar čísla, a přesnost měřím.',
       notice: 'Vše na této stránce běží jen v prohlížeči. Text, který napíšete, nikam neodchází.',
       card: 'Vložte text a sledujte, jak se rodná čísla a účty schovají dřív, než odejdou do AI.',
-      chips: ['Běží jen ve vašem prohlížeči'],
+      tips: [
+        'Všechno běží ve vašem prohlížeči. Text nikam neodchází.',
+        'U desetimístného rodného čísla se kontroluje i dělitelnost 11. Samotný tvar nestačí.',
+        'Stejná osoba dostane vždy stejný zástupný symbol, i když se jméno skloňuje.',
+        'Syntetická data výkon nadhodnocují. Skutečné texty jsou pestřejší.',
+      ],
     },
     agent: {
       title: 'Agent pod kontrolou',
+      nav: 'Agent',
       question: 'Jak AI bezpečně jedná?',
       summary:
         'AI asistent sám hledá ve fiktivních fondech a počítá poplatky. Každý jeho krok ale hlídají pravidla v kódu, která model nemůže obejít.',
@@ -525,10 +537,16 @@ export const cs = {
       notice:
         'Odpovědi modelu jsou předem nahrané. Všechno ostatní (smyčka agenta, pravidla, nástroje i pseudonymizace) běží živě ve vašem prohlížeči. Fondy jsou fiktivní a nic se nikam neodesílá.',
       card: 'Pusťte AI asistenta a sledujte, jak ho hlídají pravidla, i když se ho někdo snaží zmást.',
-      chips: ['Nahrané odpovědi modelu', 'Fiktivní fondy'],
+      tips: [
+        'Odpovědi modelu jsou předem nahrané. Smyčka agenta, pravidla i nástroje běží živě u vás.',
+        'Fondy jsou fiktivní a nic se nikam neodesílá.',
+        'Pravidla jsou kód, ne prosba v promptu.',
+        'Zkuste stejný scénář s pojistkami a bez nich. Model i prompt jsou stejné.',
+      ],
     },
     local: {
       title: 'Lokálně',
+      nav: 'Lokálně',
       question: 'Co když data nesmí opustit zařízení?',
       summary:
         'Rozbor tréninku z hodinek a malý jazykový model, který ho vysvětlí. Všechno běží ve vašem počítači, data nikam neodcházejí.',
@@ -537,7 +555,12 @@ export const cs = {
       notice:
         'Všechno běží ve vašem prohlížeči. Soubor nikam neodchází a panel Síťová aktivita dole to dokládá.',
       card: 'Nahrajte trénink z hodinek a nechte si ho vysvětlit AI, která běží jen u vás.',
-      chips: ['Běží jen u vás'],
+      tips: [
+        'Všechno běží ve vašem prohlížeči. Soubor nikam neodchází.',
+        'Začátek a konec trasy se ořízne: start bývá u vás doma.',
+        'AI dostane jen souhrnná čísla, nikdy body z GPS.',
+        'Model se stáhne až po kliknutí a pak běží jen ve vašem počítači.',
+      ],
     },
   },
 
@@ -620,7 +643,7 @@ export const cs = {
       untitled: 'Nový záměr',
       title: (name: string) => `ADR: ${name}`,
       status: 'Stav',
-      statusValue: 'navrženo (vygenerováno modulem Intake)',
+      statusValue: 'navrženo (vygenerováno modulem Rozcestník)',
       date: 'Datum',
       decision: 'Rozhodnutí',
       context: 'Kontext a problém',
@@ -643,7 +666,7 @@ export const cs = {
       rationale: 'Zdůvodnění',
       reference: 'Zdroj',
       disclaimer:
-        'Vygenerováno technickým demem „Bezpečná AI v praxi“ (modul Intake). Klasifikace podle AI Act je orientační a nejde o právní posouzení.',
+        'Vygenerováno technickým demem „Bezpečná AI v praxi“ (modul Rozcestník). Klasifikace podle AI Act je orientační a nejde o právní posouzení.',
     },
   },
 
@@ -1218,14 +1241,25 @@ export const cs = {
   },
 
   shell: {
-    backToGallery: 'Projekty',
-    backToGalleryLabel: 'Zpět na projekty',
     terms: 'Pojmy',
-    howItWorks: 'Jak to funguje',
+    underTheHood: 'Pod kapotou',
     drawerClose: 'Zavřít',
     whatItDoes: 'Co to dělá',
     proof: 'Co tím ukazuji',
     goodToKnow: 'Dobré vědět',
+  },
+
+  theme: {
+    dark: 'Tmavý režim',
+    toDark: 'Přepnout na tmavý režim',
+    toLight: 'Přepnout na světlý režim',
+  },
+
+  ticker: {
+    label: 'Tipy',
+    pause: 'Pozastavit tipy',
+    resume: 'Spustit tipy',
+    next: 'Další tip',
   },
 
   trace: {

@@ -24,6 +24,20 @@
   background: var(--color-accent-soft);
 }
 
+.iconButton[data-icon='bulb'] {
+  width: 1.75rem;
+  height: 1.875rem;
+  background: var(--color-surface);
+}
+
+.iconButton[data-icon='bulb']:hover {
+  background: var(--color-warning-soft);
+}
+
+.iconButton svg {
+  display: block;
+}
+
 .panel {
   --edge: var(--color-frame);
   max-width: min(26rem, calc(100vw - 2rem));

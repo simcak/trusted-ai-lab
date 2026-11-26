@@ -7,8 +7,24 @@
       name="description"
       content="Bezpečná AI v praxi: galerie interaktivních ukázek, jak používat AI s ohledem na soukromí, lokálně a pod kontrolou pravidel. Běží v prohlížeči bez API klíče."
     />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#151a35" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" />
+    <script>
+      // Theme before first paint (no flash): the visitor's choice, else the system setting.
+      // Kept in sync with src/theme/theme.ts.
+      (function () {
+        var theme;
+        try {
+          theme = localStorage.getItem('theme');
+        } catch (e) {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = theme;
+        document
+          .querySelector('meta[name="theme-color"]')
+          .setAttribute('content', theme === 'dark' ? '#151a35' : '#ffffff');
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Bezpečná AI v praxi</title>
   </head>

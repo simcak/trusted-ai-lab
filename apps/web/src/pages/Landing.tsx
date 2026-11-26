@@ -13,9 +13,7 @@ export function Landing() {
 
       <section id="projects" className={styles.projects} aria-labelledby="projects-heading">
         <header className={styles.projectsHeader}>
-          <h2 id="projects-heading" tabIndex={-1}>
-            {cs.landing.galleryHeading}
-          </h2>
+          <h2 id="projects-heading">{cs.landing.galleryHeading}</h2>
           <p>{cs.landing.galleryLead}</p>
         </header>
         <ul className={styles.grid}>

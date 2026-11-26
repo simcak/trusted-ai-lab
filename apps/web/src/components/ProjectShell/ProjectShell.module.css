@@ -1,117 +1,98 @@
+/*
+ * The project's colour drives buttons, links and focus on its page. Light theme: the dark end
+ * of the ramp with white text; dark theme: the light end with ink text. Pairs are checked in
+ * styles/tokens.test.ts.
+ */
 .project {
+  --color-accent: var(--accent-0);
+  --color-accent-hover: color-mix(in srgb, var(--accent-0) 80%, black);
+  --color-accent-soft: var(--accent-3);
+  --color-on-accent: var(--px-white);
+  --color-focus: var(--accent-0);
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
+:global(:root[data-theme='dark']) .project {
+  --color-accent: var(--accent-2);
+  --color-accent-hover: var(--accent-3);
+  --color-accent-soft: color-mix(in srgb, var(--accent-0) 55%, var(--color-surface));
+  --color-on-accent: var(--px-ink-0);
+  --color-focus: var(--accent-2);
+}
+
+/* Title bar: a pixel frame with a thick band in the project's colour on top. */
 .bar {
   --edge: var(--color-frame);
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3) var(--space-5);
   margin: var(--px);
-  padding: var(--space-3) var(--space-4);
+  padding: calc(var(--space-3) + var(--px) * 3) var(--space-4) var(--space-3);
   background: var(--color-surface);
   box-shadow:
     0 calc(-1 * var(--px)) 0 0 var(--edge),
     0 var(--px) 0 0 var(--edge),
     calc(-1 * var(--px)) 0 0 0 var(--edge),
     var(--px) 0 0 0 var(--edge),
-    inset 0 calc(var(--px) * 2) 0 0 var(--accent-2);
-}
-
-.back {
-  align-self: stretch;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding-right: var(--space-4);
-  border-right: 2px dashed var(--color-border);
-  color: var(--color-text);
-  font-family: var(--font-pixel);
-  text-decoration: none;
-}
-
-.back:hover {
-  color: var(--color-accent-hover);
+    inset 0 calc(var(--px) * 3) 0 0 var(--accent-1),
+    inset 0 calc(var(--px) * 4) 0 0 var(--accent-2);
 }
 
 .title {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
   min-width: 0;
 }
 
 .badge {
   display: grid;
   place-items: center;
-  padding: var(--space-1);
+  padding: var(--space-2);
   background: var(--accent-3);
-  box-shadow: inset 0 -3px 0 0 var(--accent-2);
+  box-shadow:
+    inset 0 -3px 0 0 var(--accent-2),
+    0 0 0 2px var(--accent-1);
+}
+
+.badge svg {
+  display: block;
 }
 
 .title h1 {
   margin: 0;
-  font-size: var(--text-2xl);
+  font-size: var(--text-3xl);
 }
 
 .question {
   margin: 0;
   color: var(--color-text-muted);
+  font-family: var(--font-pixel);
   font-size: var(--text-lg);
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
 }
 
-@media (max-width: 64rem) {
-  .bar {
-    grid-template-columns: 1fr auto;
-  }
-
-  .back {
-    grid-column: 1 / -1;
-    justify-self: start;
-    border-right: 0;
-    padding: 0;
-  }
-
-  .chips {
-    grid-column: 1 / -1;
-    grid-row: 3;
-  }
-
-  .actions {
-    grid-column: 1 / -1;
-    grid-row: 4;
-    flex-wrap: wrap;
-  }
-}
-
 @media (max-width: 40rem) {
   .badge {
-    display: none;
+    padding: var(--space-1);
+  }
+
+  .badge svg {
+    width: 32px;
+    height: 24px;
   }
 
   .question {
     font-size: var(--text-base);
-  }
-
-  .bar {
-    gap: var(--space-2) var(--space-4);
   }
 }

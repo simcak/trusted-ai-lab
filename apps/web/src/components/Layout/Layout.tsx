@@ -5,6 +5,8 @@ import { cs } from '../../i18n/cs.ts';
 import { Sprite } from '../../pixel/Sprite.tsx';
 import { shield } from '../../pixel/sprites/icons.ts';
 import { Disclaimer } from '../Disclaimer/Disclaimer.tsx';
+import { ProjectNav } from '../ProjectNav/ProjectNav.tsx';
+import { ThemeToggle } from '../ThemeToggle/ThemeToggle.tsx';
 import styles from './Layout.module.css';
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -16,18 +18,19 @@ export function Layout({ children }: { children: ReactNode }) {
       </a>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <Link to="/" className={styles.brand}>
+          <Link to="/" className={styles.brand} aria-label={cs.app.home}>
             <Sprite sprite={shield} scale={2} />
-            <span className={styles.brandName}>{cs.app.name}</span>
+            <span className={styles.brandName} aria-hidden="true">
+              {cs.app.name}
+            </span>
           </Link>
-          <nav aria-label={cs.app.mainNav} className={styles.nav}>
-            <Link to="/" className={`${styles.navLink} ${styles.wideOnly}`}>
-              {cs.app.gallery}
-            </Link>
-            <a href={REPO_URL} className={styles.navLink}>
+          <ProjectNav />
+          <div className={styles.tools}>
+            <ThemeToggle />
+            <a href={REPO_URL} className={`${styles.navLink} ${styles.wideOnly}`}>
               {cs.footer.github}
             </a>
-          </nav>
+          </div>
         </div>
       </header>
 

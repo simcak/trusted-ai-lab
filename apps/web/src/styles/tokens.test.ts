@@ -10,7 +10,7 @@ function readColours(block: string): Map<string, string> {
   return out;
 }
 
-const darkStart = tokens.indexOf('@media (prefers-color-scheme: dark)');
+const darkStart = tokens.indexOf(":root[data-theme='dark']");
 const light = readColours(tokens.slice(0, darkStart));
 const dark = new Map([...light, ...readColours(tokens.slice(darkStart))]);
 
@@ -57,5 +57,28 @@ describe.each([
     expect(contrast(colours.get('color-frame')!, colours.get('color-bg')!)).toBeGreaterThanOrEqual(
       3,
     );
+  });
+});
+
+/*
+ * Project pages take the project's colour (components/ProjectShell): light theme uses ramp 0
+ * with white text, dark theme ramp 2 with ink text. Ramp 3 is the soft tint behind text.
+ */
+describe.each(['sun', 'berry', 'sky', 'leaf'])('project colour %s', (ramp) => {
+  const px = (step: number | string) => light.get(`px-${ramp}-${step}`)!;
+
+  it('light theme: accent text and buttons meet WCAG AA', () => {
+    for (const bg of ['color-bg', 'color-surface']) {
+      expect(contrast(px(0), light.get(bg)!), `${ramp}-0 on ${bg}`).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(contrast(light.get('px-white')!, px(0))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(light.get('color-text')!, px(3))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('dark theme: accent text and buttons meet WCAG AA', () => {
+    for (const bg of ['color-bg', 'color-surface']) {
+      expect(contrast(px(2), dark.get(bg)!), `${ramp}-2 on ${bg}`).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(contrast(dark.get('px-ink-0')!, px(2))).toBeGreaterThanOrEqual(4.5);
   });
 });

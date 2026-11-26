@@ -69,3 +69,72 @@ export const cartridge = defineSprite({
       .rows(),
   ],
 });
+
+/** Sun for the light theme, 13×13. */
+export const sun = defineSprite({
+  palette: P,
+  frames: [
+    canvas(13, 13)
+      .rect(6, 0, 1, 2, 'j')
+      .rect(6, 11, 1, 2, 'j')
+      .rect(0, 6, 2, 1, 'j')
+      .rect(11, 6, 2, 1, 'j')
+      .px(2, 2, 'j')
+      .px(10, 2, 'j')
+      .px(2, 10, 'j')
+      .px(10, 10, 'j')
+      .disc(6, 6, 3, 'j')
+      .disc(6, 6, 2, 'l')
+      .px(5, 5, 'm')
+      .px(5, 4, 'm')
+      .px(4, 5, 'm')
+      .rows(),
+  ],
+});
+
+/** Crescent moon with a star for the dark theme, 13×13. */
+export const moon = defineSprite({
+  palette: P,
+  frames: [
+    canvas(13, 13)
+      .disc(6, 7, 5, 'l')
+      .disc(6, 7, 4, 'm')
+      .disc(9, 5, 4, '.')
+      .px(11, 1, 'm')
+      .px(10, 2, 'm')
+      .px(12, 2, 'm')
+      .px(11, 3, 'm')
+      .rows(),
+  ],
+});
+
+/** Light bulb for tips and "good to know" hints, 9×11. */
+export const bulb = defineSprite({
+  palette: P,
+  frames: [
+    [
+      '..ooooo..',
+      '.omllllo.',
+      'ommlllljo',
+      'omllllljo',
+      'olllllllo',
+      '.ojllljo.',
+      '..ojjjo..',
+      '..o444o..',
+      '..o333o..',
+      '..o444o..',
+      '...ooo...',
+    ],
+  ],
+});
+
+/** Pause and play marks for the scene overlay, 7×7, white on the overlay's ink. */
+export const pauseMark = defineSprite({
+  palette: P,
+  frames: [['ww...ww', 'ww...ww', 'ww...ww', 'ww...ww', 'ww...ww', 'ww...ww', 'ww...ww']],
+});
+
+export const playMark = defineSprite({
+  palette: P,
+  frames: [['w......', 'www....', 'wwwww..', 'wwwwwww', 'wwwww..', 'www....', 'w......']],
+});

@@ -39,6 +39,7 @@
   height: clamp(12rem, 54vw, min(64vh, 38rem));
   margin: var(--px);
   background: var(--scene-sky-0);
+  cursor: pointer;
   box-shadow:
     0 calc(-1 * var(--px)) 0 0 var(--edge),
     0 var(--px) 0 0 var(--edge),
@@ -58,6 +59,31 @@
   display: block;
   width: 100%;
   height: 100%;
+}
+
+/* Pause / play mark: only on hover and focus, and whenever the scene stands still. */
+.playState {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--px-ink-1);
+  box-shadow: 0 0 0 var(--px) var(--px-steel-3);
+  opacity: 0;
+  transition: opacity 120ms steps(2);
+}
+
+.playState svg {
+  display: block;
+}
+
+.stage:hover .playState,
+.stage:focus-visible .playState,
+.hero[data-paused] .playState {
+  opacity: 1;
 }
 
 .places {
@@ -116,25 +142,6 @@
 
 .later {
   opacity: 0;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.dialog :global(.button--secondary) {
-  --face: var(--px-ink-1);
-  --ink: var(--px-white);
-  --edge: var(--px-steel-2);
-  --bevel-hi: var(--px-steel-0);
-  --bevel-lo: var(--px-ink-0);
-}
-
-.dialog :global(.button--secondary):hover:not(:disabled) {
-  --face: var(--px-steel-0);
-  --ink: var(--px-white);
 }
 
 /* Ambient loops: stars, clouds, server LEDs, blinking eyes. */

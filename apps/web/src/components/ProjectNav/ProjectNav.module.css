@@ -1,0 +1,63 @@
+.nav {
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: calc(var(--header-height) - 0.75rem);
+  padding: var(--space-1) var(--space-3);
+  color: var(--color-text);
+  font-family: var(--font-pixel);
+  white-space: nowrap;
+  text-decoration: none;
+  box-shadow: inset 0 calc(-1 * var(--px)) 0 0 transparent;
+  transition: box-shadow 120ms steps(2);
+}
+
+.tab:hover {
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+  box-shadow: inset 0 calc(-1 * var(--px)) 0 0 var(--accent-2);
+}
+
+/* The open project: tinted tile with a thick bar in the project's colour. */
+.tab[aria-current='page'] {
+  background: color-mix(in srgb, var(--accent-3) 70%, var(--color-surface));
+  box-shadow: inset 0 calc(-2 * var(--px)) 0 0 var(--accent-1);
+}
+
+:global(:root[data-theme='dark']) .tab[aria-current='page'] {
+  background: color-mix(in srgb, var(--accent-0) 45%, var(--color-surface));
+  box-shadow: inset 0 calc(-2 * var(--px)) 0 0 var(--accent-2);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 24px;
+}
+
+.icon svg {
+  display: block;
+}
+
+@media (max-width: 60rem) {
+  .label {
+    display: none;
+  }
+
+  .tab {
+    padding-inline: var(--space-2);
+  }
+}

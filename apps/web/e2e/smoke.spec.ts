@@ -19,7 +19,7 @@ const test = base.extend<{ consoleErrors: string[] }>({
 });
 
 const modules = [
-  { hash: '#/intake', title: 'Intake', question: 'Má to vůbec být AI?' },
+  { hash: '#/intake', title: 'Rozcestník', question: 'Má to vůbec být AI?' },
   { hash: '#/pii', title: 'Ochrana dat', question: 'Co nesmí odejít do modelu?' },
   { hash: '#/agent', title: 'Agent pod kontrolou', question: 'Jak AI bezpečně jedná?' },
   { hash: '#/local', title: 'Lokálně', question: 'Co když data nesmí opustit zařízení?' },
@@ -40,9 +40,43 @@ test('landing shows the project gallery', async ({ page }) => {
 
 test('clicking a card opens the module', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('link', { name: 'Otevřít projekt Intake' }).click();
+  await page.getByRole('link', { name: 'Otevřít projekt Rozcestník' }).click();
   await expect(page).toHaveURL(/#\/intake$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Intake' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Rozcestník' })).toBeVisible();
+});
+
+test('the header switches between projects from any page', async ({ page }) => {
+  await page.goto('./#/pii');
+  const tabs = page.getByRole('navigation', { name: 'Projekty' });
+  await expect(tabs.getByRole('link')).toHaveCount(4);
+  await expect(tabs.getByRole('link', { name: 'Ochrana dat' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await tabs.getByRole('link', { name: 'Agent pod kontrolou' }).click();
+  await expect(page).toHaveURL(/#\/agent$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Agent pod kontrolou' })).toBeVisible();
+  await page.getByRole('link', { name: 'Bezpečná AI v praxi: úvod' }).click();
+  await expect(page.getByTestId('module-card')).toHaveCount(4);
+});
+
+test('the theme switch overrides the system and is remembered', async ({ browser }) => {
+  const context = await browser.newContext({ colorScheme: 'light' });
+  const page = await context.newPage();
+  await page.goto('./#/pii');
+  const html = page.locator('html');
+  await expect(html).toHaveAttribute('data-theme', 'light');
+  const toggle = page.getByRole('switch', { name: 'Tmavý režim' });
+  await expect(toggle).toHaveAttribute('aria-checked', 'false');
+  await toggle.click();
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await page.reload();
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await expect(page.getByRole('switch', { name: 'Tmavý režim' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await context.close();
 });
 
 for (const m of modules) {
@@ -52,10 +86,13 @@ for (const m of modules) {
     await expect(page.getByText(m.question).first()).toBeVisible();
     await expect(page.getByText('Technické demo. Nejde o investiční')).toBeVisible();
     await expect(page).toHaveTitle(`${m.title} · Bezpečná AI v praxi`);
+    await expect(
+      page.getByRole('navigation', { name: 'Projekty' }).getByRole('link', { name: m.title }),
+    ).toHaveAttribute('aria-current', 'page');
   });
 }
 
-test('hero scene: pause stops the motion, reduced motion shows a still frame', async ({
+test('hero scene: a click on the scene pauses it, reduced motion shows a still frame', async ({
   browser,
 }) => {
   const running = (page: Page) =>
@@ -90,6 +127,7 @@ test('every route renders in the dark theme', async ({ browser }) => {
   for (const hash of ['', ...modules.map((m) => m.hash)]) {
     await page.goto(`./${hash}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   }
   expect(errors).toEqual([]);
   await context.close();

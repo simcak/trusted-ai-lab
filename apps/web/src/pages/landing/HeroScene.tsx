@@ -1,4 +1,4 @@
-import { memo, useRef, type CSSProperties } from 'react';
+import { memo, useRef, type CSSProperties, type KeyboardEvent } from 'react';
 import { cs } from '../../i18n/cs.ts';
 import { paint, type PaletteKey } from '../../pixel/palette.ts';
 import { Sprite } from '../../pixel/Sprite.tsx';
@@ -18,7 +18,8 @@ import {
   thinking,
   tower,
 } from '../../pixel/sprites/hero.ts';
-import { usePrefersReducedMotion, useScene } from '../../pixel/useScene.ts';
+import { pauseMark, playMark } from '../../pixel/sprites/icons.ts';
+import { useScene } from '../../pixel/useScene.ts';
 import { useStageScale } from '../../pixel/useStageScale.ts';
 import { POS, WORLD, heroTimeline } from './hero-timeline.ts';
 import styles from './HeroScene.module.css';
@@ -272,7 +273,8 @@ const HeroWorld = memo(function HeroWorld() {
 /**
  * Landing hero: a looping pixel scene that tells the site's story in four beats — your
  * message, masked before it reaches the AI, the reply checked by rules on the way back, and
- * sensitive data staying home. Captions run in sync; the scene pauses on demand.
+ * sensitive data staying home. Captions run in sync. The scene itself is the pause control
+ * (click, Enter or Space; WCAG 2.2.2): no extra button, a small mark shows on hover and focus.
  */
 export function HeroScene() {
   const t = cs.landing.hero;
@@ -281,12 +283,11 @@ export function HeroScene() {
   const worldRef = useRef<HTMLDivElement>(null);
   useStageScale(stageRef, worldRef, W, H);
   const { status, toggle } = useScene(rootRef, heroTimeline);
-  const reduced = usePrefersReducedMotion();
-
-  const goToProjects = () => {
-    const target = document.getElementById('projects');
-    target?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
-    target?.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true });
+  const playing = status === 'playing';
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    toggle();
   };
 
   return (
@@ -294,7 +295,7 @@ export function HeroScene() {
       ref={rootRef}
       className={styles.hero}
       aria-labelledby="hero-title"
-      data-paused={status === 'playing' ? undefined : ''}
+      data-paused={playing ? undefined : ''}
     >
       <div className={styles.intro}>
         <h1 id="hero-title">{cs.app.name}</h1>
@@ -308,7 +309,15 @@ export function HeroScene() {
         </ul>
       </div>
 
-      <div ref={stageRef} className={styles.stage}>
+      <div
+        ref={stageRef}
+        className={styles.stage}
+        role="button"
+        tabIndex={0}
+        aria-label={playing ? t.pause : t.play}
+        onClick={toggle}
+        onKeyDown={onKeyDown}
+      >
         <div ref={worldRef} className={styles.world}>
           <HeroWorld />
           <ul className={styles.places} aria-hidden="true">
@@ -317,6 +326,9 @@ export function HeroScene() {
             <li style={{ left: `${(320 / W) * 100}%` }}>{t.places.model}</li>
           </ul>
         </div>
+        <span className={styles.playState} aria-hidden="true">
+          <Sprite sprite={playing ? pauseMark : playMark} scale={3} />
+        </span>
       </div>
 
       <div className={styles.dialog}>
@@ -328,14 +340,6 @@ export function HeroScene() {
           ))}
         </div>
         <p className="visually-hidden">{t.description}</p>
-        <div className={styles.controls}>
-          <button type="button" className="button button--secondary" onClick={toggle}>
-            {status === 'playing' ? t.pause : t.play}
-          </button>
-          <button type="button" className="button" onClick={goToProjects}>
-            {t.cta} <span aria-hidden="true">↓</span>
-          </button>
-        </div>
       </div>
     </section>
   );
