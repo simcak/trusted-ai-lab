@@ -19,7 +19,7 @@ const test = base.extend<{ consoleErrors: string[] }>({
 });
 
 const modules = [
-  { hash: '#/intake', title: 'Intake', question: 'Má to vůbec být AI?' },
+  { hash: '#/intake', title: 'Rozcestník', question: 'Má to vůbec být AI?' },
   { hash: '#/pii', title: 'Ochrana dat', question: 'Co nesmí odejít do modelu?' },
   { hash: '#/agent', title: 'Agent pod kontrolou', question: 'Jak AI bezpečně jedná?' },
   { hash: '#/local', title: 'Lokálně', question: 'Co když data nesmí opustit zařízení?' },
@@ -40,9 +40,43 @@ test('landing shows the project gallery', async ({ page }) => {
 
 test('clicking a card opens the module', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('link', { name: 'Otevřít projekt Intake' }).click();
+  await page.getByRole('link', { name: 'Otevřít projekt Rozcestník' }).click();
   await expect(page).toHaveURL(/#\/intake$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Intake' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Rozcestník' })).toBeVisible();
+});
+
+test('the header switches between projects from any page', async ({ page }) => {
+  await page.goto('./#/pii');
+  const tabs = page.getByRole('navigation', { name: 'Projekty' });
+  await expect(tabs.getByRole('link')).toHaveCount(4);
+  await expect(tabs.getByRole('link', { name: 'Ochrana dat' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await tabs.getByRole('link', { name: 'Agent pod kontrolou' }).click();
+  await expect(page).toHaveURL(/#\/agent$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Agent pod kontrolou' })).toBeVisible();
+  await page.getByRole('link', { name: 'Bezpečná AI v praxi: úvod' }).click();
+  await expect(page.getByTestId('module-card')).toHaveCount(4);
+});
+
+test('the theme switch overrides the system and is remembered', async ({ browser }) => {
+  const context = await browser.newContext({ colorScheme: 'light' });
+  const page = await context.newPage();
+  await page.goto('./#/pii');
+  const html = page.locator('html');
+  await expect(html).toHaveAttribute('data-theme', 'light');
+  const toggle = page.getByRole('switch', { name: 'Tmavý režim' });
+  await expect(toggle).toHaveAttribute('aria-checked', 'false');
+  await toggle.click();
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await page.reload();
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await expect(page.getByRole('switch', { name: 'Tmavý režim' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await context.close();
 });
 
 for (const m of modules) {
@@ -52,10 +86,13 @@ for (const m of modules) {
     await expect(page.getByText(m.question).first()).toBeVisible();
     await expect(page.getByText('Technické demo. Nejde o investiční')).toBeVisible();
     await expect(page).toHaveTitle(`${m.title} · Bezpečná AI v praxi`);
+    await expect(
+      page.getByRole('navigation', { name: 'Projekty' }).getByRole('link', { name: m.title }),
+    ).toHaveAttribute('aria-current', 'page');
   });
 }
 
-test('hero scene: pause stops the motion, reduced motion shows a still frame', async ({
+test('hero scene: a click on the scene pauses it, reduced motion shows a still frame', async ({
   browser,
 }) => {
   const running = (page: Page) =>
@@ -90,6 +127,7 @@ test('every route renders in the dark theme', async ({ browser }) => {
   for (const hash of ['', ...modules.map((m) => m.hash)]) {
     await page.goto(`./${hash}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   }
   expect(errors).toEqual([]);
   await context.close();
@@ -161,19 +199,27 @@ test('pii module detects, pseudonymises and redacts in the browser without any n
   });
   await page.goto('./#/pii');
 
-  const findings = page.getByTestId('pii-findings');
-  await expect(findings.getByText('791112/5013')).toBeVisible();
-  await expect(page.getByTestId('pii-output')).toContainText('<OSOBA_1>');
-  await expect(page.getByTestId('pii-output')).not.toContainText('791112/5013');
-
-  await page.getByText('Začernění', { exact: true }).click();
-  await expect(page.getByTestId('pii-output')).toContainText('[RODNÉ_ČÍSLO]');
-
-  await page.getByRole('button', { name: 'Těžké případy' }).click();
-  await expect(findings.getByText('Petr Nový')).toBeVisible();
-
-  await expect(page.getByTestId('pii-flow-restored')).toContainText('Petr Nový');
+  const highlighted = page.getByTestId('pii-highlighted');
+  const output = page.getByTestId('pii-output');
+  await expect(highlighted.getByText('791112/5013')).toBeVisible();
+  await expect(output).toContainText('<OSOBA_1>');
+  await expect(output).not.toContainText('791112/5013');
+  await expect(page.getByTestId('pii-flow-restored')).toContainText('Jan Dvořák');
   await expect(page.getByTestId('simulated-badge')).toContainText('ne výstup jazykového modelu');
+
+  // Why was it flagged? The type label opens the reasons.
+  await highlighted.getByRole('button', { name: 'Rodné číslo: proč?' }).click();
+  await expect(page.getByRole('note', { name: 'Rodné číslo' })).toContainText('kontrolní součet');
+  await page.keyboard.press('Escape');
+
+  await page.locator('label', { hasText: 'Začernit' }).click();
+  await expect(output).toContainText('[RODNÉ_ČÍSLO]');
+  await expect(page.getByTestId('pii-flow-restored')).toHaveCount(0);
+
+  await page.locator('label', { hasText: 'Zaměnit a vrátit' }).click();
+  await page.getByRole('button', { name: 'Těžké případy' }).click();
+  await expect(highlighted.getByText('Petr Nový').first()).toBeVisible();
+  await expect(page.getByTestId('pii-flow-restored')).toContainText('Petr Nový');
 
   // The NER model and its runtime are loaded only after an explicit click.
   expect(external).toEqual([]);
@@ -191,6 +237,8 @@ test('pii eval table shows the numbers from evals/pii/results.json', async ({ pa
     maximumFractionDigits: 1,
   });
   await page.goto('./#/pii');
+  await page.getByRole('button', { name: 'Pod kapotou' }).click();
+  await page.getByText('Jak přesné to je', { exact: true }).click();
   await expect(page.getByTestId('synthetic-warning')).toContainText('nadhodnocují');
 
   const total = page.getByTestId('pii-eval-table').getByRole('row', { name: /Celkem/ });

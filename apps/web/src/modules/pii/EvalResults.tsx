@@ -141,8 +141,7 @@ export function EvalResults() {
   const { corpus, ner } = RESULTS;
 
   return (
-    <section className={styles.section} aria-labelledby="eval-heading">
-      <h2 id="eval-heading">{t.heading}</h2>
+    <div className={styles.section}>
       <p>{t.intro}</p>
       <p className={styles.warning} role="note" data-testid="synthetic-warning">
         {t.warning}
@@ -226,6 +225,6 @@ export function EvalResults() {
           <dd>{formatDate(RESULTS.generatedAt)}</dd>
         </div>
       </dl>
-    </section>
+    </div>
   );
 }

@@ -1,0 +1,59 @@
+.toggle {
+  --edge: var(--color-frame);
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  margin: 2px;
+  padding: 3px;
+  border: 0;
+  background: var(--color-surface-muted);
+  cursor: pointer;
+  box-shadow:
+    0 -2px 0 0 var(--edge),
+    0 2px 0 0 var(--edge),
+    -2px 0 0 0 var(--edge),
+    2px 0 0 0 var(--edge);
+}
+
+.icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 1.75rem;
+}
+
+.icon svg {
+  display: block;
+}
+
+/* The knob: a raised pixel tile under the active icon. */
+.knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 2rem;
+  height: 1.75rem;
+  background: var(--color-surface);
+  box-shadow:
+    inset 0 -2px 0 0 var(--color-frame-shade),
+    0 0 0 2px var(--color-border);
+  transition: transform 160ms steps(4);
+}
+
+.toggle[data-theme-state='dark'] .knob {
+  transform: translateX(2rem);
+}
+
+/* The inactive icon is dimmed, so the state reads at a glance. */
+.toggle[data-theme-state='light'] .icon:last-child,
+.toggle[data-theme-state='dark'] .icon:nth-child(2) {
+  opacity: 0.45;
+}
+
+.toggle:hover .knob {
+  box-shadow:
+    inset 0 -2px 0 0 var(--color-frame-shade),
+    0 0 0 2px var(--color-accent);
+}

@@ -1,6 +1,6 @@
 /* Design tokens — the only place with raw colours, spacing and type values. */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
@@ -132,62 +132,63 @@
   --scene-window-glow-opacity: 0.35;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #0b0e20;
-    --color-bg-dot: #161b38;
-    --color-surface: #151a35;
-    --color-surface-muted: #1e2446;
-    --color-text: #eef1ff;
-    --color-text-muted: #aab2d6;
-    --color-border: #343c6a;
-    --color-frame: #5a64ad;
-    --color-frame-hi: #262d55;
-    --color-frame-shade: #0f1329;
-    --color-accent: #8fb0ff;
-    --color-accent-hover: #b5cbff;
-    --color-accent-soft: #1d2a55;
-    --color-on-accent: #0b1020;
-    --color-focus: #b5cbff;
-    --color-backdrop: rgb(3 5 15 / 65%);
+/* Dark theme: set on <html data-theme> by index.html and src/theme/theme.ts. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
 
-    --color-success: #6ee7a0;
-    --color-success-soft: #13301f;
-    --color-danger: #ff8a7a;
-    --color-danger-soft: #3b1714;
-    --color-warning: #fcd581;
-    --color-warning-soft: #3a2c0b;
-    --color-neutral-soft: #242a4a;
+  --color-bg: #0b0e20;
+  --color-bg-dot: #161b38;
+  --color-surface: #151a35;
+  --color-surface-muted: #1e2446;
+  --color-text: #eef1ff;
+  --color-text-muted: #aab2d6;
+  --color-border: #343c6a;
+  --color-frame: #5a64ad;
+  --color-frame-hi: #262d55;
+  --color-frame-shade: #0f1329;
+  --color-accent: #8fb0ff;
+  --color-accent-hover: #b5cbff;
+  --color-accent-soft: #1d2a55;
+  --color-on-accent: #0b1020;
+  --color-focus: #b5cbff;
+  --color-backdrop: rgb(3 5 15 / 65%);
 
-    --zone-0: #667085;
-    --zone-1: #7aa2ff;
-    --zone-2: #4fd18b;
-    --zone-3: #f5c542;
-    --zone-4: #ff9447;
-    --zone-5: #ff6b5e;
+  --color-success: #6ee7a0;
+  --color-success-soft: #13301f;
+  --color-danger: #ff8a7a;
+  --color-danger-soft: #3b1714;
+  --color-warning: #fcd581;
+  --color-warning-soft: #3a2c0b;
+  --color-neutral-soft: #242a4a;
 
-    --shadow-card: 0 1px 2px rgb(0 0 0 / 40%);
-    --shadow-card-hover: 0 4px 12px rgb(0 0 0 / 50%);
+  --zone-0: #667085;
+  --zone-1: #7aa2ff;
+  --zone-2: #4fd18b;
+  --zone-3: #f5c542;
+  --zone-4: #ff9447;
+  --zone-5: #ff6b5e;
 
-    /* Scene colours — night in the dark theme. */
-    --scene-sky-0: #070b1e;
-    --scene-sky-1: #0e1636;
-    --scene-sky-2: #18235a;
-    --scene-sky-3: #2b2f74;
-    --scene-orb: #f2efcf;
-    --scene-orb-halo: #3b417e;
-    --scene-cloud: #2c3366;
-    --scene-cloud-shade: #1f2550;
-    --scene-star: #ffffff;
-    --scene-star-opacity: 1;
-    --scene-hill-far: #1c2b55;
-    --scene-hill-mid: #15224a;
-    --scene-hill-near: #101a3a;
-    --scene-ground: #0d1630;
-    --scene-ground-dark: #091024;
-    --scene-path: #3a3f6e;
-    --scene-path-dark: #2b2f57;
-    --scene-window: #ffc94a;
-    --scene-window-glow-opacity: 1;
-  }
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-card-hover: 0 4px 12px rgb(0 0 0 / 50%);
+
+  /* Scene colours — night in the dark theme. */
+  --scene-sky-0: #070b1e;
+  --scene-sky-1: #0e1636;
+  --scene-sky-2: #18235a;
+  --scene-sky-3: #2b2f74;
+  --scene-orb: #f2efcf;
+  --scene-orb-halo: #3b417e;
+  --scene-cloud: #2c3366;
+  --scene-cloud-shade: #1f2550;
+  --scene-star: #ffffff;
+  --scene-star-opacity: 1;
+  --scene-hill-far: #1c2b55;
+  --scene-hill-mid: #15224a;
+  --scene-hill-near: #101a3a;
+  --scene-ground: #0d1630;
+  --scene-ground-dark: #091024;
+  --scene-path: #3a3f6e;
+  --scene-path-dark: #2b2f57;
+  --scene-window: #ffc94a;
+  --scene-window-glow-opacity: 1;
 }

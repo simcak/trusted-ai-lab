@@ -5,7 +5,7 @@ import { reasonsText } from './labels.ts';
 import styles from './pii.module.css';
 
 export function FindingsTable({ findings }: { findings: readonly Finding[] }) {
-  const t = cs.pii.playground;
+  const t = cs.pii.findings;
   if (findings.length === 0) return <p className={styles.muted}>{t.none}</p>;
   return (
     <div className={styles.tableWrap}>

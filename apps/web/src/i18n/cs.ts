@@ -449,8 +449,8 @@ export const cs = {
     name: 'Bezpečná AI v praxi',
     tagline: 'Laboratoř bezpečné AI',
     skipToContent: 'Přeskočit na obsah',
-    mainNav: 'Hlavní navigace',
-    gallery: 'Projekty',
+    home: 'Bezpečná AI v praxi: úvod',
+    projectsNav: 'Projekty',
     loading: 'Načítám…',
   },
 
@@ -469,7 +469,6 @@ export const cs = {
         'Animace: dopis s osobními údaji vyjde z domu. Ochrana mu údaje zakryje a pošle ho k AI. Odpověď cestou zpět zkontroluje, odrazí podvržený pokyn a údaje zase doplní. Citlivá data zůstávají doma.',
       pause: 'Pozastavit animaci',
       play: 'Přehrát animaci',
-      cta: 'Vybrat projekt',
     },
     galleryHeading: 'Projekty',
     galleryLead:
@@ -493,7 +492,8 @@ export const cs = {
 
   modules: {
     intake: {
-      title: 'Intake',
+      title: 'Rozcestník',
+      nav: 'Rozcestník',
       question: 'Má to vůbec být AI?',
       summary:
         'Popíšete nápad a pravidla navrhnou, jak ho postavit: jestli vůbec s AI, jak je to riskantní a kolik to bude stát.',
@@ -502,10 +502,16 @@ export const cs = {
       notice:
         'Tady žádná AI není: doporučení skládají pravidla, každé s důvodem a odkazem na zdroj. Nic se nikam neodesílá.',
       card: 'Popište nápad a zjistěte, jestli na něj vůbec potřebujete AI.',
-      chips: ['Bez AI', 'Nic se neodesílá'],
+      tips: [
+        'Tady žádná AI není: doporučení skládají pravidla a nic se neodesílá.',
+        'Někdy je nejlepší odpověď „AI nepotřebujete“. Na výpočet poplatků stačí vzorec.',
+        'Každé doporučení má důvod a pravidlo, které jde otestovat.',
+        'Kategorie podle AI Act je orientační, ne právní posouzení.',
+      ],
     },
     pii: {
       title: 'Ochrana dat',
+      nav: 'Ochrana dat',
       question: 'Co nesmí odejít do modelu?',
       summary:
         'Kód najde v textu české osobní údaje, třeba rodné číslo nebo číslo účtu, a schová je dřív, než text odejde do jazykového modelu.',
@@ -513,10 +519,17 @@ export const cs = {
         'Rozumím ochraně osobních údajů až na úroveň kódu: kontroluji i kontrolní součty, ne jen tvar čísla, a přesnost měřím.',
       notice: 'Vše na této stránce běží jen v prohlížeči. Text, který napíšete, nikam neodchází.',
       card: 'Vložte text a sledujte, jak se rodná čísla a účty schovají dřív, než odejdou do AI.',
-      chips: ['Běží jen ve vašem prohlížeči'],
+      tips: [
+        'Všechno běží ve vašem prohlížeči. Text nikam neodchází.',
+        'U desetimístného rodného čísla se kontroluje i dělitelnost 11. Samotný tvar nestačí.',
+        'Stejná osoba dostane vždy stejný zástupný symbol, i když se jméno skloňuje.',
+        'Syntetická data výkon nadhodnocují. Skutečné texty jsou pestřejší.',
+        'Klikněte na zvýrazněný údaj a uvidíte, proč ho knihovna našla.',
+      ],
     },
     agent: {
       title: 'Agent pod kontrolou',
+      nav: 'Agent',
       question: 'Jak AI bezpečně jedná?',
       summary:
         'AI asistent sám hledá ve fiktivních fondech a počítá poplatky. Každý jeho krok ale hlídají pravidla v kódu, která model nemůže obejít.',
@@ -525,10 +538,16 @@ export const cs = {
       notice:
         'Odpovědi modelu jsou předem nahrané. Všechno ostatní (smyčka agenta, pravidla, nástroje i pseudonymizace) běží živě ve vašem prohlížeči. Fondy jsou fiktivní a nic se nikam neodesílá.',
       card: 'Pusťte AI asistenta a sledujte, jak ho hlídají pravidla, i když se ho někdo snaží zmást.',
-      chips: ['Nahrané odpovědi modelu', 'Fiktivní fondy'],
+      tips: [
+        'Odpovědi modelu jsou předem nahrané. Smyčka agenta, pravidla i nástroje běží živě u vás.',
+        'Fondy jsou fiktivní a nic se nikam neodesílá.',
+        'Pravidla jsou kód, ne prosba v promptu.',
+        'Zkuste stejný scénář s pojistkami a bez nich. Model i prompt jsou stejné.',
+      ],
     },
     local: {
       title: 'Lokálně',
+      nav: 'Lokálně',
       question: 'Co když data nesmí opustit zařízení?',
       summary:
         'Rozbor tréninku z hodinek a malý jazykový model, který ho vysvětlí. Všechno běží ve vašem počítači, data nikam neodcházejí.',
@@ -537,7 +556,12 @@ export const cs = {
       notice:
         'Všechno běží ve vašem prohlížeči. Soubor nikam neodchází a panel Síťová aktivita dole to dokládá.',
       card: 'Nahrajte trénink z hodinek a nechte si ho vysvětlit AI, která běží jen u vás.',
-      chips: ['Běží jen u vás'],
+      tips: [
+        'Všechno běží ve vašem prohlížeči. Soubor nikam neodchází.',
+        'Začátek a konec trasy se ořízne: start bývá u vás doma.',
+        'AI dostane jen souhrnná čísla, nikdy body z GPS.',
+        'Model se stáhne až po kliknutí a pak běží jen ve vašem počítači.',
+      ],
     },
   },
 
@@ -620,7 +644,7 @@ export const cs = {
       untitled: 'Nový záměr',
       title: (name: string) => `ADR: ${name}`,
       status: 'Stav',
-      statusValue: 'navrženo (vygenerováno modulem Intake)',
+      statusValue: 'navrženo (vygenerováno modulem Rozcestník)',
       date: 'Datum',
       decision: 'Rozhodnutí',
       context: 'Kontext a problém',
@@ -643,7 +667,7 @@ export const cs = {
       rationale: 'Zdůvodnění',
       reference: 'Zdroj',
       disclaimer:
-        'Vygenerováno technickým demem „Bezpečná AI v praxi“ (modul Intake). Klasifikace podle AI Act je orientační a nejde o právní posouzení.',
+        'Vygenerováno technickým demem „Bezpečná AI v praxi“ (modul Rozcestník). Klasifikace podle AI Act je orientační a nejde o právní posouzení.',
     },
   },
 
@@ -651,35 +675,53 @@ export const cs = {
     types: piiTypes,
     reasons: piiReasons,
 
-    playground: {
-      heading: 'Vyzkoušejte',
-      intro: 'Vyberte ukázku nebo napište vlastní text a zvolte, co se má s nalezenými údaji stát.',
-      samplesLabel: 'Ukázkové texty (syntetická data)',
+    machine: {
+      label: 'Ukázka ochrany osobních údajů',
+      samplesLabel: 'Text (syntetická data)',
       samples: {
         'client-email': 'E-mail klienta',
         'advisor-note': 'Poznámka poradce',
         contract: 'Úryvek smlouvy',
         'hard-cases': 'Těžké případy',
       },
-      textareaLabel: 'Text ke kontrole',
-      modeLegend: 'Co udělat s nálezy',
+      custom: 'Vlastní text',
+      modesLabel: 'Ochrana',
       modes: {
         redact: {
-          label: 'Začernění',
-          hint: 'Každý nález nahradí jeho typ, např. [RODNÉ_ČÍSLO]. Původní hodnotu už nelze vrátit.',
+          label: 'Začernit',
+          example: '[RODNÉ_ČÍSLO]',
+          hint: 'Údaj nahradí jeho typ. Původní hodnotu už nejde vrátit.',
         },
         pseudonymize: {
-          label: 'Pseudonymizace',
-          hint: 'Stejná hodnota dostane vždy stejný zástupný symbol, např. <OSOBA_1>, i ve skloňovaném tvaru. Mapa symbolů se hned zahodí.',
+          label: 'Zaměnit',
+          example: '<OSOBA_1>',
+          hint: 'Stejný údaj dostane vždy stejný symbol, i ve skloňovaném tvaru. Mapa symbolů se hned zahodí.',
         },
         reversible: {
-          label: 'Vratná pseudonymizace',
-          hint: 'Jako pseudonymizace, ale mapa zůstane v paměti stránky. Odpověď modelu jde pak doplnit původními hodnotami. Ukázka je níže.',
+          label: 'Zaměnit a vrátit',
+          example: '<OSOBA_1> → Jan',
+          hint: 'Mapa symbolů zůstane v paměti stránky, takže odpověď AI jde doplnit zpět. Nikam se neposílá a po zavření stránky zmizí.',
         },
       },
-      highlightedHeading: 'Nalezené údaje v textu',
-      outputHeading: 'Co by odešlo do jazykového modelu',
-      findingsHeading: 'Nálezy a proč je knihovna označila',
+      modesTip: 'Co dělají jednotlivé režimy',
+      steps: { input: 'Váš text', masked: 'Co uvidí AI', reply: 'Odpověď AI' },
+      found: (n: number) => `Nalezeno: ${n}`,
+      edit: 'Upravit',
+      done: 'Hotovo',
+      textareaLabel: 'Text ke kontrole',
+      typeCount: (n: number, type: string) => `${n}× ${type}`,
+      why: (type: string) => `${type}: proč?`,
+      reasons: 'Proč',
+      score: 'Skóre',
+      detector: 'Našel',
+      guard: 'Ochrana',
+      ai: 'AI',
+      restoredCaption: 'AI odpověděla se symboly. Váš prohlížeč je nahradil zpět.',
+      none: 'V textu nejsou žádné osobní údaje.',
+      noReply: 'Bez osobních údajů není co vracet.',
+    },
+
+    findings: {
       columns: {
         type: 'Typ',
         text: 'Nalezený text',
@@ -693,13 +735,23 @@ export const cs = {
         'rules+ner': 'pravidla i NER',
       } as Record<string, string>,
       none: 'V textu nebyly nalezeny žádné osobní údaje.',
-      count: (n: number) => `Nálezů: ${n}`,
       minScoreNote: (score: string) =>
         `Zobrazují se nálezy se skóre aspoň ${score}. Skóre vychází z formátu, kontrolních součtů a okolních slov.`,
     },
 
+    details: {
+      findings: (n: number) => `Všechny nálezy (${n})`,
+      eval: 'Jak přesné to je',
+      limits: 'Co detekce neumí',
+      managed: 'Vlastní knihovna, nebo služba?',
+      map: 'Mapa symbolů a záznam kroků',
+      ner: 'AI model na jména (NER)',
+    },
+
     ner: {
-      heading: 'Volitelně: NER model pro jména',
+      toggle: (size: string) => `+ AI na jména (${size})`,
+      toggleOn: 'AI na jména',
+      tip: 'Malý AI model (NER) doplní jména, která pravidla minou. Stáhne se až po kliknutí a běží jen ve vašem prohlížeči.',
       intro:
         'Pravidla hledají jména podle slovníku, oslovení a koncovek. Malý model pro rozpoznávání jmen (NER) může doplnit ta, která pravidla minou. Používá se jen pro jména osob.',
       load: (size: string) => `Načíst NER model (${size})`,
@@ -719,18 +771,10 @@ export const cs = {
     },
 
     reversible: {
-      heading: 'Vratná pseudonymizace: do modelu a zpět',
-      intro:
-        'Do jazykového modelu odejde jen text se zástupnými symboly. Jeho odpověď se pak doplní původními hodnotami lokálně, v prohlížeči. Mapa symbolů nikdy neopustí stránku.',
-      steps: {
-        original: '1. Původní text',
-        masked: '2. Odchází do modelu',
-        reply: '3. Odpověď modelu',
-        restored: '4. Doplněno lokálně',
-      },
       simulatedBadge: 'Simulovaná odpověď: šablona v kódu, ne výstup jazykového modelu',
+      simulatedTip: 'Proč simulovaná',
       simulatedNote:
-        'Tady jde jen o cestu dat. Skutečné volání modelu se stejnou ochranou ukazuje modul Agent pod kontrolou:',
+        'Tady jde jen o cestu dat. Skutečné volání modelu se stejnou ochranou ukazuje Agent pod kontrolou:',
       simulatedNoteLink: 'scénář Rodné číslo v dotazu',
       mapHeading: 'Mapa zástupných symbolů (jen v paměti této stránky)',
       mapColumns: { placeholder: 'Symbol', type: 'Typ', original: 'Původní hodnota' },
@@ -739,7 +783,6 @@ export const cs = {
         `Odpověď obsahuje symboly, které tato stránka nevydala: ${list}. Zůstaly beze změny.`,
       limitation:
         'Omezení: doplní se tvar z původního textu, takže pád nemusí sedět (např. „Dobrý den, Jan Dvořák“ místo „Dobrý den, pane Dvořáku“).',
-      empty: 'V textu nejsou osobní údaje, není co pseudonymizovat. Vyberte některou ukázku výše.',
       traceTitle: 'Trace: co se stalo (bez osobních údajů)',
       reply: {
         greeting: (person?: string) => (person ? `Dobrý den, ${person},` : 'Dobrý den,'),
@@ -763,7 +806,6 @@ export const cs = {
     },
 
     eval: {
-      heading: 'Jak přesná je detekce',
       intro:
         'Čísla pocházejí z evalu nad syntetickým korpusem (soubor evals/pii/results.json). Vytváří je skript, ne člověk, a CI kontroluje, že odpovídají aktuálnímu kódu.',
       warning:
@@ -827,7 +869,6 @@ export const cs = {
     },
 
     limits: {
-      heading: 'Co detekce neumí',
       items: [
         'Jména psaná malými písmeny nebo bez diakritiky („jana novakova“) pravidla nenajdou.',
         'Vzácná jména mimo seznam MV ČR najde jen podle kontextu (oslovení, podpis, koncovka).',
@@ -838,7 +879,6 @@ export const cs = {
     },
 
     managed: {
-      heading: 'Kdy použít tohle a kdy spravovanou službu',
       prosLabel: 'Výhody',
       consLabel: 'Nevýhody',
       own: {
@@ -1218,14 +1258,25 @@ export const cs = {
   },
 
   shell: {
-    backToGallery: 'Projekty',
-    backToGalleryLabel: 'Zpět na projekty',
     terms: 'Pojmy',
-    howItWorks: 'Jak to funguje',
+    underTheHood: 'Pod kapotou',
     drawerClose: 'Zavřít',
     whatItDoes: 'Co to dělá',
     proof: 'Co tím ukazuji',
     goodToKnow: 'Dobré vědět',
+  },
+
+  theme: {
+    dark: 'Tmavý režim',
+    toDark: 'Přepnout na tmavý režim',
+    toLight: 'Přepnout na světlý režim',
+  },
+
+  ticker: {
+    label: 'Tipy',
+    pause: 'Pozastavit tipy',
+    resume: 'Spustit tipy',
+    next: 'Další tip',
   },
 
   trace: {

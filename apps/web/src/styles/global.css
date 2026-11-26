@@ -153,6 +153,8 @@ pre {
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    /* Staged animations (delays) must not hold content back either. */
+    animation-delay: 0s !important;
     /* Without this, an infinite steps() loop at 0.01 ms would turn into a strobe. */
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
