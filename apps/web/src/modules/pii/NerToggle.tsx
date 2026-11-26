@@ -4,6 +4,7 @@ import { NER_MODEL } from '../../../../../evals/pii/ner-model.ts';
 import { formatBytes } from './format.ts';
 import { RUNTIME_WASM_BYTES } from './ner/load-ner.ts';
 import type { NerState } from './NerPanel.tsx';
+import machine from '../../components/Machine/machine.module.css';
 import styles from './pii.module.css';
 
 interface Props {
@@ -20,12 +21,12 @@ export function NerToggle({ state, enabled, analysing, onLoad, onToggle }: Props
   return (
     <div className={styles.ner}>
       {state.status === 'idle' && (
-        <button type="button" className={styles.linkButton} onClick={onLoad}>
+        <button type="button" className={machine.linkButton} onClick={onLoad}>
           {t.toggle(formatBytes(NER_MODEL.downloadBytes))}
         </button>
       )}
       {state.status === 'loading' && (
-        <span role="status" className={styles.small}>
+        <span role="status" className={machine.small}>
           {state.progress
             ? t.progress(formatBytes(state.progress.loaded), formatBytes(state.progress.total))
             : t.loading}
@@ -39,7 +40,7 @@ export function NerToggle({ state, enabled, analysing, onLoad, onToggle }: Props
             onChange={(e) => onToggle(e.currentTarget.checked)}
           />
           {t.toggleOn}
-          {enabled && analysing && <span className={styles.small}>{t.analysing}</span>}
+          {enabled && analysing && <span className={machine.small}>{t.analysing}</span>}
         </label>
       )}
       {state.status === 'error' && (

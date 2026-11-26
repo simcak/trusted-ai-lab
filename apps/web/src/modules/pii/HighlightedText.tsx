@@ -4,6 +4,7 @@ import { InfoTip } from '../../components/InfoTip/InfoTip.tsx';
 import { cs } from '../../i18n/cs.ts';
 import { formatScore } from './format.ts';
 import { reasonsText, TYPE_CATEGORY } from './labels.ts';
+import machine from '../../components/Machine/machine.module.css';
 import styles from './pii.module.css';
 
 /**
@@ -49,7 +50,7 @@ function FindingMark({ finding: f, index }: { finding: Finding; index: number })
     >
       {f.text}
       <InfoTip bare className={styles.markLabel} text={type} label={t.why(type)} title={type}>
-        <dl className={styles.why}>
+        <dl className={machine.why}>
           <div>
             <dt>{t.reasons}</dt>
             <dd>{reasonsText(f)}</dd>

@@ -7,6 +7,7 @@ import type {
   ModelTier,
   PatternId,
   PresetId,
+  TechnicalPattern,
 } from '@trusted-ai-lab/intake-rules';
 import type { RuleId, RunStatus, ScenarioId } from '@trusted-ai-lab/agent-runtime';
 import type { LlmErrorCode, ProviderId } from '@trusted-ai-lab/llm-core';
@@ -507,6 +508,7 @@ export const cs = {
         'Někdy je nejlepší odpověď „AI nepotřebujete“. Na výpočet poplatků stačí vzorec.',
         'Každé doporučení má důvod a pravidlo, které jde otestovat.',
         'Kategorie podle AI Act je orientační, ne právní posouzení.',
+        'Klikněte na kterýkoli fakt v rozhovoru a změňte ho.',
       ],
     },
     pii: {
@@ -566,13 +568,68 @@ export const cs = {
   },
 
   intake: {
-    presetsLabel: 'Ukázkové záměry',
     presets: intakePresets,
-    formHeading: 'Popište záměr',
-    descriptionLabel: 'Popis záměru',
-    descriptionHint: 'Pravidla text nečtou, jen ho vloží do staženého dokumentu (ADR).',
     fields: intakeFields,
-    groups: { work: 'Úloha a data', impact: 'Dopad a provoz' },
+
+    chat: {
+      label: 'Rozhovor s Rozcestníkem',
+      title: 'Váš nápad',
+      bot: 'Rozcestník',
+      you: 'Vy',
+      hello: 'Dobrý den. S jakým nápadem přicházíte?',
+      customIntro: 'Mám vlastní nápad.',
+      understood: 'Rozumím. Takhle to vidím:',
+      askIntro: 'Zeptám se na pár věcí. Stačí klikat.',
+      factsLabel: 'Co o nápadu víme',
+      change: (field: string, value: string) => `Změnit: ${field}, teď ${value}`,
+      reopen: 'Vyberte jinou odpověď.',
+      verdict: 'Doporučuji:',
+      rules: (fired: number, total: number) => `Platí ${fired} z ${total} pravidel.`,
+      trayPresets: 'Vzorové situace',
+      trayAnswer: 'Vaše odpověď',
+      progress: (n: number, total: number) => `${n}/${total}`,
+      answered: (n: number, total: number) => `Zodpovězeno ${n} z ${total}`,
+      custom: 'Vlastní nápad',
+      backToPresets: 'Zpět na vzorové situace',
+      keep: 'Nechat, jak je',
+      waiting: 'Doporučení se objeví po poslední odpovědi.',
+      questions: {
+        task: 'Co má systém dělat?',
+        deterministic: 'Dá se to zapsat přesnými pravidly nebo vzorcem?',
+        labeledData: 'Máte historické příklady se správnou odpovědí?',
+        dataSensitivity: 'Jaká nejcitlivější data v tom budou?',
+        audience: 'Kdo s tím bude pracovat?',
+        decisionAboutPeople: 'Rozhoduje výsledek o lidech?',
+        automation: 'Kdo má poslední slovo?',
+        explainability: 'Musí jít každý výsledek přesně vysvětlit?',
+        errorTolerance: 'Kolik chyb snesete?',
+        practice: 'Jde o některý z těchto účelů?',
+        volume: 'Kolik dotazů měsíčně čekáte?',
+        latency: 'Jak rychle potřebujete odpověď?',
+      } satisfies Record<FactField, string>,
+    },
+
+    ladder: {
+      label: 'Od nejjednoduššího',
+      tip: 'Pravidla zkouší řešení od nejjednoduššího. Vyhraje první, které žádné pravidlo nevyřadí. Na přeškrtnuté klikněte a uvidíte proč.',
+      tipTitle: 'Jak se vybírá řešení',
+      short: {
+        'no-ai': 'Bez AI',
+        'classic-software': 'Software',
+        'classic-ml': 'ML',
+        llm: 'LLM',
+        rag: 'RAG',
+        agent: 'Agent',
+      } satisfies Record<TechnicalPattern, string>,
+      states: {
+        winner: 'doporučeno',
+        excluded: 'vyřazeno',
+        needless: 'zbytečně složité',
+        blocked: 'zakázáno',
+      },
+      why: (pattern: string) => `${pattern}: proč ne?`,
+      human: 'Rozhodne člověk',
+    },
 
     resultLabel: 'Doporučení',
     patterns: intakePatterns,
@@ -582,6 +639,7 @@ export const cs = {
     },
     withHuman: '+ člověk ve smyčce',
     humanWhy: 'Proč člověk ve smyčce',
+    humanTip: 'Proč člověk?',
 
     aiAct: {
       heading: 'AI Act (orientačně)',
@@ -589,6 +647,7 @@ export const cs = {
       appliesFrom: (date: string, inForce: boolean) =>
         inForce ? `Platí od ${date}` : `Bude platit od ${date}`,
       asOf: (date: string) => `Stav k ${date} · zdroje`,
+      asOfShort: (date: string) => `Stav k ${date}`,
       amendedBy: 'Ve znění nařízení (EU) 2026/1744 (Digital Omnibus on AI).',
     },
 
@@ -610,9 +669,12 @@ export const cs = {
       perMonth: 'USD / měsíc',
       range: (min: string, max: string) => `${min}–${max}`,
       unverified: 'cena neověřena',
+      none: '0 USD',
       noTokens: 'Bez nákladů na tokeny: řešení nevolá jazykový model.',
       notTokenBased:
         'Klasické ML se platí provozem a trénováním modelu, ne tokeny. Z ceníku tokenů se neodhaduje.',
+      assumptionShort: 'Předpoklad dema, ne měření',
+      assumptionTip: 'Z čeho odhad vychází',
       assumption: (input: string, output: string) =>
         `Předpoklad dema, ne měření: ${input} vstupních a ${output} výstupních tokenů na dotaz.`,
       batch: 'Dávkově: počítáno s cenami Batch API (poloviční).',
@@ -621,7 +683,6 @@ export const cs = {
     },
 
     rejected: {
-      heading: 'Zamítnuté alternativy',
       allBlocked: 'Žádná: účel je zakázaný.',
     },
 
@@ -638,10 +699,24 @@ export const cs = {
       patternField: 'Zvolený vzor',
     },
 
+    restart: 'Začít znovu',
+    details: {
+      how: 'Jak pravidla rozhodují',
+      howText: [
+        'Nejdřív pravidla vyberou řešení: zakázaný účel výběr ukončí, jinak vyhraje nejjednodušší řešení, které žádné pravidlo nevyřadí.',
+        'Pak z faktů a zvoleného řešení odvodí kategorii podle AI Act, potřebné kontroly a lidský dohled. Žádný jazykový model, stejný vstup dá vždy stejný výsledek.',
+      ],
+      aiActSources: 'Zdroje k AI Act',
+      pricing: 'Ceníky modelů',
+    },
+
     adr: {
       button: 'Stáhnout ADR (.md)',
+      what: 'Co je ADR?',
       hint: 'Rozhodnutí ve formátu MADR, připravené k uložení do repozitáře.',
       untitled: 'Nový záměr',
+      customName: 'Vlastní záměr',
+      editedName: (label: string) => `${label} (upraveno)`,
       title: (name: string) => `ADR: ${name}`,
       status: 'Stav',
       statusValue: 'navrženo (vygenerováno modulem Rozcestník)',

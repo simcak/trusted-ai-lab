@@ -14,6 +14,7 @@ import { RoundTrip } from './RoundTrip.tsx';
 import { SAMPLE_IDS, type SampleId } from './samples.ts';
 import { redactReplacements, segmentsFromReplacements } from './segments.ts';
 import { SegmentText } from './SegmentText.tsx';
+import machine from '../../components/Machine/machine.module.css';
 import styles from './pii.module.css';
 
 interface Props {
@@ -59,17 +60,17 @@ export function PiiMachine(props: Props) {
 
   return (
     <section className={styles.machine} aria-label={t.label}>
-      <div className={styles.deck}>
-        <div className={styles.group} role="group" aria-label={t.samplesLabel}>
-          <span className={styles.groupLabel} aria-hidden="true">
+      <div className={machine.deck}>
+        <div className={machine.group} role="group" aria-label={t.samplesLabel}>
+          <span className={machine.groupLabel} aria-hidden="true">
             {t.samplesLabel}
           </span>
-          <div className={styles.choices}>
+          <div className={machine.choices}>
             {SAMPLE_IDS.map((id) => (
               <button
                 key={id}
                 type="button"
-                className={styles.choice}
+                className={machine.choice}
                 aria-pressed={sample === id}
                 onClick={() => props.onSample(id)}
               >
@@ -78,7 +79,7 @@ export function PiiMachine(props: Props) {
             ))}
             <button
               type="button"
-              className={styles.choice}
+              className={machine.choice}
               aria-pressed={sample === null}
               onClick={props.onCustom}
             >
@@ -88,11 +89,11 @@ export function PiiMachine(props: Props) {
           </div>
         </div>
 
-        <fieldset className={styles.group}>
-          <legend className={styles.groupLabel}>
+        <fieldset className={machine.group}>
+          <legend className={machine.groupLabel}>
             {t.modesLabel}
             <InfoTip label={t.modesTip} title={t.modesTip} icon="bulb">
-              <dl className={styles.why}>
+              <dl className={machine.why}>
                 {MODES.map((m) => (
                   <div key={m}>
                     <dt>{t.modes[m].label}</dt>
@@ -102,9 +103,9 @@ export function PiiMachine(props: Props) {
               </dl>
             </InfoTip>
           </legend>
-          <div className={styles.choices}>
+          <div className={machine.choices}>
             {MODES.map((m) => (
-              <label key={m} className={styles.mode}>
+              <label key={m} className={machine.tile}>
                 <input
                   type="radio"
                   name="pii-mode"
@@ -112,7 +113,7 @@ export function PiiMachine(props: Props) {
                   checked={mode === m}
                   onChange={() => props.onMode(m)}
                 />
-                <span className={styles.modeLabel}>{t.modes[m].label}</span>
+                <span className={machine.tileLabel}>{t.modes[m].label}</span>
                 <span className={styles.modeExample} data-mode={m} aria-hidden="true">
                   {t.modes[m].example}
                 </span>
@@ -128,20 +129,20 @@ export function PiiMachine(props: Props) {
         data-reversible={reversible ? '' : undefined}
         data-live={editing ? '' : undefined}
       >
-        <li className={styles.panel} data-step="1">
-          <header className={styles.panelHeader}>
-            <span className={styles.stepNo}>1</span>
+        <li className={machine.panel} data-tone="sun">
+          <header className={machine.panelHeader}>
+            <span className={machine.stepNo}>1</span>
             <h2>{t.steps.input}</h2>
             <button
               type="button"
-              className={styles.headerButton}
+              className={machine.headerButton}
               aria-pressed={editing}
               onClick={() => props.onEditing(!editing)}
             >
               {editing ? t.done : `✎ ${t.edit}`}
             </button>
           </header>
-          <div className={styles.panelBody}>
+          <div className={machine.panelBody}>
             {editing ? (
               <>
                 <label htmlFor={textareaId} className="visually-hidden">
@@ -165,8 +166,8 @@ export function PiiMachine(props: Props) {
               </>
             )}
           </div>
-          <footer className={styles.panelFooter}>
-            <p className={styles.count} aria-live="polite">
+          <footer className={machine.panelFooter}>
+            <p className={machine.count} aria-live="polite">
               {t.found(analysed.findings.length)}
             </p>
             <TypeSummary findings={analysed.findings} />
@@ -180,22 +181,22 @@ export function PiiMachine(props: Props) {
           </footer>
         </li>
 
-        <li className={styles.arrow} aria-hidden="true">
-          <span className={styles.arrowStop}>
+        <li className={machine.arrow} aria-hidden="true">
+          <span className={machine.arrowStop}>
             <Sprite sprite={guardShield} scale={2} />
             <span>{t.guard}</span>
           </span>
-          <span className={styles.letter} data-leg="1">
+          <span className={machine.traveller} data-leg="1">
             <Sprite sprite={envelope} scale={2} />
           </span>
         </li>
 
-        <li className={styles.panel} data-step="2">
-          <header className={styles.panelHeader}>
-            <span className={styles.stepNo}>2</span>
+        <li className={machine.panel} data-tone="berry">
+          <header className={machine.panelHeader}>
+            <span className={machine.stepNo}>2</span>
             <h2>{t.steps.masked}</h2>
           </header>
-          <div className={styles.panelBody}>
+          <div className={machine.panelBody}>
             <SegmentText
               segments={masked}
               variant={mode === 'redact' ? 'redact' : 'pseudonym'}
@@ -206,20 +207,20 @@ export function PiiMachine(props: Props) {
 
         {reversible && (
           <>
-            <li className={styles.arrow} aria-hidden="true">
-              <span className={styles.arrowStop} data-stop="ai">
+            <li className={machine.arrow} aria-hidden="true">
+              <span className={machine.arrowStop} data-stop="ai">
                 <span className={styles.aiChip}>{t.ai}</span>
               </span>
-              <span className={styles.letter} data-leg="2">
+              <span className={machine.traveller} data-leg="2">
                 <Sprite sprite={envelope} scale={2} />
               </span>
             </li>
-            <li className={styles.panel} data-step="3">
-              <header className={styles.panelHeader}>
-                <span className={styles.stepNo}>3</span>
+            <li className={machine.panel} data-tone="leaf">
+              <header className={machine.panelHeader}>
+                <span className={machine.stepNo}>3</span>
                 <h2>{t.steps.reply}</h2>
               </header>
-              <div className={styles.panelBody}>
+              <div className={machine.panelBody}>
                 <RoundTrip flow={flow} />
               </div>
             </li>
@@ -234,7 +235,7 @@ export function PiiMachine(props: Props) {
 function TypeSummary({ findings }: { findings: readonly Finding[] }) {
   const counts = new Map<PiiType, number>();
   for (const f of findings) counts.set(f.type, (counts.get(f.type) ?? 0) + 1);
-  if (counts.size === 0) return <p className={styles.muted}>{cs.pii.machine.none}</p>;
+  if (counts.size === 0) return <p className={machine.muted}>{cs.pii.machine.none}</p>;
   return (
     <ul className={styles.types}>
       {[...counts].map(([type, n]) => (

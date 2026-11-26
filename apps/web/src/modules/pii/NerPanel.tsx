@@ -2,6 +2,7 @@ import { cs } from '../../i18n/cs.ts';
 import { NER_MODEL } from '../../../../../evals/pii/ner-model.ts';
 import { formatBytes } from './format.ts';
 import { RUNTIME_WASM_BYTES, type NerProgress } from './ner/load-ner.ts';
+import machine from '../../components/Machine/machine.module.css';
 import styles from './pii.module.css';
 
 export type NerState =
@@ -21,7 +22,7 @@ interface Props {
 export function NerPanel({ state, enabled, analysing, onLoad, onToggle }: Props) {
   const t = cs.pii.ner;
   return (
-    <div className={styles.section}>
+    <div className={machine.section}>
       <p>{t.intro}</p>
 
       {state.status === 'idle' && (
@@ -29,7 +30,7 @@ export function NerPanel({ state, enabled, analysing, onLoad, onToggle }: Props)
           <button type="button" className="button button--secondary" onClick={onLoad}>
             {t.load(formatBytes(NER_MODEL.downloadBytes))}
           </button>
-          <p className={styles.small}>{t.downloadNote(formatBytes(RUNTIME_WASM_BYTES))}</p>
+          <p className={machine.small}>{t.downloadNote(formatBytes(RUNTIME_WASM_BYTES))}</p>
         </>
       )}
 
@@ -39,7 +40,7 @@ export function NerPanel({ state, enabled, analysing, onLoad, onToggle }: Props)
           {state.progress && (
             <>
               <progress max={state.progress.total} value={state.progress.loaded} />
-              <p className={styles.small}>
+              <p className={machine.small}>
                 {t.progress(formatBytes(state.progress.loaded), formatBytes(state.progress.total))}
               </p>
             </>
@@ -51,7 +52,7 @@ export function NerPanel({ state, enabled, analysing, onLoad, onToggle }: Props)
         <div>
           <p role="status">{t.ready}</p>
           {state.runtimeTransferBytes !== undefined && (
-            <p className={styles.small}>
+            <p className={machine.small}>
               {t.runtimeMeasured(formatBytes(state.runtimeTransferBytes))}
             </p>
           )}
@@ -63,7 +64,7 @@ export function NerPanel({ state, enabled, analysing, onLoad, onToggle }: Props)
             />
             {t.use}
           </label>
-          {enabled && analysing && <p className={styles.small}>{t.analysing}</p>}
+          {enabled && analysing && <p className={machine.small}>{t.analysing}</p>}
         </div>
       )}
 
@@ -73,7 +74,7 @@ export function NerPanel({ state, enabled, analysing, onLoad, onToggle }: Props)
         </p>
       )}
 
-      <p className={styles.small}>
+      <p className={machine.small}>
         {t.attribution}{' '}
         <a href={NER_MODEL.modelCard} rel="noreferrer">
           {NER_MODEL.id}
