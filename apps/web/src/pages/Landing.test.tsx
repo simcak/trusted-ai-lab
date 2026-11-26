@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { cs } from '../i18n/cs.ts';
@@ -43,7 +43,31 @@ describe('Landing', () => {
   it('keeps the hero scene out of the accessibility tree but describes it in text', () => {
     renderLanding();
     expect(screen.getByRole('heading', { level: 1, name: cs.app.name })).toBeTruthy();
-    expect(screen.getByText(cs.landing.hero.description)).toBeTruthy();
+    expect(screen.getByText(cs.landing.scenes.intake.description)).toBeTruthy();
     expect(screen.getByRole('button', { name: cs.landing.hero.pause })).toBeTruthy();
+  });
+
+  it('shows one scene per project; a project button switches the scene and the link', () => {
+    renderLanding();
+    const scenes = within(screen.getByRole('group', { name: cs.landing.hero.scenesLabel }));
+    expect(scenes.getAllByRole('button')).toHaveLength(4);
+    const cta = () =>
+      screen.getByRole('link', {
+        name: `${cs.landing.hero.cta} ${cs.landing.hero.ctaProject(cs.modules.intake.title)}`,
+      });
+    expect(cta().getAttribute('href')).toBe('/intake');
+
+    fireEvent.click(scenes.getByRole('button', { name: cs.modules.agent.nav }));
+    expect(
+      scenes.getByRole('button', { name: cs.modules.agent.nav }).getAttribute('aria-pressed'),
+    ).toBe('true');
+    expect(screen.getByText(cs.landing.scenes.agent.description)).toBeTruthy();
+    expect(
+      screen
+        .getByRole('link', {
+          name: `${cs.landing.hero.cta} ${cs.landing.hero.ctaProject(cs.modules.agent.title)}`,
+        })
+        .getAttribute('href'),
+    ).toBe('/agent');
   });
 });

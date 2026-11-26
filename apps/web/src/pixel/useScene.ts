@@ -19,17 +19,30 @@ export function usePrefersReducedMotion(): boolean {
 
 export type SceneStatus = 'playing' | 'paused' | 'static';
 
+export interface SceneOptions {
+  /** Play once and call `onFinish` (a carousel moves on); by default the scene loops. */
+  once?: boolean;
+  onFinish?: () => void;
+}
+
 /**
  * Runs a scene timeline on the element in `rootRef`.
  * - Reduced motion: the DOM's own state is the still frame; "play" runs the scene once.
  * - Off-screen the scene pauses; the user can always pause it (WCAG 2.2.2).
  * `build` must be stable (a module-level function), it receives the root to query targets.
+ * A new `build` starts the new scene from its beginning.
  */
 export function useScene(
   rootRef: RefObject<Element | null>,
   build: (root: Element) => SceneTimeline,
+  options: SceneOptions = {},
 ): { status: SceneStatus; toggle: () => void } {
   const reduced = usePrefersReducedMotion();
+  const once = options.once ?? false;
+  const onFinishRef = useRef(options.onFinish);
+  useEffect(() => {
+    onFinishRef.current = options.onFinish;
+  });
   const [paused, setPaused] = useState(false);
   const [onceRequest, setOnceRequest] = useState(0);
   const animations = useRef<Animation[]>([]);
@@ -49,7 +62,7 @@ export function useScene(
   useEffect(() => {
     const root = rootRef.current;
     if (!root || isStatic) return;
-    const list = playTimeline(build(root), { iterations: reduced ? 1 : Infinity });
+    const list = playTimeline(build(root), { iterations: reduced || once ? 1 : Infinity });
     animations.current = list;
     apply();
     if (reduced) {
@@ -57,12 +70,18 @@ export function useScene(
         () => setOnceRequest(0),
         () => {},
       );
+    } else if (once && list.length > 0) {
+      // Cancelled animations (a new scene, unmount) reject: then nothing moves on.
+      Promise.all(list.map((a) => a.finished)).then(
+        () => onFinishRef.current?.(),
+        () => {},
+      );
     }
     return () => {
       for (const a of list) a.cancel();
       animations.current = [];
     };
-  }, [rootRef, build, reduced, isStatic, onceRequest]);
+  }, [rootRef, build, reduced, isStatic, onceRequest, once]);
 
   useEffect(() => {
     pausedRef.current = paused;

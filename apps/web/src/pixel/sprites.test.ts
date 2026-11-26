@@ -6,11 +6,12 @@ import * as actors from './sprites/actors.ts';
 import * as hero from './sprites/hero.ts';
 import * as icons from './sprites/icons.ts';
 import * as projects from './sprites/projects.ts';
+import * as scenes from './sprites/scenes.ts';
 
 const isSprite = (value: unknown): value is SpriteDef =>
   typeof value === 'object' && value !== null && 'frames' in value && 'palette' in value;
 
-const sprites = Object.entries({ ...icons, ...projects, ...hero, ...actors }).filter(
+const sprites = Object.entries({ ...icons, ...projects, ...hero, ...actors, ...scenes }).filter(
   (entry): entry is [string, SpriteDef] => isSprite(entry[1]),
 );
 

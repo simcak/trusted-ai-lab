@@ -92,17 +92,11 @@ for (const m of modules) {
   });
 }
 
-test('hero scene: a click on the scene pauses it, reduced motion shows a still frame', async ({
+test('hero scenes: a click on the scene pauses it, reduced motion shows a still frame', async ({
   browser,
 }) => {
   const running = (page: Page) =>
-    page.evaluate(
-      () =>
-        document
-          .getAnimations()
-          .filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations === Infinity)
-          .length,
-    );
+    page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length);
 
   const normal = await browser.newPage();
   await normal.goto('./');
@@ -117,6 +111,35 @@ test('hero scene: a click on the scene pauses it, reduced motion shows a still f
   await expect(reduced.getByRole('button', { name: 'Přehrát animaci' })).toBeVisible();
   expect(await running(reduced)).toBe(0);
   await context.close();
+});
+
+test('hero scenes: one per project, switched by buttons, and the next one follows', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const scenes = page.getByRole('group', { name: 'Scény podle projektů' });
+  await expect(scenes.getByRole('button')).toHaveCount(4);
+  await expect(scenes.getByRole('button', { name: 'Rozcestník' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+
+  await scenes.getByRole('button', { name: 'Agent' }).click();
+  const cta = page.getByRole('link', { name: 'Vyzkoušet projekt Agent pod kontrolou' });
+  await expect(cta).toHaveAttribute('href', '#/agent');
+
+  // Jump to the end of the scene: the carousel moves on to the next project.
+  await page.evaluate(() => {
+    for (const a of document.getAnimations()) {
+      if (a.effect?.getTiming().iterations !== Infinity) a.finish();
+    }
+  });
+  await expect(scenes.getByRole('button', { name: 'Lokálně' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await page.getByRole('link', { name: 'Vyzkoušet projekt Lokálně' }).click();
+  await expect(page).toHaveURL(/#\/local$/);
 });
 
 test('every route renders in the dark theme', async ({ browser }) => {

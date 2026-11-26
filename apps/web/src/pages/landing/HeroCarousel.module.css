@@ -55,10 +55,9 @@
   aspect-ratio: 400 / 180;
 }
 
-.svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+.scene {
+  position: absolute;
+  inset: 0;
 }
 
 /* Pause / play mark: only on hover and focus, and whenever the scene stands still. */
@@ -144,78 +143,94 @@
   opacity: 0;
 }
 
-/* Ambient loops: stars, clouds, server LEDs, blinking eyes. */
-.stars {
-  opacity: var(--scene-star-opacity);
-}
-
-.twinkle {
-  animation: twinkle 3.2s steps(1) infinite;
-}
-
-@keyframes twinkle {
-  50% {
-    opacity: 0.25;
-  }
-}
-
-.cloud {
-  animation: drift 120s linear infinite;
-}
-
-@keyframes drift {
-  from {
-    transform: translateX(calc(-40px - var(--x0)));
-  }
-  to {
-    transform: translateX(calc(440px - var(--x0)));
-  }
-}
-
-.led {
-  animation: led 1.6s steps(1) infinite;
-}
-
-@keyframes led {
-  50% {
-    opacity: 0.2;
-  }
-}
-
-.eyelid {
-  opacity: 0;
-  animation: blink 4.6s steps(1) infinite;
-}
-
-@keyframes blink {
-  0%,
-  93% {
-    opacity: 0;
-  }
-  94%,
-  97% {
-    opacity: 1;
-  }
-}
-
-.windowGlow {
-  opacity: calc(var(--scene-window-glow-opacity) * 0.25);
-}
-
-.domeFill {
-  fill-opacity: 0.14;
-}
-
 .hero[data-paused] * {
   animation-play-state: paused !important;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .twinkle,
-  .cloud,
-  .led,
-  .eyelid {
-    animation: none;
+/* Under the captions: one button per project scene, and the way into it. */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2) calc(var(--space-1) + 3px);
+  border: 0;
+  background: transparent;
+  color: var(--px-steel-4);
+  font-family: var(--font-pixel);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--px-steel-1);
+}
+
+.tab svg {
+  display: block;
+}
+
+.tab:hover {
+  color: var(--px-white);
+  box-shadow: inset 0 0 0 1px var(--px-steel-3);
+}
+
+.tab[aria-pressed='true'] {
+  background: var(--px-steel-0);
+  color: var(--px-white);
+  box-shadow:
+    inset 0 0 0 1px var(--accent-2),
+    inset 0 -3px 0 0 color-mix(in srgb, var(--accent-2) 35%, transparent);
+}
+
+.tab:focus-visible {
+  outline: 3px solid var(--px-glow-1);
+  outline-offset: 2px;
+}
+
+/* Fills while the scene plays; the scene timeline drives it, so pause stops it too. */
+.progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--accent-2);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.hero[data-static] .progress {
+  display: none;
+}
+
+.cta {
+  white-space: nowrap;
+}
+
+.hero[data-accent] .cta {
+  background: var(--accent-2);
+  color: var(--px-ink-0);
+}
+
+.hero[data-accent] .cta:hover {
+  background: var(--accent-3);
+}
+
+/* Labels under the props would overlap on a phone; the captions tell the story there. */
+@media (max-width: 36rem) {
+  .places {
+    display: none;
   }
 }
 

@@ -459,18 +459,57 @@ export const cs = {
     lead: 'Interaktivní ukázky, jak používat AI chytře a bezpečně: s ohledem na soukromí, lokálně a pod kontrolou pravidel.',
     facts: ['Běží v prohlížeči', 'Bez účtu a API klíče', 'Zdarma'],
     hero: {
-      captions: [
-        'Vítejte v laboratoři bezpečné AI.',
-        'Osobní údaje zakryjeme dřív, než odejdou do AI.',
-        'Odpověď hlídají pravidla. Podvržené pokyny neprojdou.',
-        'A citlivá data zůstanou u vás.',
-      ],
-      places: { device: 'Vaše zařízení', guard: 'Ochrana', model: 'AI model' },
-      description:
-        'Animace: dopis s osobními údaji vyjde z domu. Ochrana mu údaje zakryje a pošle ho k AI. Odpověď cestou zpět zkontroluje, odrazí podvržený pokyn a údaje zase doplní. Citlivá data zůstávají doma.',
       pause: 'Pozastavit animaci',
       play: 'Přehrát animaci',
+      scenesLabel: 'Scény podle projektů',
+      cta: 'Vyzkoušet',
+      ctaProject: (title: string) => `projekt ${title}`,
     },
+    scenes: {
+      intake: {
+        captions: [
+          'Máte nápad. Má to vůbec být AI?',
+          'Pravidla zkusí nejdřív nejjednodušší cestu…',
+          '…a tady stačí obyčejný výpočet.',
+        ],
+        places: { post: 'Rozcestník', stop: 'Zakázáno', noAi: 'Bez AI', ai: 'AI' },
+        description:
+          'Animace: nápad dojde k rozcestníku. Cedule „AI“ se přeškrtne, rozsvítí se cedule „Bez AI“ a nápad dojde k domku, kde úlohu vyřeší kalkulačka.',
+      },
+      pii: {
+        captions: [
+          'Dopis s osobními údaji míří k AI.',
+          'Brána údaje zakryje dřív, než odejdou.',
+          'Odpověď se vrátí a údaje se doplní až u vás.',
+        ],
+        places: { device: 'Vaše zařízení', guard: 'Ochrana', model: 'AI model' },
+        description:
+          'Animace: dopis s osobními údaji vyjde z domu. Brána mu údaje zakryje a pošle ho k AI. Odpověď se vrátí a údaje se doplní až doma.',
+      },
+      agent: {
+        captions: [
+          'AI agent sám hledá a počítá…',
+          '…ale každý krok hlídají pravidla.',
+          'O e-mailu rozhoduje člověk.',
+        ],
+        places: { archive: 'Fondy', calc: 'Výpočet', mail: 'E-mail', human: 'Člověk' },
+        description:
+          'Animace: robot chodí mezi archivem fondů, kalkulačkou a schránkou. Z archivu vyskočí skřítek s podvrženým pokynem a štít pravidel ho odrazí. Koncept e-mailu robot předá člověku, který ho schválí.',
+      },
+      local: {
+        captions: [
+          'Trénink z hodinek…',
+          '…vysvětlí AI přímo ve vašem počítači.',
+          'Ven neodešlo nic: 0 požadavků.',
+        ],
+        places: { device: 'Váš počítač', route: 'Trasa', cloud: 'AI v cloudu' },
+        description:
+          'Animace: běžec doběhne domů, začátek trasy u domu zakryje mlha a hodinky předají čísla počítači pod kopulí, kde je vysvětlí AI. Anténa na střeše ukazuje nulu: ven nic neodešlo a AI v cloudu nedostala nic.',
+      },
+    } satisfies Record<
+      ModuleId,
+      { captions: string[]; places: Record<string, string>; description: string }
+    >,
     galleryHeading: 'Projekty',
     galleryLead:
       'Každý projekt odpovídá na jednu otázku, kterou si položit, než AI nasadíte. Další přibudou.',
