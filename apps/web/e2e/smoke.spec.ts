@@ -390,7 +390,10 @@ test('local coach analyses the sample week in the browser and sends nothing afte
   await expect(page.getByTestId('coach-template')).toContainText('Za týden: 3 aktivity');
   await expect(page.getByTestId('network-after-file')).toHaveText('0');
 
-  await page.getByRole('button', { name: /Intervaly FIT/ }).click();
+  await page
+    .getByRole('list', { name: 'Načtené aktivity' })
+    .getByRole('button', { name: /^Intervaly/ })
+    .click();
   await expect(page.getByTestId('metrics')).toContainText('7,1 km');
   expect(after).toEqual([]);
 });

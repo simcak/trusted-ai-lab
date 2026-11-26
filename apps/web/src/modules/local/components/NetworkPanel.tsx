@@ -1,39 +1,24 @@
+import machine from '../../../components/Machine/machine.module.css';
 import { cs } from '../../../i18n/cs.ts';
 import type { NetworkPhase, NetworkSnapshot } from '../network/network-monitor.ts';
 import styles from '../local.module.css';
 
 const PHASES: NetworkPhase[] = ['page', 'model', 'afterFile'];
 
+/** Under the hood: every request of the page by phase, with the full list. */
 export function NetworkPanel({ snapshot }: { snapshot: NetworkSnapshot }) {
   const t = cs.local.network;
-  const after = snapshot.counts.afterFile;
-  const chosen = snapshot.fileSelectedAt !== undefined;
   return (
-    <section
-      className={styles.section}
-      aria-labelledby="network-heading"
-      data-testid="network-panel"
-    >
-      <h2 id="network-heading">{t.heading}</h2>
+    <div className={machine.section} data-testid="network-panel">
       <p>{t.intro}</p>
-
-      <div className={`${styles.counter} ${chosen && after === 0 ? styles.counterZero : ''}`}>
-        <span className={styles.groupLabel}>{t.counterLabel}</span>
-        <strong className={styles.counterValue} data-testid="network-after-file">
-          {chosen ? after : '–'}
-        </strong>
-        <span>{!chosen ? t.beforeFile : after === 0 ? t.zero : t.nonZero}</span>
-      </div>
-
       <ol className={styles.phases}>
         {PHASES.map((phase) => (
           <li key={phase} className={styles.phase}>
             <strong>{t.phases[phase]}</strong>: {t.requests(snapshot.counts[phase])}
-            <span className={styles.small}>{t.phaseHints[phase]}</span>
+            <span className={machine.small}>{t.phaseHints[phase]}</span>
           </li>
         ))}
       </ol>
-
       {snapshot.entries.length > 0 && (
         <details className={styles.details}>
           <summary>{t.listLabel}</summary>
@@ -50,7 +35,7 @@ export function NetworkPanel({ snapshot }: { snapshot: NetworkSnapshot }) {
           </ul>
         </details>
       )}
-      <p className={styles.small}>{t.caveat}</p>
-    </section>
+      <p className={machine.small}>{t.caveat}</p>
+    </div>
   );
 }

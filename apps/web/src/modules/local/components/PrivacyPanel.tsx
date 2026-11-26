@@ -1,3 +1,5 @@
+import { InfoTip } from '../../../components/InfoTip/InfoTip.tsx';
+import machine from '../../../components/Machine/machine.module.css';
 import { cs } from '../../../i18n/cs.ts';
 import { distanceMeters } from '../activity/metrics.ts';
 import { MAX_PRIVACY_RADIUS_M, type ProtectedActivity } from '../activity/privacy.ts';
@@ -18,6 +20,7 @@ interface Props {
 /** Length of a trimmed part, including the step to the first (or from the last) kept point. */
 const trimmedLength = (points: ParsedActivity['points']) => distanceMeters(points) ?? 0;
 
+/** Step 1: the route with its start and finish hidden in fog, and the size of the fog. */
 export function PrivacyPanel({
   original,
   label,
@@ -41,17 +44,15 @@ export function PrivacyPanel({
   else status = t.trimmed(formatDistance(start), formatDistance(end));
 
   return (
-    <section className={styles.section} aria-labelledby="privacy-heading">
-      <h2 id="privacy-heading">{t.heading}</h2>
-      <p>{t.intro}</p>
-
+    <div className={styles.route}>
       {hasGps && (
-        <div className={styles.mapWrap}>
+        <>
           <RouteMap
             kept={kept}
             removed={[p.removed.start, p.removed.end]}
             maxHr={maxHr}
             label={t.mapLabel(label)}
+            radius={radius}
           />
           <label className={styles.slider}>
             <span>
@@ -66,17 +67,21 @@ export function PrivacyPanel({
               onChange={(e) => onRadius(Number(e.currentTarget.value))}
             />
           </label>
-        </div>
+        </>
       )}
-      <p role="status" data-testid="privacy-status">
-        {status}
-      </p>
-
-      <p className={styles.small}>
-        {original.droppedMetadata.length === 0
-          ? t.droppedNone
-          : `${t.dropped} ${original.droppedMetadata.map((k) => t.metadata[k]).join(', ')}.`}
-      </p>
-    </section>
+      <div className={styles.status}>
+        <p role="status" data-testid="privacy-status" data-off={radius === 0 ? '' : undefined}>
+          {status}
+        </p>
+        <InfoTip label={cs.local.machine.droppedTip} title={cs.local.machine.droppedTip}>
+          <p>{t.intro}</p>
+          <p className={machine.small}>
+            {original.droppedMetadata.length === 0
+              ? t.droppedNone
+              : `${t.dropped} ${original.droppedMetadata.map((k) => t.metadata[k]).join(', ')}.`}
+          </p>
+        </InfoTip>
+      </div>
+    </div>
   );
 }

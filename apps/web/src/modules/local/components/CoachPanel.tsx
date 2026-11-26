@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { cs } from '../../../i18n/cs.ts';
 import type { CoachInput } from '../activity/summary.ts';
 import { MAX_QUESTION_LENGTH } from '../coach/prompt.ts';
-import { COACH_MODELS, downloadBytes, WEBLLM_VERSION, type CoachModelKey } from '../coach/model.ts';
+import machine from '../../../components/Machine/machine.module.css';
+import { COACH_MODELS, downloadBytes, type CoachModelKey } from '../coach/model.ts';
 import type { useCoach } from '../coach/useCoach.ts';
 import { formatBytes, formatDecimal } from '../format.ts';
 import styles from '../local.module.css';
@@ -27,10 +28,7 @@ export function CoachPanel({ coach, input, template }: Props) {
   };
 
   return (
-    <section className={styles.section} aria-labelledby="coach-heading">
-      <h2 id="coach-heading">{t.heading}</h2>
-      <p>{t.intro}</p>
-
+    <div className={styles.coach}>
       {gpu === null && <p role="status">{t.checking}</p>}
 
       {gpu?.status === 'unsupported' && (
@@ -43,29 +41,29 @@ export function CoachPanel({ coach, input, template }: Props) {
       {gpu?.status === 'ok' && (
         <div className={styles.coachControls}>
           <p className={styles.small}>{gpu.label ? t.gpu(gpu.label) : t.gpuUnknown}</p>
-          <fieldset className={styles.modelChoice} disabled={load.status === 'loading'}>
-            <legend className={styles.groupLabel}>{t.modelLegend}</legend>
-            {(Object.keys(COACH_MODELS) as CoachModelKey[]).map((key) => {
-              const variant = COACH_MODELS[key].variants.f16;
-              return (
-                <label key={key} className={styles.modelOption}>
-                  <input
-                    type="radio"
-                    name="coach-model"
-                    checked={coach.modelKey === key}
-                    onChange={() => coach.setModelKey(key)}
-                  />
-                  <span>
-                    <strong>
-                      {t.models[key].label} · {COACH_MODELS[key].name}
-                    </strong>{' '}
-                    <span className={styles.small}>
-                      {t.models[key].detail} · {formatBytes(downloadBytes(variant))}
+          <fieldset className={machine.group} disabled={load.status === 'loading'}>
+            <legend className={machine.groupLabel}>{t.modelLegend}</legend>
+            <div className={machine.choices}>
+              {(Object.keys(COACH_MODELS) as CoachModelKey[]).map((key) => {
+                const variant = COACH_MODELS[key].variants.f16;
+                return (
+                  <label key={key} className={machine.tile}>
+                    <input
+                      type="radio"
+                      name="coach-model"
+                      checked={coach.modelKey === key}
+                      onChange={() => coach.setModelKey(key)}
+                    />
+                    <span className={machine.tileLabel}>
+                      {t.models[key].label} · {formatBytes(downloadBytes(variant))}
                     </span>
-                  </span>
-                </label>
-              );
-            })}
+                    <span className={styles.small}>
+                      {COACH_MODELS[key].name}: {t.models[key].detail}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
           </fieldset>
 
           {!ready && load.status !== 'loading' && (
@@ -184,17 +182,6 @@ export function CoachPanel({ coach, input, template }: Props) {
           <p>{template.join(' ')}</p>
         </div>
       )}
-
-      {gpu?.status === 'ok' && coach.cached[coach.modelKey] && load.status !== 'loading' && (
-        <button
-          type="button"
-          className={styles.linkButton}
-          onClick={() => void coach.deleteModel()}
-        >
-          {t.delete}
-        </button>
-      )}
-      <p className={styles.small}>{t.credits(WEBLLM_VERSION)}</p>
-    </section>
+    </div>
   );
 }

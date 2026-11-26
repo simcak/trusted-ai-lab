@@ -1062,7 +1062,6 @@ export const cs = {
       title: 'Rozhovor',
     },
     result: {
-      heading: 'Výsledek',
       empty: 'Zatím nic neběželo.',
       replayLabel: 'Nahraný běh',
       liveLabel: 'Živý běh s vaším klíčem',
@@ -1126,11 +1125,36 @@ export const cs = {
   },
 
   local: {
+    machine: {
+      label: 'Trenér, který běží jen u vás',
+      samplesLabel: 'Trénink',
+      samplesTip: 'O ukázkách',
+      own: 'Vlastní soubor',
+      ownTip: 'Vlastní záznam z hodinek',
+      ownHint:
+        'GPX, TCX nebo FIT z hodinek či sportovní aplikace. Můžete ho sem i přetáhnout. Soubor čte jen tato stránka, nikam se nenahrává.',
+      steps: { route: 'Trasa', numbers: 'Čísla', payload: 'Co uvidí AI', coach: 'AI trenér' },
+      empty: 'Vyberte trénink nahoře.',
+      stops: { code: 'Kód', device: 'Váš počítač' },
+      led: 'Odesláno po výběru souboru',
+      ledTip: 'Jak to víme',
+      droppedTip: 'Co jsme ze souboru zahodili',
+      settings: 'Tep',
+      settingsTitle: 'Vaše hodnoty tepu',
+      metricTip: (label: string) => `${label}: co to je?`,
+      showMessage: 'Ukázat přesnou zprávu',
+      week: 'Týden',
+      disputed: 'sporný ukazatel',
+      acwrTip: 'Co je ACWR',
+    },
+    details: {
+      network: 'Síťová aktivita',
+      prompt: 'Pokyny pro model',
+      sources: 'Zdroje',
+      model: 'AI model v prohlížeči',
+      trace: 'Záznam kroků',
+    },
     pick: {
-      heading: '1. Vyberte aktivitu',
-      intro:
-        'Zkuste ukázku, nebo nahrajte vlastní záznam z hodinek či sportovní aplikace (GPX, TCX nebo FIT).',
-      samplesLabel: 'Ukázky',
       samples: {
         run: { title: 'Večerní běh', detail: 'GPX · 6 km' },
         ride: { title: 'Vyjížďka na kole', detail: 'TCX · 25 km' },
@@ -1139,10 +1163,6 @@ export const cs = {
       week: 'Celý týden (všechny tři)',
       syntheticNote:
         'Ukázky jsou syntetické: smyšlený sportovec, smyšlené hodinky a trasy, které nesledují ulice.',
-      drop: 'Přetáhněte sem soubor, nebo',
-      browse: 'ho vyberte z počítače',
-      dropHint:
-        'Můžete jich vybrat i víc najednou. Soubor čte jen tato stránka, nikam se nenahrává.',
       loadedLabel: 'Načtené aktivity',
       remove: (name: string) => `Odebrat ${name}`,
       reading: 'Čtu soubor…',
@@ -1157,7 +1177,6 @@ export const cs = {
     },
     sports: { run: 'běh', ride: 'kolo', other: 'jiný sport' } satisfies Record<Sport, string>,
     privacy: {
-      heading: '2. Ochrana polohy',
       intro:
         'Začátek a konec trasy často prozradí, kde bydlíte. Proto je stránka ořízne hned po načtení, dřív než cokoli spočítá.',
       radius: 'Velikost privacy zone',
@@ -1169,7 +1188,6 @@ export const cs = {
       noGps: 'Soubor nemá polohu GPS, není co skrývat.',
       mapLabel: (name: string) =>
         `Trasa: ${name}. Vybledlé úseky jsou skryté, barva čáry ukazuje tepovou zónu.`,
-      hidden: 'skryto',
       dropped: 'Ze souboru stránka zahodila:',
       droppedNone: 'Soubor neobsahoval žádné údaje o zařízení.',
       metadata: {
@@ -1182,9 +1200,6 @@ export const cs = {
       } satisfies Record<MetadataKind, string>,
     },
     metrics: {
-      heading: '3. Co spočítal kód',
-      intro:
-        'Tahle čísla počítají obyčejné funkce v JavaScriptu, žádná AI. Jsou přesná, opakovatelná a dají se otestovat.',
       distance: { label: 'Vzdálenost', hint: 'Součet vzdáleností mezi body GPS.' },
       moving: {
         label: 'Čas v pohybu',
@@ -1202,7 +1217,6 @@ export const cs = {
       noHr: 'Soubor nemá tep, zóny a TRIMP proto chybí.',
     },
     hr: {
-      heading: 'Tepové zóny',
       intro:
         'Zóny jsou pásma podle procent maximálního tepu (50–60–70–80–90 %). Zóna 2 je klidná vytrvalost, zóna 5 je naplno.',
       settings: 'Vaše hodnoty',
@@ -1241,18 +1255,14 @@ export const cs = {
       chartLabel: 'TRIMP po dnech',
     },
     payload: {
-      heading: '4. Co uvidí AI',
       intro:
         'Model nedostane váš soubor. Dostane jen tento souhrn: žádné souřadnice, žádné časy, žádné zařízení ani název aktivity. Souhrn skládá kód z ověřeného schématu, nic jiného se do něj nedostane.',
       file: 'Váš soubor',
       fileDetail: (points: string) => `${points} bodů trasy`,
       model: 'Model dostane',
       modelDetail: 'souhrnná čísla, žádná poloha ani čas',
-      jsonLabel: 'Přesně tohle jde do modelu (u vlastní otázky se přidá ještě ona)',
-      promptLabel: 'Pokyny pro model (systémový prompt)',
     },
     coach: {
-      heading: '5. AI trenér',
       intro:
         'Malý jazykový model se jednou stáhne do prohlížeče a pak běží na grafické kartě vašeho počítače. Bez účtu, bez API klíče, zdarma.',
       checking: 'Zjišťuji, jestli prohlížeč umí WebGPU…',
@@ -1327,10 +1337,8 @@ export const cs = {
       noHr: 'Bez tepu nejde říct, jak náročný trénink byl.',
     },
     network: {
-      heading: '6. Síťová aktivita',
       intro:
         'Tohle je důkaz. Prohlížeč zapisuje každý síťový požadavek stránky a tady je vidíte všechny.',
-      counterLabel: 'Od výběru souboru odešlo požadavků',
       beforeFile: 'Zatím jste nevybrali žádnou aktivitu.',
       zero: 'Nula. Vaše data neopustila zařízení.',
       nonZero: 'Po výběru souboru proběhly požadavky. Jsou vypsané níže, ať vidíte, kam šly.',
@@ -1360,7 +1368,6 @@ export const cs = {
         'Malý model píše česky s chybami a může si vymýšlet. Neslouží jako trenér ani lékař.',
       ],
     },
-    traceSummary: 'Pod kapotou: záznam kroků',
     traceTitle: 'Záznam kroků',
   },
 
