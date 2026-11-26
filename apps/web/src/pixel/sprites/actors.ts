@@ -230,3 +230,21 @@ export const key = defineSprite({
     ['.ooo.......', 'olllo......', 'ol.looooooo', 'ol.ljjjjjjo', 'olllooojojo', '.ooo...o.o.'],
   ],
 });
+
+/** Chequered flag: the end of a run. */
+export const flag = defineSprite({
+  palette: P,
+  frames: [
+    [
+      'ooooooooo',
+      'okwkwkwko',
+      'owkwkwkwo',
+      'okwkwkwko',
+      'ooooooooo',
+      'o........',
+      'o........',
+      'o........',
+      'o........',
+    ],
+  ],
+});

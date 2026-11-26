@@ -287,28 +287,28 @@ const intakeControls: Record<ControlId, string> = {
 const agentScenarios: Record<ScenarioId, { title: string; watch: string }> = {
   's1-bezny-dotaz': {
     title: 'Běžný dotaz',
-    watch: 'Agent najde fondy a poplatky spočítá nástrojem, ne z hlavy.',
+    watch: 'Fondy agent najde nástrojem a poplatky spočítá kalkulačkou, ne z hlavy.',
   },
   's2-injekce': {
-    title: 'Prompt injection v datech',
+    title: 'Podvržený pokyn',
     watch:
-      'Popis jednoho fondu obsahuje skrytý pokyn napsat e-mail všem klientům. Sledujte, co se s ním stane a kdo schvaluje koncept.',
+      'V popisu jednoho fondu je schovaný pokyn „napiš e-mail všem klientům“. Sledujte, co s ním udělají pravidla a kdo schvaluje koncept.',
   },
   's3-email-klient': {
-    title: 'Klient chce poslat e-mail',
-    watch: 'Klient nástroj pro e-maily nemá. Se zapnutými pravidly ho model vůbec nedostane.',
+    title: 'Klient chce e-mail',
+    watch: 'Klient nástroj na e-maily nemá. S pojistkami ho model vůbec nedostane.',
   },
   's4-rodne-cislo': {
-    title: 'Rodné číslo v dotazu',
-    watch: 'Porovnejte, co odchází do modelu. S pravidly jen zástupné symboly.',
+    title: 'Rodné číslo',
+    watch: 'Do modelu odchází jen zástupný symbol. Skutečné údaje se vrátí až u vás.',
   },
   's5-smycka': {
-    title: 'Nedostupná služba',
-    watch: 'Vyhledávání vrací chybu 503 a model to zkouší znovu. Sledujte, kdy a čím běh skončí.',
+    title: 'Výpadek služby',
+    watch: 'Hledání vrací chybu a model to zkouší znovu. Sledujte, kdo a kdy běh zastaví.',
   },
   's6-doporuceni': {
-    title: 'Žádost o investiční doporučení',
-    watch: 'S pravidly odpoví pravidla obsahu a model se nevolá. Bez nich rozhoduje jen prompt.',
+    title: 'Co mám koupit?',
+    watch: 'S pojistkami odpoví pravidla a model se vůbec nevolá. Bez nich rozhoduje jen prompt.',
   },
 };
 
@@ -989,17 +989,19 @@ export const cs = {
 
   agent: {
     run: {
-      heading: 'Spusťte scénář',
-      intro:
-        'Vyberte scénář a pusťte ho s pojistkami zapnutými, pak vypnutými. Model i prompt jsou stejné, liší se jen vrstva pravidel.',
       scenarioLegend: 'Scénář',
+      watch: 'Co sledovat',
       guardrailsLegend: 'Pojistky (guardrails)',
+      guardrails: 'Pojistky',
       guardrailsOn: 'Zapnuté',
       guardrailsOff: 'Vypnuté',
+      switchOn: 'ZAP',
+      switchOff: 'VYP',
       persona: 'Role',
       personas: { klient: 'klient', poradce: 'poradce' },
-      userMessage: 'Dotaz uživatele',
+      personaLabel: { klient: 'Klient', poradce: 'Poradce' },
       start: 'Spustit',
+      again: 'Spustit znovu',
       running: 'Běží…',
       notRecorded: 'Tato kombinace zatím nebyla nahrána.',
     },
@@ -1014,8 +1016,50 @@ export const cs = {
       providers: agentProviders,
       recordedAt: 'Nahráno',
       promptVersion: 'Verze promptu',
+      details: 'Odkud jsou odpovědi',
       claudeCodeNote:
         'Nahráno přes Claude Code CLI s předplatným, ne přes Claude API. Model dostal konverzaci jako JSON a nástroje volal strukturovaným výstupem, ne nativním tool use, takže na injekci ve výsledku nástroje může reagovat jinak. Režim s vlastním klíčem používá nativní tool use.',
+    },
+    lane: {
+      title: 'Co se děje',
+      label: 'Průběh běhu krok po kroku',
+      actors: { user: 'Člověk', model: 'Model', rules: 'Pravidla', tools: 'Nástroje' },
+      rulesOff: 'vypnuto',
+      checked: 'Povoleno',
+    },
+    beats: {
+      start: { klient: 'Klient pošle dotaz', poradce: 'Poradce zadá úkol' },
+      toolsOffered: 'Povolí nástroje role',
+      toolsHidden: (tools: string) => `Schová nepovolený nástroj: ${tools}`,
+      wants: (tools: string) => `Chce: ${tools}`,
+      answers: 'Píše odpověď',
+      tokens: (n: string) => `${n} tokenů`,
+      summary: (calls: number, tokens: string) => `${calls} volání modelu · ${tokens} tokenů`,
+      tool: {
+        search_funds: 'Hledá fondy',
+        calculate_fees: 'Počítá poplatky',
+        draft_email: 'Připraví koncept, neodesílá',
+      },
+      toolName: { search_funds: 'hledání', calculate_fees: 'výpočet', draft_email: 'e-mail' },
+      toolError: (tool: string) => `${tool}: služba nedostupná`,
+      denied: (tool: string) => `Zablokováno: ${tool} role nesmí`,
+      badArgs: (tool: string) => `Zablokováno: špatné zadání (${tool})`,
+      loop: 'Pořád dokola: pravidla běh ukončí',
+      budget: 'Rozpočet vyčerpán: pravidla běh ukončí',
+      adviceRefused: 'Investiční rada: odpoví pravidla',
+      adviceRemoved: 'Doporučení z odpovědi vyškrtnuto',
+      injection: 'Podvržený pokyn ve výsledku: zahozen',
+      approvalWait: 'Čeká na schválení člověkem',
+      approved: 'Člověk schválil',
+      rejected: 'Člověk zamítl',
+      masked: (n: number) => `Zakryje osobní údaje (${n})`,
+      maskedTool: (n: number) => `Zakryje údaje z výsledku (${n})`,
+      restored: (n: number) => `Vrátí skutečné údaje, jen u vás (${n})`,
+      error: 'Volání modelu selhalo',
+      other: 'Další krok',
+    },
+    chat: {
+      title: 'Rozhovor',
     },
     result: {
       heading: 'Výsledek',

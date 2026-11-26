@@ -264,9 +264,15 @@ test('agent page works offline: scenarios, rules and the BYOK panel without any 
     if (new URL(req.url()).hostname !== 'localhost') external.push(req.url());
   });
   await page.goto('./#/agent?scenario=s4-rodne-cislo');
-  await expect(page.getByRole('radio', { name: /Rodné číslo v dotazu/ })).toBeChecked();
+  await expect(page.getByRole('button', { name: 'Rodné číslo', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   await expect(page.getByText('785215/3650')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Pravidla' })).toBeVisible();
+  await expect(page.getByRole('switch', { name: 'Pojistky' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
   await expect(page.getByTestId('byok-panel')).toBeVisible();
   if (recordingFiles.length === 0) {
     await expect(page.getByTestId('agent-not-recorded')).toBeVisible();
@@ -298,7 +304,9 @@ test('every recorded scenario replays to an answer without errors or network cal
       await page.waitForTimeout(100);
     }
     await expect(page.getByTestId('agent-error')).toHaveCount(0);
-    await expect(page.getByTestId('trace-panel').getByTestId('trace-event').first()).toBeVisible();
+    // The lane shows the run; the full trace waits under the hood.
+    await expect(page.getByTestId('agent-beat').last()).toBeVisible();
+    await expect(page.getByTestId('trace-panel').getByTestId('trace-event')).not.toHaveCount(0);
   }
   expect(external).toEqual([]);
 });

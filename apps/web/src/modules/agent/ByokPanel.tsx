@@ -9,6 +9,8 @@ import {
 import type { LlmProvider } from '@trusted-ai-lab/llm-core';
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { cs } from '../../i18n/cs.ts';
+import { Sprite } from '../../pixel/Sprite.tsx';
+import { key as keyIcon } from '../../pixel/sprites/actors.ts';
 import styles from './agent.module.css';
 import { createByokProvider } from './byok.ts';
 import { FUNDS } from './funds.ts';
@@ -82,7 +84,10 @@ export function ByokPanel({ running, start }: Props) {
 
   return (
     <details className={styles.byok} data-testid="byok-panel">
-      <summary>{t.summary}</summary>
+      <summary>
+        <Sprite sprite={keyIcon} scale={2} className={styles.summaryIcon} />
+        {t.summary}
+      </summary>
       <p>{t.intro}</p>
       <ul className={styles.warnings}>
         {t.warnings.map((w) => (
