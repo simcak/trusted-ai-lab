@@ -4,13 +4,14 @@ import { cs } from '../../i18n/cs.ts';
 import type { Flow } from './flow.ts';
 import { replySegments } from './segments.ts';
 import { SegmentText } from './SegmentText.tsx';
+import machine from '../../components/Machine/machine.module.css';
 import styles from './pii.module.css';
 
 /** Panel 3: the (simulated) reply comes back with placeholders and is restored in the browser. */
 export function RoundTrip({ flow }: { flow: Flow }) {
   const t = cs.pii.reversible;
   if (flow.entries.length === 0) {
-    return <p className={styles.muted}>{cs.pii.machine.noReply}</p>;
+    return <p className={machine.muted}>{cs.pii.machine.noReply}</p>;
   }
   return (
     <>
@@ -34,7 +35,7 @@ export function RoundTrip({ flow }: { flow: Flow }) {
         variant="restored"
         testId="pii-flow-restored"
       />
-      <p className={styles.small}>{cs.pii.machine.restoredCaption}</p>
+      <p className={machine.small}>{cs.pii.machine.restoredCaption}</p>
       {flow.unknown.length > 0 && <p role="alert">{t.unknown(flow.unknown.join(', '))}</p>}
     </>
   );

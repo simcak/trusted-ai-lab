@@ -1,0 +1,77 @@
+/* Ambient loops shared by the landing scenes: stars, clouds, server LEDs, blinking eyes. */
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.stars {
+  opacity: var(--scene-star-opacity);
+}
+
+.twinkle {
+  animation: twinkle 3.2s steps(1) infinite;
+}
+
+@keyframes twinkle {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.cloud {
+  animation: drift 120s linear infinite;
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(calc(-40px - var(--x0)));
+  }
+  to {
+    transform: translateX(calc(440px - var(--x0)));
+  }
+}
+
+.led {
+  animation: led 1.6s steps(1) infinite;
+}
+
+@keyframes led {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.eyelid {
+  opacity: 0;
+  animation: blink 4.6s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%,
+  93% {
+    opacity: 0;
+  }
+  94%,
+  97% {
+    opacity: 1;
+  }
+}
+
+.windowGlow {
+  opacity: calc(var(--scene-window-glow-opacity) * 0.25);
+}
+
+.domeFill {
+  fill-opacity: 0.14;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .twinkle,
+  .cloud,
+  .led,
+  .eyelid {
+    animation: none;
+  }
+}

@@ -1,229 +1,513 @@
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-7);
-}
+/*
+ * Rozcestník: a chat without typing (left) and the recommendation (right). One staged run (ms):
+ * the visitor's idea 0 · the bot's facts from 450 · verdict 1350 · rules light up from 1450 ·
+ * result card from 1600 (ladder rungs one by one, then the tiles). Reduced motion shows the end
+ * state (global.css zeroes durations and delays).
+ */
 
-.notice {
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-success-soft);
-  border-radius: var(--radius-md);
-}
-
-/* Presets on top; form and result side by side. On narrow screens the result comes
-   before the form, so a click on a preset shows its effect without scrolling. */
-.workspace {
+.machine {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  grid-template-areas:
-    'presets presets'
-    'form result';
   gap: var(--space-5) var(--space-6);
   align-items: start;
 }
 
 @media (max-width: 64rem) {
-  .workspace {
+  .machine {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      'presets'
-      'result'
-      'form';
   }
 }
 
-.presets {
-  grid-area: presets;
+/* ---- Chat ---- */
+
+.chatBody {
+  padding: var(--space-4) var(--space-3);
+}
+
+.messages {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.message {
+  display: flex;
+  align-items: flex-end;
   gap: var(--space-2);
 }
 
-.presets .groupLabel {
-  width: 100%;
+.message[data-from='you'] {
+  flex-direction: row-reverse;
 }
 
-.presets button[aria-pressed='true'] {
+.avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+}
+
+.avatar svg {
+  display: block;
+}
+
+.bubble {
+  --edge: var(--color-frame);
+  position: relative;
+  min-width: 0;
+  max-width: min(32rem, 100%);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  line-height: 1.5;
+  box-shadow:
+    0 -2px 0 0 var(--edge),
+    0 2px 0 0 var(--edge),
+    -2px 0 0 0 var(--edge),
+    2px 0 0 0 var(--edge);
+}
+
+.bubble p {
+  margin: 0;
+}
+
+.bubble p + * {
+  margin-top: var(--space-2);
+}
+
+/* Pixel tail towards the speaker. */
+.bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  left: -8px;
+  width: 6px;
+  height: 6px;
+  background: var(--edge);
+  box-shadow: -2px 2px 0 0 var(--edge);
+}
+
+.message[data-from='you'] .bubble {
+  background: var(--px-sun-3);
+  color: var(--px-ink-0);
+}
+
+.message[data-from='you'] .bubble::after {
+  left: auto;
+  right: -8px;
+  box-shadow: 2px 2px 0 0 var(--edge);
+}
+
+:global(:root[data-theme='dark']) .message[data-from='you'] .bubble {
+  background: color-mix(in srgb, var(--px-sun-0) 55%, var(--color-surface));
+  color: var(--color-text);
+}
+
+.presetName {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-family: var(--font-pixel);
+  font-weight: 500;
+  font-size: var(--text-lg);
+}
+
+.reopen {
+  color: var(--color-text-muted);
+}
+
+/* Facts the rules see: one chip each, click to change. */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fact {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  margin: 1px;
+  padding: 0.1em 0.45em;
+  border: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px var(--color-frame),
+    inset 0 -2px 0 0 var(--color-frame-shade);
+}
+
+.fact:hover {
+  background: var(--color-accent-soft);
+}
+
+.fact[aria-pressed='true'] {
   background: var(--color-accent);
   color: var(--color-on-accent);
 }
 
-.formColumn {
-  grid-area: form;
+.fact[aria-pressed='true'] .factField {
+  color: inherit;
 }
 
-.formColumn > h2 {
-  font-size: var(--text-xl);
-}
-
-.groupLabel {
-  display: block;
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-sm);
-  font-weight: 700;
+.factField {
+  font-family: var(--font-pixel);
+  font-size: var(--text-xs);
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
   color: var(--color-text-muted);
 }
 
-.small {
-  display: block;
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
+/* One square per rule; the ones that applied light up one after another. */
+.ruleStrip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
-/* ── Form ─────────────────────────────────────────────────────────────────────── */
+.squares {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-width: 17rem;
+}
 
-.form {
+.squares span {
+  width: 6px;
+  height: 6px;
+  background: var(--color-border);
+}
+
+.squares span[data-on] {
+  background: var(--px-leaf-1);
+  box-shadow: 0 0 0 1px var(--px-leaf-0);
+  animation: light 160ms steps(2) backwards;
+  animation-delay: calc(var(--delay, 0ms) + var(--i, 0) * var(--stagger, 0ms));
+}
+
+:global(:root[data-theme='dark']) .squares span[data-on] {
+  background: var(--px-leaf-2);
+}
+
+@keyframes light {
+  from {
+    background: var(--color-border);
+    box-shadow: none;
+  }
+}
+
+/* Where a text field would be: the answers to pick. */
+.tray {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+/* Before the last answer, the right column waits. */
+.waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-7) var(--space-4);
+  border: 2px dashed var(--color-border);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.waiting p {
+  margin: 0;
+}
+
+.waitingProgress {
+  font-family: var(--font-pixel);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+/* ---- Recommendation ---- */
+
+.resultBody {
+  padding: var(--space-4);
+}
+
+.resultInner {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
 }
 
-.group {
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  animation: pop 280ms steps(3) backwards;
+  animation-delay: var(--start, 0ms);
+}
+
+.verdictIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 5.5rem;
+  height: 5.5rem;
+  background: var(--step-3);
+  box-shadow:
+    inset 0 -4px 0 0 var(--step-1),
+    0 0 0 var(--px) var(--color-frame);
+}
+
+:global(:root[data-theme='dark']) .verdictIcon {
+  background: color-mix(in srgb, var(--step-0) 45%, var(--color-surface));
+  box-shadow:
+    inset 0 -4px 0 0 var(--step-2),
+    0 0 0 var(--px) var(--color-frame);
+}
+
+.verdictText {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.verdictText h3 {
+  margin: 0;
+  font-size: var(--text-2xl);
+  line-height: 1.2;
+}
+
+.verdictText h3[data-blocked='true'] {
+  color: var(--color-danger);
+}
+
+.verdictText p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+}
+
+.humanTip {
+  align-self: flex-start;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+
+/* The ladder: simplest first. */
+.ladder {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 
-.group > h3 {
+.ladder > :first-child {
+  animation: pop 200ms steps(2) backwards;
+  animation-delay: calc(var(--start, 0ms) + 150ms);
+}
+
+.rungs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.25rem, 1fr));
+  gap: var(--space-2);
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.field {
+.rung {
+  --edge: var(--color-border);
+  position: relative;
+  display: flex;
+  min-width: 0;
+  background: var(--color-surface);
+  box-shadow: 0 0 0 2px var(--edge);
+  animation: rung-in 220ms steps(3) backwards;
+  animation-delay: calc(var(--start, 0ms) + 250ms + var(--i, 0) * 140ms);
+}
+
+@keyframes rung-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.rungBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-2) var(--space-1);
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+}
+
+button.rungBody {
+  cursor: pointer;
+}
+
+button.rungBody:hover {
+  background: var(--color-surface-muted);
+}
+
+.rungIcon {
+  display: grid;
+  place-items: center;
+  height: 1.75rem;
+}
+
+.rungIcon svg {
+  display: block;
+}
+
+.rungName {
+  font-family: var(--font-pixel);
+  font-size: var(--text-base);
+}
+
+.rungState {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.rung[data-state='excluded'] .rungIcon,
+.rung[data-state='excluded'] .rungName,
+.rung[data-state='needless'] .rungIcon,
+.rung[data-state='needless'] .rungName {
+  opacity: 0.45;
+}
+
+.rung[data-state='excluded'] .rungName {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+/* A pixel ✕ stamped over an excluded rung. */
+.rung[data-state='excluded']::after,
+.rung[data-state='blocked']::after {
+  content: '✕';
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  font-family: var(--font-pixel);
+  font-size: var(--text-lg);
+  line-height: 1;
+  color: var(--color-danger);
+  pointer-events: none;
+  animation: stamp 200ms steps(2) backwards;
+  animation-delay: calc(var(--start, 0ms) + 360ms + var(--i, 0) * 140ms);
+}
+
+.rung[data-state='needless'] {
+  box-shadow: none;
+  outline: 2px dashed var(--color-border);
+  outline-offset: -2px;
+}
+
+.rung[data-state='winner'] {
+  --edge: var(--step-0);
+  background: var(--step-3);
+  color: var(--px-ink-0);
+  box-shadow:
+    0 0 0 3px var(--edge),
+    0 0 14px 2px color-mix(in srgb, var(--step-1) 60%, transparent);
+}
+
+.rung[data-state='winner'] .rungState {
+  color: inherit;
+  font-weight: 700;
+}
+
+.rung[data-state='winner']::after {
+  content: '★';
+  position: absolute;
+  top: -0.7rem;
+  right: -0.4rem;
+  font-size: var(--text-xl);
+  line-height: 1;
+  color: var(--px-sun-1);
+  text-shadow: 0 1px 0 var(--px-ink-0);
+  animation: stamp 240ms steps(3) backwards;
+  animation-delay: calc(var(--start, 0ms) + 1150ms);
+}
+
+:global(:root[data-theme='dark']) .rung[data-state='winner'] {
+  --edge: var(--step-2);
+  background: color-mix(in srgb, var(--step-0) 50%, var(--color-surface));
+  color: var(--color-text);
+}
+
+.rung[data-state='blocked'] {
+  --edge: var(--px-ember-1);
+}
+
+.rung[data-state='blocked'] .rungIcon,
+.rung[data-state='blocked'] .rungName {
+  opacity: 0.4;
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+/* Three tiles: AI Act, data and controls, cost. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-3);
+}
+
+.tile {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   min-width: 0;
+  padding: var(--space-3);
+  background: var(--color-surface-muted);
+  box-shadow: inset 0 3px 0 0 var(--step-1);
+  animation: pop 260ms steps(3) backwards;
+  animation-delay: calc(var(--start, 0ms) + 1250ms + var(--i, 0) * 130ms);
+}
+
+.tile h4 {
   margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.legend {
-  padding: 0;
-  font-weight: 600;
-}
-
-.textarea {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font: inherit;
-  resize: vertical;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: var(--color-surface);
-  font-size: var(--text-sm);
-  cursor: pointer;
-}
-
-.chip:has(input:checked) {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-  font-weight: 600;
-}
-
-.chip:has(input:focus-visible) {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.chip input {
-  margin: 0;
-  accent-color: var(--color-accent);
-}
-
-/* ── Result ───────────────────────────────────────────────────────────────────── */
-
-.result {
-  grid-area: result;
-  position: sticky;
-  top: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
-}
-
-@media (max-width: 64rem) {
-  .result {
-    position: static;
-  }
-}
-
-.result > .groupLabel {
-  margin: 0;
-}
-
-.headline {
-  margin: 0;
-  font-size: var(--text-2xl);
-}
-
-.headline[data-blocked='true'] {
-  color: var(--color-danger);
-}
-
-.summary {
-  margin: 0;
-}
-
-.why {
-  padding: var(--space-3) var(--space-4);
-  border-left: 4px solid var(--color-accent);
-  background: var(--color-accent-soft);
-  border-radius: var(--radius-sm);
-}
-
-.why ul {
-  margin: var(--space-1) 0 0;
-  padding-left: var(--space-5);
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: var(--space-3);
-  margin-top: var(--space-2);
-}
-
-.card {
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
-}
-
-.card h3 {
-  margin: 0 0 var(--space-2);
+  font-family: var(--font-pixel);
   font-size: var(--text-base);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
-.card p {
-  margin: 0 0 var(--space-2);
+.tile p {
+  margin: 0;
+}
+
+.bigValue {
+  font-family: var(--font-pixel);
+  font-size: var(--text-2xl);
 }
 
 .plain {
@@ -239,10 +523,10 @@
 .category {
   display: inline-block;
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
   background: var(--color-neutral-soft);
-  font-size: var(--text-sm);
-  font-weight: 700;
+  font-family: var(--font-pixel);
+  font-size: var(--text-base);
+  box-shadow: inset 0 -3px 0 0 currentcolor;
 }
 
 .category[data-category='prohibited'] {
@@ -256,8 +540,13 @@
 }
 
 .category[data-category='transparency'] {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+  background: var(--px-sky-3);
+  color: var(--px-sky-0);
+}
+
+:global(:root[data-theme='dark']) .category[data-category='transparency'] {
+  background: color-mix(in srgb, var(--px-sky-0) 55%, var(--color-surface));
+  color: var(--px-sky-2);
 }
 
 .category[data-category='minimal'],
@@ -266,49 +555,65 @@
   color: var(--color-success);
 }
 
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+}
+
+.controls li {
+  padding-left: var(--space-2);
+  box-shadow: inset 3px 0 0 0 var(--color-border);
+}
+
+.controls li[data-linked] {
+  box-shadow: inset 3px 0 0 0 var(--step-1);
+}
+
 .moduleLink {
   display: block;
-  font-size: var(--text-sm);
   font-weight: 600;
 }
 
-.sources {
-  margin-top: var(--space-2);
-  font-size: var(--text-sm);
-}
-
-.sources summary {
-  cursor: pointer;
-  color: var(--color-text-muted);
-}
-
-.sources ul {
-  margin: var(--space-1) 0 0;
-  padding-left: var(--space-4);
-}
-
-.table {
+.costTable {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--text-sm);
 }
 
-.table th,
-.table td {
+.costTable th,
+.costTable td {
   padding: var(--space-1) 0;
   border-bottom: 1px solid var(--color-border);
   text-align: left;
   font-weight: 400;
 }
 
-.table thead th {
+.costTable thead th {
   color: var(--color-text-muted);
 }
 
-.table .num {
-  text-align: right;
+.num {
+  text-align: right !important;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.assumption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* „Proč to systém doporučil“: every rule that applied. */
+.rules,
+.actions {
+  animation: pop 200ms steps(2) backwards;
+  animation-delay: calc(var(--start, 0ms) + 1700ms);
 }
 
 .rules summary {
@@ -336,11 +641,11 @@
   font-weight: 600;
 }
 
-.adr {
+.actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) var(--space-4);
+  gap: var(--space-2) var(--space-3);
   padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border);
+  border-top: 2px dashed var(--color-border);
 }

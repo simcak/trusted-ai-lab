@@ -7,6 +7,7 @@ import { FindingsTable } from './FindingsTable.tsx';
 import type { Flow } from './flow.ts';
 import { formatScore } from './format.ts';
 import { NerPanel, type NerState } from './NerPanel.tsx';
+import machine from '../../components/Machine/machine.module.css';
 import styles from './pii.module.css';
 
 interface Props {
@@ -24,7 +25,7 @@ export function PiiDetails({ findings, flow, ner, onNerLoad, onNerToggle }: Prop
   return (
     <>
       <DrawerSection title={d.findings(findings.length)}>
-        <p className={styles.small}>{t.findings.minScoreNote(formatScore(DEFAULT_MIN_SCORE))}</p>
+        <p className={machine.small}>{t.findings.minScoreNote(formatScore(DEFAULT_MIN_SCORE))}</p>
         <FindingsTable findings={findings} />
       </DrawerSection>
 
@@ -33,7 +34,7 @@ export function PiiDetails({ findings, flow, ner, onNerLoad, onNerToggle }: Prop
       </DrawerSection>
 
       <DrawerSection title={d.limits}>
-        <ul className={styles.list}>
+        <ul className={machine.list}>
           {t.limits.items.map((item) => (
             <li key={item}>{item}</li>
           ))}
@@ -45,13 +46,13 @@ export function PiiDetails({ findings, flow, ner, onNerLoad, onNerToggle }: Prop
           {[t.managed.own, t.managed.managedService].map((option) => (
             <div key={option.heading} className={styles.compareCard}>
               <h4>{option.heading}</h4>
-              <p className={styles.groupLabel}>{t.managed.prosLabel}</p>
+              <p className={`${machine.groupLabel} ${styles.groupLabel}`}>{t.managed.prosLabel}</p>
               <ul className={styles.pros}>
                 {option.pros.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
-              <p className={styles.groupLabel}>{t.managed.consLabel}</p>
+              <p className={`${machine.groupLabel} ${styles.groupLabel}`}>{t.managed.consLabel}</p>
               <ul className={styles.cons}>
                 {option.cons.map((item) => (
                   <li key={item}>{item}</li>
@@ -65,7 +66,7 @@ export function PiiDetails({ findings, flow, ner, onNerLoad, onNerToggle }: Prop
 
       <DrawerSection title={d.map}>
         {flow.entries.length === 0 ? (
-          <p className={styles.muted}>{t.machine.none}</p>
+          <p className={machine.muted}>{t.machine.none}</p>
         ) : (
           <>
             <div className={styles.tableWrap}>
@@ -93,7 +94,7 @@ export function PiiDetails({ findings, flow, ner, onNerLoad, onNerToggle }: Prop
                 </tbody>
               </table>
             </div>
-            <p className={styles.small}>{t.reversible.mapNote}</p>
+            <p className={machine.small}>{t.reversible.mapNote}</p>
             <TracePanel events={flow.events} title={t.reversible.traceTitle} headingLevel={3} />
           </>
         )}

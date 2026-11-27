@@ -92,17 +92,11 @@ for (const m of modules) {
   });
 }
 
-test('hero scene: a click on the scene pauses it, reduced motion shows a still frame', async ({
+test('hero scenes: a click on the scene pauses it, reduced motion shows a still frame', async ({
   browser,
 }) => {
   const running = (page: Page) =>
-    page.evaluate(
-      () =>
-        document
-          .getAnimations()
-          .filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations === Infinity)
-          .length,
-    );
+    page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length);
 
   const normal = await browser.newPage();
   await normal.goto('./');
@@ -117,6 +111,35 @@ test('hero scene: a click on the scene pauses it, reduced motion shows a still f
   await expect(reduced.getByRole('button', { name: 'Přehrát animaci' })).toBeVisible();
   expect(await running(reduced)).toBe(0);
   await context.close();
+});
+
+test('hero scenes: one per project, switched by buttons, and the next one follows', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const scenes = page.getByRole('group', { name: 'Scény podle projektů' });
+  await expect(scenes.getByRole('button')).toHaveCount(4);
+  await expect(scenes.getByRole('button', { name: 'Rozcestník' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+
+  await scenes.getByRole('button', { name: 'Agent' }).click();
+  const cta = page.getByRole('link', { name: 'Vyzkoušet projekt Agent pod kontrolou' });
+  await expect(cta).toHaveAttribute('href', '#/agent');
+
+  // Jump to the end of the scene: the carousel moves on to the next project.
+  await page.evaluate(() => {
+    for (const a of document.getAnimations()) {
+      if (a.effect?.getTiming().iterations !== Infinity) a.finish();
+    }
+  });
+  await expect(scenes.getByRole('button', { name: 'Lokálně' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await page.getByRole('link', { name: 'Vyzkoušet projekt Lokálně' }).click();
+  await expect(page).toHaveURL(/#\/local$/);
 });
 
 test('every route renders in the dark theme', async ({ browser }) => {
@@ -264,9 +287,15 @@ test('agent page works offline: scenarios, rules and the BYOK panel without any 
     if (new URL(req.url()).hostname !== 'localhost') external.push(req.url());
   });
   await page.goto('./#/agent?scenario=s4-rodne-cislo');
-  await expect(page.getByRole('radio', { name: /Rodné číslo v dotazu/ })).toBeChecked();
+  await expect(page.getByRole('button', { name: 'Rodné číslo', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   await expect(page.getByText('785215/3650')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Pravidla' })).toBeVisible();
+  await expect(page.getByRole('switch', { name: 'Pojistky' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
   await expect(page.getByTestId('byok-panel')).toBeVisible();
   if (recordingFiles.length === 0) {
     await expect(page.getByTestId('agent-not-recorded')).toBeVisible();
@@ -298,7 +327,9 @@ test('every recorded scenario replays to an answer without errors or network cal
       await page.waitForTimeout(100);
     }
     await expect(page.getByTestId('agent-error')).toHaveCount(0);
-    await expect(page.getByTestId('trace-panel').getByTestId('trace-event').first()).toBeVisible();
+    // The lane shows the run; the full trace waits under the hood.
+    await expect(page.getByTestId('agent-beat').last()).toBeVisible();
+    await expect(page.getByTestId('trace-panel').getByTestId('trace-event')).not.toHaveCount(0);
   }
   expect(external).toEqual([]);
 });
@@ -382,7 +413,10 @@ test('local coach analyses the sample week in the browser and sends nothing afte
   await expect(page.getByTestId('coach-template')).toContainText('Za týden: 3 aktivity');
   await expect(page.getByTestId('network-after-file')).toHaveText('0');
 
-  await page.getByRole('button', { name: /Intervaly FIT/ }).click();
+  await page
+    .getByRole('list', { name: 'Načtené aktivity' })
+    .getByRole('button', { name: /^Intervaly/ })
+    .click();
   await expect(page.getByTestId('metrics')).toContainText('7,1 km');
   expect(after).toEqual([]);
 });

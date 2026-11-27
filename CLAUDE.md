@@ -116,7 +116,8 @@ Každé volání produkuje `TraceEvent` (typ, vstup, výstup, tokeny, latence, r
 ### Modul 1: Intake (`#/intake`, `packages/intake-rules`)
 
 Formulář, kam byznys popíše use case → výstup návrhu architektury. **Bez LLM** (pravidla
-jsou testovatelná a vysvětlitelná — to je pointa; zdůvodni v ADR).
+jsou testovatelná a vysvětlitelná — to je pointa; zdůvodni v ADR). Od fáze 4b je to v UI
+„Rozcestník“: chat, ve kterém se nepíše, jen vybírá (viz „Změny“).
 
 Vstupy (mimo jiné): popis; typ dat (veřejná / interní / důvěrná / osobní údaje /
 zvláštní kategorie); uživatelé (interní / klienti); rozhoduje výstup o lidech (úvěr, HR,
@@ -359,3 +360,15 @@ udělal jinak"** 9) disclaimer, licence.
 - **Panel Síťová aktivita** řadí požadavky do fází: načtení stránky, stažení modelu (okno od kliknutí do připravení modelu, jen hosty modelu a vlastní web) a po výběru souboru, kde má být nula. Stav cache a mazání modelu jdou přímo přes Cache API, bez stažení WebLLM.
 - **Prahy metrik** (pohyb ≥ 0,5 m/s, mezera ≤ 30 s, hystereze výšky 3 m) jsou designové volby, ne měření. Zóny (Edwards 1993), TRIMP (Banister 1991, konstanty 0,64/1,92 a 0,86/1,67), 220 − věk (Fox 1971, kritika Robergs a Landwehr 2002) a ACWR (Gabbett 2016, kritika Impellizzeri a kol. 2020) jsou ověřené a citované v kódu i na stránce. ACWR se počítá jen při ≥ 28 dnech dat.
 - **Bez WebGPU** stránka řekne proč a ukáže shrnutí z pravidel (`template.ts`). Shrnutí je vidět vždy, i vedle odpovědi modelu. E2E testy WebGPU skrývají, aby byl výsledek deterministický. Skutečný model se v CI netestuje (OQ-27).
+
+### 2026-11-26 — fáze 4b (redesign webu)
+
+- **Vzor každé stránky projektu** (rozhodl autor: „méně textu, víc animací a barev“): lišta projektu (ikona, název, otázka, Pojmy, Pod kapotou) → pás tipů, které se střídají → nástroj jako stroj. Stroj má nahoře „deck“ s volbou ukázky a pod ním barevné očíslované panely se šipkami, po kterých letí předmět. Animace se spustí znovu při každé volbě. Vysvětlení jsou za 💡/? (nativní `popover`). Evaly, limity, pravidla, zdroje a trace jsou v „Pod kapotou“ (`<dialog>` s rozbalovacími sekcemi). Styly stroje jsou sdílené v `components/Machine` a Ochrana dat je po převodu pixelově stejná.
+- **Viditelně zůstává** štítek „Simulovaná odpověď“ (Ochrana dat), „Skutečný výstup modelu“ (Agent, podrobnosti na kliknutí), varování o syntetických datech u eval čísel, „Předpoklad dema, ne měření“ u nákladů, „sporný ukazatel“ u ACWR, varování u odhadu 220 − věk, počet požadavků po výběru souboru a disclaimery v patičce.
+- **Téma** se přepíná tlačítkem slunce/měsíc a volba se ukládá do `localStorage` (`theme`). Je to předvolba, ne tajný údaj, takže pravidlo 2 se na ni nevztahuje. Bez uložené volby platí nastavení systému. Inline skript v `index.html` nastaví `data-theme` před prvním vykreslením.
+- **Navigace:** logo vede na úvod, v hlavičce jsou 4 záložky projektů (na mobilu jen ikony). Odkaz „Projekty“ a „← Projekty“ zmizely. Stránka projektu přebírá barvu projektu (`sun`/`berry`/`sky`/`leaf`) pro tlačítka, odkazy a fokus. Kontrast hlídá `tokens.test.ts`.
+- **Animace na úvodu:** 4 scény, jedna na projekt, každá se přehraje jednou a pak přijde další. Pauza je kliknutí na scénu (nebo Enter/mezerník), tím se zastaví i střídání. Tlačítko „Pozastavit animaci“ zmizelo. Při omezeném pohybu jsou scény statické a nestřídají se. Globální pravidlo pro omezený pohyb nuluje i `animation-delay`, takže se rovnou ukáže konečný stav.
+- **Intake se v UI jmenuje Rozcestník** (route `#/intake` zůstává). Místo formuláře je chat bez psaní: vzorové situace a odpovědi se vybírají z lišty odpovědí. Vzorová situace se přehraje jako jedna animace, vlastní nápad se ptá po jedné otázce (`chat/script.ts`). Na každý fakt jde kliknout a změnit ho. Volný popis zmizel: ADR dostane popis vzorové situace, u úprav „(upraveno)“ a u vlastního nápadu „Vlastní záměr“. Výsledek ukazuje žebříček vzorů od nejjednoduššího (`ladder.ts`), takže je vidět logika enginu. Engine `intake-rules` se nezměnil.
+- **Agent:** volba scénáře nebo přepnutí pojistek běh rovnou spustí. Scénář otevřený odkazem začíná bez běhu. Běh se kreslí jako sekvenční diagram (člověk, model, pravidla, nástroje). Řádky skládá `stage/beats.ts` jen ze strukturovaných polí trace (pravidlo, rozhodnutí, název nástroje, počty), nikdy z textu modelu. Do modelu nejde nic z `cs.ts` a nahrávky platí dál (`pnpm evals:check`).
+- **Lokálně:** čtyři panely (trasa s mlhou přes start a cíl, čísla, co uvidí AI, AI trenér) a kontrolka „Odesláno po výběru souboru“ vždy na očích. Ukázka se po otevření stránky sama nevybírá, protože výběr zahajuje fázi měření sítě „po výběru souboru“. Logika výpočtů, privacy zone a monitor sítě se nezměnily.
+

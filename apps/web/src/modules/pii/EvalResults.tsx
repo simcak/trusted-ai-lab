@@ -4,6 +4,7 @@ import type { ConfigId, Report, TypeMetrics } from '../../../../../evals/pii/sch
 import { cs } from '../../i18n/cs.ts';
 import { RESULTS } from './eval-results.ts';
 import { formatDate, formatInt, formatPercent } from './format.ts';
+import machine from '../../components/Machine/machine.module.css';
 import styles from './pii.module.css';
 
 function MetricsRow({ label, m, header }: { label: string; m: TypeMetrics; header?: boolean }) {
@@ -106,7 +107,7 @@ function PersonComparison() {
 
 function Errors({ report }: { report: Report }) {
   const t = cs.pii.eval;
-  if (report.errors.length === 0) return <p className={styles.muted}>{t.noErrors}</p>;
+  if (report.errors.length === 0) return <p className={machine.muted}>{t.noErrors}</p>;
   const types = PII_TYPES.filter((type) => report.errors.some((e) => e.type === type));
   return (
     <div className={styles.errors}>
@@ -141,14 +142,14 @@ export function EvalResults() {
   const { corpus, ner } = RESULTS;
 
   return (
-    <div className={styles.section}>
+    <div className={machine.section}>
       <p>{t.intro}</p>
       <p className={styles.warning} role="note" data-testid="synthetic-warning">
         {t.warning}
       </p>
 
       <fieldset className={styles.inlineRadios}>
-        <legend className={styles.groupLabel}>{t.configLegend}</legend>
+        <legend className={`${machine.groupLabel} ${styles.groupLabel}`}>{t.configLegend}</legend>
         {available.map((id) => (
           <label key={id}>
             <input
@@ -162,10 +163,10 @@ export function EvalResults() {
           </label>
         ))}
       </fieldset>
-      {available.length === 1 && <p className={styles.muted}>{t.noNer}</p>}
+      {available.length === 1 && <p className={machine.muted}>{t.noNer}</p>}
 
       <MetricsTable report={report} caption={t.caption(t.configs[config])} />
-      <p className={styles.small}>{t.metricsNote}</p>
+      <p className={machine.small}>{t.metricsNote}</p>
 
       <h3>{t.leakageHeading}</h3>
       <p data-testid="pii-leakage">
@@ -176,12 +177,12 @@ export function EvalResults() {
         )}{' '}
         {t.leakagePartial(formatInt(leakage.partialSpans))}
       </p>
-      <p className={styles.small}>{t.leakageNote}</p>
+      <p className={machine.small}>{t.leakageNote}</p>
 
       <PersonComparison />
 
       <h3>{t.errorsHeading}</h3>
-      <p className={styles.small}>{t.errorsIntro}</p>
+      <p className={machine.small}>{t.errorsIntro}</p>
       <Errors report={report} />
 
       <h3>{t.provenanceHeading}</h3>

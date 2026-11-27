@@ -1,20 +1,25 @@
 import { createTraceLog } from '@trusted-ai-lab/llm-core';
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useMemo, useState, useSyncExternalStore, type DragEvent } from 'react';
+import machine from '../../components/Machine/machine.module.css';
+import { Panel } from '../../components/Machine/Panel.tsx';
 import { ProjectShell } from '../../components/ProjectShell/ProjectShell.tsx';
-import { TracePanel } from '../../components/TracePanel/TracePanel.tsx';
 import { cs } from '../../i18n/cs.ts';
+import { Sprite } from '../../pixel/Sprite.tsx';
+import { calculator, chart, watch } from '../../pixel/sprites/actors.ts';
+import { envelope } from '../../pixel/sprites/hero.ts';
+import { localThumb } from '../../pixel/sprites/projects.ts';
 import { acwr, weekLoad, dayKey, type LoadEntry } from './activity/load.ts';
 import { DEFAULT_PRIVACY_RADIUS_M, protect } from './activity/privacy.ts';
 import { computeMetrics, toCoachInput, type CoachInput } from './activity/summary.ts';
 import { trimp } from './activity/heart-rate.ts';
 import { templateExplanation } from './coach/template.ts';
 import { useCoach } from './coach/useCoach.ts';
-import { ActivityPicker } from './components/ActivityPicker.tsx';
 import { CoachPanel } from './components/CoachPanel.tsx';
-import { HeartRatePanel } from './components/HeartRatePanel.tsx';
+import { HeartRateSettings, ZonesBar } from './components/HeartRatePanel.tsx';
+import { LocalDeck } from './components/LocalDeck.tsx';
+import { LocalDetails } from './components/LocalDetails.tsx';
 import { toHeartRateSettings, type HeartRateForm } from './heart-rate-form.ts';
 import { MetricsGrid } from './components/MetricsGrid.tsx';
-import { NetworkPanel } from './components/NetworkPanel.tsx';
 import { PayloadPreview } from './components/PayloadPreview.tsx';
 import { PrivacyPanel } from './components/PrivacyPanel.tsx';
 import { WeekLoad } from './components/WeekLoad.tsx';
@@ -40,6 +45,7 @@ export default function LocalPage() {
   const coach = useCoach(monitor, log);
   const [radius, setRadius] = useState(DEFAULT_PRIVACY_RADIUS_M);
   const [hrForm, setHrForm] = useState(INITIAL_HR);
+  const [dragging, setDragging] = useState(false);
   const settings = useMemo(() => toHeartRateSettings(hrForm), [hrForm]);
 
   const selected = acts.selected;
@@ -104,78 +110,139 @@ export default function LocalPage() {
     });
   }
 
+  const onDrop = (e: DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length) void acts.addFiles(files);
+  };
+  const empty = (
+    <p className={styles.empty}>
+      <Sprite sprite={watch} scale={2} />
+      {t.machine.empty}
+    </p>
+  );
+
   return (
-    <ProjectShell id="local">
-      <div className={styles.page}>
-        <ActivityPicker
+    <ProjectShell
+      id="local"
+      info={<LocalDetails network={snapshot} coach={traced} events={events} />}
+    >
+      <section
+        className={styles.machine}
+        aria-label={t.machine.label}
+        data-dragging={dragging ? '' : undefined}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={(e) => {
+          if (e.currentTarget === e.target) setDragging(false);
+        }}
+        onDrop={onDrop}
+      >
+        <LocalDeck
           activities={acts.activities}
           selectedKey={selected?.key}
           errors={acts.errors}
           reading={acts.reading}
+          network={snapshot}
           onSamples={(ids) => void acts.addSamples(ids)}
           onFiles={(files) => void acts.addFiles(files)}
           onSelect={acts.select}
           onRemove={acts.remove}
         />
 
-        {selected && zone && (
-          <PrivacyPanel
-            original={selected.parsed}
-            label={selected.label}
-            protectedActivity={zone}
-            radius={radius}
-            maxHr={settings.maxHr}
-            onRadius={setRadius}
-          />
-        )}
+        {/* A new activity replays the machine: fog, numbers, the message, the coach. */}
+        <ol key={selected?.key ?? 'none'} className={styles.pipeline}>
+          <Panel step={1} tone="leaf" title={t.machine.steps.route}>
+            {selected && zone ? (
+              <PrivacyPanel
+                original={selected.parsed}
+                label={selected.label}
+                protectedActivity={zone}
+                radius={radius}
+                maxHr={settings.maxHr}
+                onRadius={setRadius}
+              />
+            ) : (
+              empty
+            )}
+          </Panel>
 
-        {metrics && (
-          <section className={styles.section} aria-labelledby="metrics-heading">
-            <h2 id="metrics-heading">{t.metrics.heading}</h2>
-            <p>{t.metrics.intro}</p>
-            <MetricsGrid metrics={metrics} />
-            <HeartRatePanel
-              form={hrForm}
-              onForm={setHrForm}
-              zonesS={metrics.zonesS}
-              isSample={
-                selected?.sample !== undefined &&
-                !hrForm.useAge &&
-                hrForm.maxHr === INITIAL_HR.maxHr
-              }
-            />
-            {week.entries.length > 1 && <WeekLoad days={week.days} acwr={week.acwr} />}
-          </section>
-        )}
+          <li className={machine.arrow} aria-hidden="true">
+            <span className={machine.arrowStop}>
+              <Sprite sprite={calculator} scale={2} />
+              <span>{t.machine.stops.code}</span>
+            </span>
+            {selected && (
+              <span className={machine.traveller} data-leg="1">
+                <Sprite sprite={chart} scale={2} />
+              </span>
+            )}
+          </li>
 
-        {selected && input && (
-          <PayloadPreview
-            points={selected.parsed.points.length}
-            fileBytes={selected.fileBytes}
-            input={input}
-          />
-        )}
+          <Panel
+            step={2}
+            tone="sun"
+            title={t.machine.steps.numbers}
+            extra={
+              metrics && (
+                <HeartRateSettings
+                  form={hrForm}
+                  onForm={setHrForm}
+                  isSample={
+                    selected?.sample !== undefined &&
+                    !hrForm.useAge &&
+                    hrForm.maxHr === INITIAL_HR.maxHr
+                  }
+                />
+              )
+            }
+          >
+            {metrics ? (
+              <div className={styles.numbers}>
+                <MetricsGrid metrics={metrics} />
+                <ZonesBar zonesS={metrics.zonesS} />
+                {hrForm.useAge && <p className={styles.warning}>{t.hr.estimateWarning}</p>}
+                {week.entries.length > 1 && <WeekLoad days={week.days} acwr={week.acwr} />}
+              </div>
+            ) : (
+              empty
+            )}
+          </Panel>
 
-        <CoachPanel coach={traced} input={input} template={template} />
+          <li className={`${machine.arrow} ${styles.turn}`} aria-hidden="true" />
 
-        <NetworkPanel snapshot={snapshot} />
+          <Panel step={3} tone="berry" title={t.machine.steps.payload}>
+            {selected && input ? (
+              <PayloadPreview
+                points={selected.parsed.points.length}
+                fileBytes={selected.fileBytes}
+                input={input}
+              />
+            ) : (
+              empty
+            )}
+          </Panel>
 
-        <section className={styles.section} aria-labelledby="limits-heading">
-          <h2 id="limits-heading">{t.limits.heading}</h2>
-          <ul className={styles.list}>
-            {t.limits.items.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </section>
+          <li className={machine.arrow} aria-hidden="true">
+            <span className={machine.arrowStop}>
+              <Sprite sprite={localThumb} scale={1} />
+              <span>{t.machine.stops.device}</span>
+            </span>
+            {input && (
+              <span className={machine.traveller} data-leg="2">
+                <Sprite sprite={envelope} scale={2} />
+              </span>
+            )}
+          </li>
 
-        {events.length > 0 && (
-          <details className={styles.details}>
-            <summary>{t.traceSummary}</summary>
-            <TracePanel events={events} title={t.traceTitle} headingLevel={3} />
-          </details>
-        )}
-      </div>
+          <Panel step={4} tone="sky" title={t.machine.steps.coach}>
+            <CoachPanel coach={traced} input={input} template={template} />
+          </Panel>
+        </ol>
+      </section>
     </ProjectShell>
   );
 }

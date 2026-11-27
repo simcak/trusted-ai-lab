@@ -132,7 +132,13 @@ afterEach(() => {
 describe('AgentPage', () => {
   it('works without recordings: every scenario says it is not recorded yet', () => {
     renderPage();
-    expect(screen.getAllByRole('radio', { name: /Běžný dotaz|Prompt injection/ })).toHaveLength(2);
+    expect(
+      screen.getAllByRole('button', {
+        name: new RegExp(
+          `${cs.agent.scenarios['s1-bezny-dotaz'].title}|${cs.agent.scenarios['s2-injekce'].title}`,
+        ),
+      }),
+    ).toHaveLength(2);
     expect(screen.getByTestId('agent-not-recorded').textContent).toBe(cs.agent.run.notRecorded);
     expect(
       screen.getByRole<HTMLButtonElement>('button', { name: cs.agent.run.start }).disabled,
@@ -143,11 +149,12 @@ describe('AgentPage', () => {
   it('selects the scenario from the link and shows its persona and message', () => {
     renderPage('/agent?scenario=s4-rodne-cislo');
     expect(
-      screen.getByRole<HTMLInputElement>('radio', {
-        name: new RegExp(cs.agent.scenarios['s4-rodne-cislo'].title),
-      }).checked,
-    ).toBe(true);
+      screen
+        .getByRole('button', { name: cs.agent.scenarios['s4-rodne-cislo'].title })
+        .getAttribute('aria-pressed'),
+    ).toBe('true');
     expect(screen.getByText(SCENARIOS['s4-rodne-cislo'].userMessage)).toBeTruthy();
+    expect(screen.getByText(cs.agent.run.personaLabel.klient)).toBeTruthy();
   });
 
   it('replays a recording live: recorded approval, answer, draft and trace', async () => {
@@ -167,6 +174,11 @@ describe('AgentPage', () => {
     expect(answer.textContent).toContain('Koncept je připravený ke kontrole.');
     expect(screen.getByTestId('agent-draft').textContent).toContain(cs.agent.result.draftNotSent);
 
+    // The lane tells the story row by row: the approval wait and the checked e-mail tool.
+    const beats = screen.getAllByTestId('agent-beat').map((b) => b.textContent);
+    expect(beats.some((b) => b?.includes(cs.agent.beats.approvalWait))).toBe(true);
+    expect(beats.at(-1)).toContain(cs.agent.result.status.completed);
+
     const trace = screen.getByTestId('trace-panel');
     const decisions = within(trace).getAllByText(/prompt-injection|human-approval/);
     expect(decisions.length).toBeGreaterThan(0);
@@ -185,9 +197,29 @@ describe('AgentPage', () => {
   it('switching guardrails off without a recording disables the run', async () => {
     mocks.recording = await fixtureRecording();
     renderPage('/agent?scenario=s2-injekce');
-    // The first guardrails switch belongs to the recorded scenarios, the second to BYOK.
-    fireEvent.click(screen.getAllByRole('radio', { name: cs.agent.run.guardrailsOff })[0]!);
+    const guard = screen.getByRole('switch', { name: cs.agent.run.guardrails });
+    expect(guard.getAttribute('aria-checked')).toBe('true');
+    fireEvent.click(guard);
+    expect(guard.getAttribute('aria-checked')).toBe('false');
     expect(screen.getByTestId('agent-not-recorded')).toBeTruthy();
+  });
+
+  it('a scenario reached by a link starts clean', async () => {
+    mocks.recording = await fixtureRecording();
+    const view = renderPage('/agent?scenario=s2-injekce');
+    fireEvent.click(screen.getByRole('button', { name: cs.agent.run.start }));
+    expect(await screen.findByTestId('approval-dialog', {}, { timeout: 3000 })).toBeTruthy();
+    view.unmount();
+    renderPage('/agent?scenario=s4-rodne-cislo');
+    expect(screen.queryAllByTestId('agent-beat')).toHaveLength(0);
+  });
+
+  it('picking a scenario runs it right away', async () => {
+    mocks.recording = await fixtureRecording();
+    renderPage('/agent');
+    fireEvent.click(screen.getByRole('button', { name: cs.agent.scenarios['s2-injekce'].title }));
+    expect(await screen.findByTestId('approval-dialog', {}, { timeout: 3000 })).toBeTruthy();
+    expect(screen.getAllByTestId('agent-beat').length).toBeGreaterThan(2);
   });
 
   it('BYOK: runs live with the key only in memory and asks the visitor to approve', async () => {
@@ -208,6 +240,8 @@ describe('AgentPage', () => {
 
     await waitFor(() => expect(screen.getByTestId('agent-answer')).toBeTruthy());
     expect(screen.getByText(cs.agent.result.liveLabel)).toBeTruthy();
+    // The live run draws the same lane, for the persona chosen in the BYOK form.
+    expect(screen.getByText(cs.agent.beats.start.poradce)).toBeTruthy();
     expect(screen.queryByTestId('agent-draft')).toBeNull();
     expect(mocks.keys).toEqual(['test-key-not-real']);
 

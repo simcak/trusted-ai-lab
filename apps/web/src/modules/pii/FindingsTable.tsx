@@ -2,11 +2,12 @@ import type { Finding } from '@trusted-ai-lab/pii-cz';
 import { cs } from '../../i18n/cs.ts';
 import { formatScore } from './format.ts';
 import { reasonsText } from './labels.ts';
+import machine from '../../components/Machine/machine.module.css';
 import styles from './pii.module.css';
 
 export function FindingsTable({ findings }: { findings: readonly Finding[] }) {
   const t = cs.pii.findings;
-  if (findings.length === 0) return <p className={styles.muted}>{t.none}</p>;
+  if (findings.length === 0) return <p className={machine.muted}>{t.none}</p>;
   return (
     <div className={styles.tableWrap}>
       <table className={styles.table} data-testid="pii-findings">

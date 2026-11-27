@@ -1,7 +1,7 @@
 import { useDocumentTitle } from '../hooks/useDocumentTitle.ts';
 import { cs } from '../i18n/cs.ts';
 import { MODULES } from '../modules/registry.ts';
-import { HeroScene } from './landing/HeroScene.tsx';
+import { HeroCarousel } from './landing/HeroCarousel.tsx';
 import { ComingSoon, ProjectCard } from './landing/ProjectCard.tsx';
 import styles from './Landing.module.css';
 
@@ -9,7 +9,7 @@ export function Landing() {
   useDocumentTitle();
   return (
     <div className={styles.landing}>
-      <HeroScene />
+      <HeroCarousel />
 
       <section id="projects" className={styles.projects} aria-labelledby="projects-heading">
         <header className={styles.projectsHeader}>

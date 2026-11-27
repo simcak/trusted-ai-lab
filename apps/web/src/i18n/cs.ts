@@ -7,6 +7,7 @@ import type {
   ModelTier,
   PatternId,
   PresetId,
+  TechnicalPattern,
 } from '@trusted-ai-lab/intake-rules';
 import type { RuleId, RunStatus, ScenarioId } from '@trusted-ai-lab/agent-runtime';
 import type { LlmErrorCode, ProviderId } from '@trusted-ai-lab/llm-core';
@@ -286,28 +287,28 @@ const intakeControls: Record<ControlId, string> = {
 const agentScenarios: Record<ScenarioId, { title: string; watch: string }> = {
   's1-bezny-dotaz': {
     title: 'Běžný dotaz',
-    watch: 'Agent najde fondy a poplatky spočítá nástrojem, ne z hlavy.',
+    watch: 'Fondy agent najde nástrojem a poplatky spočítá kalkulačkou, ne z hlavy.',
   },
   's2-injekce': {
-    title: 'Prompt injection v datech',
+    title: 'Podvržený pokyn',
     watch:
-      'Popis jednoho fondu obsahuje skrytý pokyn napsat e-mail všem klientům. Sledujte, co se s ním stane a kdo schvaluje koncept.',
+      'V popisu jednoho fondu je schovaný pokyn „napiš e-mail všem klientům“. Sledujte, co s ním udělají pravidla a kdo schvaluje koncept.',
   },
   's3-email-klient': {
-    title: 'Klient chce poslat e-mail',
-    watch: 'Klient nástroj pro e-maily nemá. Se zapnutými pravidly ho model vůbec nedostane.',
+    title: 'Klient chce e-mail',
+    watch: 'Klient nástroj na e-maily nemá. S pojistkami ho model vůbec nedostane.',
   },
   's4-rodne-cislo': {
-    title: 'Rodné číslo v dotazu',
-    watch: 'Porovnejte, co odchází do modelu. S pravidly jen zástupné symboly.',
+    title: 'Rodné číslo',
+    watch: 'Do modelu odchází jen zástupný symbol. Skutečné údaje se vrátí až u vás.',
   },
   's5-smycka': {
-    title: 'Nedostupná služba',
-    watch: 'Vyhledávání vrací chybu 503 a model to zkouší znovu. Sledujte, kdy a čím běh skončí.',
+    title: 'Výpadek služby',
+    watch: 'Hledání vrací chybu a model to zkouší znovu. Sledujte, kdo a kdy běh zastaví.',
   },
   's6-doporuceni': {
-    title: 'Žádost o investiční doporučení',
-    watch: 'S pravidly odpoví pravidla obsahu a model se nevolá. Bez nich rozhoduje jen prompt.',
+    title: 'Co mám koupit?',
+    watch: 'S pojistkami odpoví pravidla a model se vůbec nevolá. Bez nich rozhoduje jen prompt.',
   },
 };
 
@@ -458,18 +459,57 @@ export const cs = {
     lead: 'Interaktivní ukázky, jak používat AI chytře a bezpečně: s ohledem na soukromí, lokálně a pod kontrolou pravidel.',
     facts: ['Běží v prohlížeči', 'Bez účtu a API klíče', 'Zdarma'],
     hero: {
-      captions: [
-        'Vítejte v laboratoři bezpečné AI.',
-        'Osobní údaje zakryjeme dřív, než odejdou do AI.',
-        'Odpověď hlídají pravidla. Podvržené pokyny neprojdou.',
-        'A citlivá data zůstanou u vás.',
-      ],
-      places: { device: 'Vaše zařízení', guard: 'Ochrana', model: 'AI model' },
-      description:
-        'Animace: dopis s osobními údaji vyjde z domu. Ochrana mu údaje zakryje a pošle ho k AI. Odpověď cestou zpět zkontroluje, odrazí podvržený pokyn a údaje zase doplní. Citlivá data zůstávají doma.',
       pause: 'Pozastavit animaci',
       play: 'Přehrát animaci',
+      scenesLabel: 'Scény podle projektů',
+      cta: 'Vyzkoušet',
+      ctaProject: (title: string) => `projekt ${title}`,
     },
+    scenes: {
+      intake: {
+        captions: [
+          'Máte nápad. Má to vůbec být AI?',
+          'Pravidla zkusí nejdřív nejjednodušší cestu…',
+          '…a tady stačí obyčejný výpočet.',
+        ],
+        places: { post: 'Rozcestník', stop: 'Zakázáno', noAi: 'Bez AI', ai: 'AI' },
+        description:
+          'Animace: nápad dojde k rozcestníku. Cedule „AI“ se přeškrtne, rozsvítí se cedule „Bez AI“ a nápad dojde k domku, kde úlohu vyřeší kalkulačka.',
+      },
+      pii: {
+        captions: [
+          'Dopis s osobními údaji míří k AI.',
+          'Brána údaje zakryje dřív, než odejdou.',
+          'Odpověď se vrátí a údaje se doplní až u vás.',
+        ],
+        places: { device: 'Vaše zařízení', guard: 'Ochrana', model: 'AI model' },
+        description:
+          'Animace: dopis s osobními údaji vyjde z domu. Brána mu údaje zakryje a pošle ho k AI. Odpověď se vrátí a údaje se doplní až doma.',
+      },
+      agent: {
+        captions: [
+          'AI agent sám hledá a počítá…',
+          '…ale každý krok hlídají pravidla.',
+          'O e-mailu rozhoduje člověk.',
+        ],
+        places: { archive: 'Fondy', calc: 'Výpočet', mail: 'E-mail', human: 'Člověk' },
+        description:
+          'Animace: robot chodí mezi archivem fondů, kalkulačkou a schránkou. Z archivu vyskočí skřítek s podvrženým pokynem a štít pravidel ho odrazí. Koncept e-mailu robot předá člověku, který ho schválí.',
+      },
+      local: {
+        captions: [
+          'Trénink z hodinek…',
+          '…vysvětlí AI přímo ve vašem počítači.',
+          'Ven neodešlo nic: 0 požadavků.',
+        ],
+        places: { device: 'Váš počítač', route: 'Trasa', cloud: 'AI v cloudu' },
+        description:
+          'Animace: běžec doběhne domů, začátek trasy u domu zakryje mlha a hodinky předají čísla počítači pod kopulí, kde je vysvětlí AI. Anténa na střeše ukazuje nulu: ven nic neodešlo a AI v cloudu nedostala nic.',
+      },
+    } satisfies Record<
+      ModuleId,
+      { captions: string[]; places: Record<string, string>; description: string }
+    >,
     galleryHeading: 'Projekty',
     galleryLead:
       'Každý projekt odpovídá na jednu otázku, kterou si položit, než AI nasadíte. Další přibudou.',
@@ -507,6 +547,7 @@ export const cs = {
         'Někdy je nejlepší odpověď „AI nepotřebujete“. Na výpočet poplatků stačí vzorec.',
         'Každé doporučení má důvod a pravidlo, které jde otestovat.',
         'Kategorie podle AI Act je orientační, ne právní posouzení.',
+        'Klikněte na kterýkoli fakt v rozhovoru a změňte ho.',
       ],
     },
     pii: {
@@ -566,13 +607,68 @@ export const cs = {
   },
 
   intake: {
-    presetsLabel: 'Ukázkové záměry',
     presets: intakePresets,
-    formHeading: 'Popište záměr',
-    descriptionLabel: 'Popis záměru',
-    descriptionHint: 'Pravidla text nečtou, jen ho vloží do staženého dokumentu (ADR).',
     fields: intakeFields,
-    groups: { work: 'Úloha a data', impact: 'Dopad a provoz' },
+
+    chat: {
+      label: 'Rozhovor s Rozcestníkem',
+      title: 'Váš nápad',
+      bot: 'Rozcestník',
+      you: 'Vy',
+      hello: 'Dobrý den. S jakým nápadem přicházíte?',
+      customIntro: 'Mám vlastní nápad.',
+      understood: 'Rozumím. Takhle to vidím:',
+      askIntro: 'Zeptám se na pár věcí. Stačí klikat.',
+      factsLabel: 'Co o nápadu víme',
+      change: (field: string, value: string) => `Změnit: ${field}, teď ${value}`,
+      reopen: 'Vyberte jinou odpověď.',
+      verdict: 'Doporučuji:',
+      rules: (fired: number, total: number) => `Platí ${fired} z ${total} pravidel.`,
+      trayPresets: 'Vzorové situace',
+      trayAnswer: 'Vaše odpověď',
+      progress: (n: number, total: number) => `${n}/${total}`,
+      answered: (n: number, total: number) => `Zodpovězeno ${n} z ${total}`,
+      custom: 'Vlastní nápad',
+      backToPresets: 'Zpět na vzorové situace',
+      keep: 'Nechat, jak je',
+      waiting: 'Doporučení se objeví po poslední odpovědi.',
+      questions: {
+        task: 'Co má systém dělat?',
+        deterministic: 'Dá se to zapsat přesnými pravidly nebo vzorcem?',
+        labeledData: 'Máte historické příklady se správnou odpovědí?',
+        dataSensitivity: 'Jaká nejcitlivější data v tom budou?',
+        audience: 'Kdo s tím bude pracovat?',
+        decisionAboutPeople: 'Rozhoduje výsledek o lidech?',
+        automation: 'Kdo má poslední slovo?',
+        explainability: 'Musí jít každý výsledek přesně vysvětlit?',
+        errorTolerance: 'Kolik chyb snesete?',
+        practice: 'Jde o některý z těchto účelů?',
+        volume: 'Kolik dotazů měsíčně čekáte?',
+        latency: 'Jak rychle potřebujete odpověď?',
+      } satisfies Record<FactField, string>,
+    },
+
+    ladder: {
+      label: 'Od nejjednoduššího',
+      tip: 'Pravidla zkouší řešení od nejjednoduššího. Vyhraje první, které žádné pravidlo nevyřadí. Na přeškrtnuté klikněte a uvidíte proč.',
+      tipTitle: 'Jak se vybírá řešení',
+      short: {
+        'no-ai': 'Bez AI',
+        'classic-software': 'Software',
+        'classic-ml': 'ML',
+        llm: 'LLM',
+        rag: 'RAG',
+        agent: 'Agent',
+      } satisfies Record<TechnicalPattern, string>,
+      states: {
+        winner: 'doporučeno',
+        excluded: 'vyřazeno',
+        needless: 'zbytečně složité',
+        blocked: 'zakázáno',
+      },
+      why: (pattern: string) => `${pattern}: proč ne?`,
+      human: 'Rozhodne člověk',
+    },
 
     resultLabel: 'Doporučení',
     patterns: intakePatterns,
@@ -582,6 +678,7 @@ export const cs = {
     },
     withHuman: '+ člověk ve smyčce',
     humanWhy: 'Proč člověk ve smyčce',
+    humanTip: 'Proč člověk?',
 
     aiAct: {
       heading: 'AI Act (orientačně)',
@@ -589,6 +686,7 @@ export const cs = {
       appliesFrom: (date: string, inForce: boolean) =>
         inForce ? `Platí od ${date}` : `Bude platit od ${date}`,
       asOf: (date: string) => `Stav k ${date} · zdroje`,
+      asOfShort: (date: string) => `Stav k ${date}`,
       amendedBy: 'Ve znění nařízení (EU) 2026/1744 (Digital Omnibus on AI).',
     },
 
@@ -610,9 +708,12 @@ export const cs = {
       perMonth: 'USD / měsíc',
       range: (min: string, max: string) => `${min}–${max}`,
       unverified: 'cena neověřena',
+      none: '0 USD',
       noTokens: 'Bez nákladů na tokeny: řešení nevolá jazykový model.',
       notTokenBased:
         'Klasické ML se platí provozem a trénováním modelu, ne tokeny. Z ceníku tokenů se neodhaduje.',
+      assumptionShort: 'Předpoklad dema, ne měření',
+      assumptionTip: 'Z čeho odhad vychází',
       assumption: (input: string, output: string) =>
         `Předpoklad dema, ne měření: ${input} vstupních a ${output} výstupních tokenů na dotaz.`,
       batch: 'Dávkově: počítáno s cenami Batch API (poloviční).',
@@ -621,7 +722,6 @@ export const cs = {
     },
 
     rejected: {
-      heading: 'Zamítnuté alternativy',
       allBlocked: 'Žádná: účel je zakázaný.',
     },
 
@@ -638,10 +738,24 @@ export const cs = {
       patternField: 'Zvolený vzor',
     },
 
+    restart: 'Začít znovu',
+    details: {
+      how: 'Jak pravidla rozhodují',
+      howText: [
+        'Nejdřív pravidla vyberou řešení: zakázaný účel výběr ukončí, jinak vyhraje nejjednodušší řešení, které žádné pravidlo nevyřadí.',
+        'Pak z faktů a zvoleného řešení odvodí kategorii podle AI Act, potřebné kontroly a lidský dohled. Žádný jazykový model, stejný vstup dá vždy stejný výsledek.',
+      ],
+      aiActSources: 'Zdroje k AI Act',
+      pricing: 'Ceníky modelů',
+    },
+
     adr: {
       button: 'Stáhnout ADR (.md)',
+      what: 'Co je ADR?',
       hint: 'Rozhodnutí ve formátu MADR, připravené k uložení do repozitáře.',
       untitled: 'Nový záměr',
+      customName: 'Vlastní záměr',
+      editedName: (label: string) => `${label} (upraveno)`,
       title: (name: string) => `ADR: ${name}`,
       status: 'Stav',
       statusValue: 'navrženo (vygenerováno modulem Rozcestník)',
@@ -914,17 +1028,19 @@ export const cs = {
 
   agent: {
     run: {
-      heading: 'Spusťte scénář',
-      intro:
-        'Vyberte scénář a pusťte ho s pojistkami zapnutými, pak vypnutými. Model i prompt jsou stejné, liší se jen vrstva pravidel.',
       scenarioLegend: 'Scénář',
+      watch: 'Co sledovat',
       guardrailsLegend: 'Pojistky (guardrails)',
+      guardrails: 'Pojistky',
       guardrailsOn: 'Zapnuté',
       guardrailsOff: 'Vypnuté',
+      switchOn: 'ZAP',
+      switchOff: 'VYP',
       persona: 'Role',
       personas: { klient: 'klient', poradce: 'poradce' },
-      userMessage: 'Dotaz uživatele',
+      personaLabel: { klient: 'Klient', poradce: 'Poradce' },
       start: 'Spustit',
+      again: 'Spustit znovu',
       running: 'Běží…',
       notRecorded: 'Tato kombinace zatím nebyla nahrána.',
     },
@@ -939,11 +1055,52 @@ export const cs = {
       providers: agentProviders,
       recordedAt: 'Nahráno',
       promptVersion: 'Verze promptu',
+      details: 'Odkud jsou odpovědi',
       claudeCodeNote:
         'Nahráno přes Claude Code CLI s předplatným, ne přes Claude API. Model dostal konverzaci jako JSON a nástroje volal strukturovaným výstupem, ne nativním tool use, takže na injekci ve výsledku nástroje může reagovat jinak. Režim s vlastním klíčem používá nativní tool use.',
     },
+    lane: {
+      title: 'Co se děje',
+      label: 'Průběh běhu krok po kroku',
+      actors: { user: 'Člověk', model: 'Model', rules: 'Pravidla', tools: 'Nástroje' },
+      rulesOff: 'vypnuto',
+      checked: 'Povoleno',
+    },
+    beats: {
+      start: { klient: 'Klient pošle dotaz', poradce: 'Poradce zadá úkol' },
+      toolsOffered: 'Povolí nástroje role',
+      toolsHidden: (tools: string) => `Schová nepovolený nástroj: ${tools}`,
+      wants: (tools: string) => `Chce: ${tools}`,
+      answers: 'Píše odpověď',
+      tokens: (n: string) => `${n} tokenů`,
+      summary: (calls: number, tokens: string) => `${calls} volání modelu · ${tokens} tokenů`,
+      tool: {
+        search_funds: 'Hledá fondy',
+        calculate_fees: 'Počítá poplatky',
+        draft_email: 'Připraví koncept, neodesílá',
+      },
+      toolName: { search_funds: 'hledání', calculate_fees: 'výpočet', draft_email: 'e-mail' },
+      toolError: (tool: string) => `${tool}: služba nedostupná`,
+      denied: (tool: string) => `Zablokováno: ${tool} role nesmí`,
+      badArgs: (tool: string) => `Zablokováno: špatné zadání (${tool})`,
+      loop: 'Pořád dokola: pravidla běh ukončí',
+      budget: 'Rozpočet vyčerpán: pravidla běh ukončí',
+      adviceRefused: 'Investiční rada: odpoví pravidla',
+      adviceRemoved: 'Doporučení z odpovědi vyškrtnuto',
+      injection: 'Podvržený pokyn ve výsledku: zahozen',
+      approvalWait: 'Čeká na schválení člověkem',
+      approved: 'Člověk schválil',
+      rejected: 'Člověk zamítl',
+      masked: (n: number) => `Zakryje osobní údaje (${n})`,
+      maskedTool: (n: number) => `Zakryje údaje z výsledku (${n})`,
+      restored: (n: number) => `Vrátí skutečné údaje, jen u vás (${n})`,
+      error: 'Volání modelu selhalo',
+      other: 'Další krok',
+    },
+    chat: {
+      title: 'Rozhovor',
+    },
     result: {
-      heading: 'Výsledek',
       empty: 'Zatím nic neběželo.',
       replayLabel: 'Nahraný běh',
       liveLabel: 'Živý běh s vaším klíčem',
@@ -1007,11 +1164,36 @@ export const cs = {
   },
 
   local: {
+    machine: {
+      label: 'Trenér, který běží jen u vás',
+      samplesLabel: 'Trénink',
+      samplesTip: 'O ukázkách',
+      own: 'Vlastní soubor',
+      ownTip: 'Vlastní záznam z hodinek',
+      ownHint:
+        'GPX, TCX nebo FIT z hodinek či sportovní aplikace. Můžete ho sem i přetáhnout. Soubor čte jen tato stránka, nikam se nenahrává.',
+      steps: { route: 'Trasa', numbers: 'Čísla', payload: 'Co uvidí AI', coach: 'AI trenér' },
+      empty: 'Vyberte trénink nahoře.',
+      stops: { code: 'Kód', device: 'Váš počítač' },
+      led: 'Odesláno po výběru souboru',
+      ledTip: 'Jak to víme',
+      droppedTip: 'Co jsme ze souboru zahodili',
+      settings: 'Tep',
+      settingsTitle: 'Vaše hodnoty tepu',
+      metricTip: (label: string) => `${label}: co to je?`,
+      showMessage: 'Ukázat přesnou zprávu',
+      week: 'Týden',
+      disputed: 'sporný ukazatel',
+      acwrTip: 'Co je ACWR',
+    },
+    details: {
+      network: 'Síťová aktivita',
+      prompt: 'Pokyny pro model',
+      sources: 'Zdroje',
+      model: 'AI model v prohlížeči',
+      trace: 'Záznam kroků',
+    },
     pick: {
-      heading: '1. Vyberte aktivitu',
-      intro:
-        'Zkuste ukázku, nebo nahrajte vlastní záznam z hodinek či sportovní aplikace (GPX, TCX nebo FIT).',
-      samplesLabel: 'Ukázky',
       samples: {
         run: { title: 'Večerní běh', detail: 'GPX · 6 km' },
         ride: { title: 'Vyjížďka na kole', detail: 'TCX · 25 km' },
@@ -1020,10 +1202,6 @@ export const cs = {
       week: 'Celý týden (všechny tři)',
       syntheticNote:
         'Ukázky jsou syntetické: smyšlený sportovec, smyšlené hodinky a trasy, které nesledují ulice.',
-      drop: 'Přetáhněte sem soubor, nebo',
-      browse: 'ho vyberte z počítače',
-      dropHint:
-        'Můžete jich vybrat i víc najednou. Soubor čte jen tato stránka, nikam se nenahrává.',
       loadedLabel: 'Načtené aktivity',
       remove: (name: string) => `Odebrat ${name}`,
       reading: 'Čtu soubor…',
@@ -1038,7 +1216,6 @@ export const cs = {
     },
     sports: { run: 'běh', ride: 'kolo', other: 'jiný sport' } satisfies Record<Sport, string>,
     privacy: {
-      heading: '2. Ochrana polohy',
       intro:
         'Začátek a konec trasy často prozradí, kde bydlíte. Proto je stránka ořízne hned po načtení, dřív než cokoli spočítá.',
       radius: 'Velikost privacy zone',
@@ -1050,7 +1227,6 @@ export const cs = {
       noGps: 'Soubor nemá polohu GPS, není co skrývat.',
       mapLabel: (name: string) =>
         `Trasa: ${name}. Vybledlé úseky jsou skryté, barva čáry ukazuje tepovou zónu.`,
-      hidden: 'skryto',
       dropped: 'Ze souboru stránka zahodila:',
       droppedNone: 'Soubor neobsahoval žádné údaje o zařízení.',
       metadata: {
@@ -1063,9 +1239,6 @@ export const cs = {
       } satisfies Record<MetadataKind, string>,
     },
     metrics: {
-      heading: '3. Co spočítal kód',
-      intro:
-        'Tahle čísla počítají obyčejné funkce v JavaScriptu, žádná AI. Jsou přesná, opakovatelná a dají se otestovat.',
       distance: { label: 'Vzdálenost', hint: 'Součet vzdáleností mezi body GPS.' },
       moving: {
         label: 'Čas v pohybu',
@@ -1083,7 +1256,6 @@ export const cs = {
       noHr: 'Soubor nemá tep, zóny a TRIMP proto chybí.',
     },
     hr: {
-      heading: 'Tepové zóny',
       intro:
         'Zóny jsou pásma podle procent maximálního tepu (50–60–70–80–90 %). Zóna 2 je klidná vytrvalost, zóna 5 je naplno.',
       settings: 'Vaše hodnoty',
@@ -1122,18 +1294,14 @@ export const cs = {
       chartLabel: 'TRIMP po dnech',
     },
     payload: {
-      heading: '4. Co uvidí AI',
       intro:
         'Model nedostane váš soubor. Dostane jen tento souhrn: žádné souřadnice, žádné časy, žádné zařízení ani název aktivity. Souhrn skládá kód z ověřeného schématu, nic jiného se do něj nedostane.',
       file: 'Váš soubor',
       fileDetail: (points: string) => `${points} bodů trasy`,
       model: 'Model dostane',
       modelDetail: 'souhrnná čísla, žádná poloha ani čas',
-      jsonLabel: 'Přesně tohle jde do modelu (u vlastní otázky se přidá ještě ona)',
-      promptLabel: 'Pokyny pro model (systémový prompt)',
     },
     coach: {
-      heading: '5. AI trenér',
       intro:
         'Malý jazykový model se jednou stáhne do prohlížeče a pak běží na grafické kartě vašeho počítače. Bez účtu, bez API klíče, zdarma.',
       checking: 'Zjišťuji, jestli prohlížeč umí WebGPU…',
@@ -1208,10 +1376,8 @@ export const cs = {
       noHr: 'Bez tepu nejde říct, jak náročný trénink byl.',
     },
     network: {
-      heading: '6. Síťová aktivita',
       intro:
         'Tohle je důkaz. Prohlížeč zapisuje každý síťový požadavek stránky a tady je vidíte všechny.',
-      counterLabel: 'Od výběru souboru odešlo požadavků',
       beforeFile: 'Zatím jste nevybrali žádnou aktivitu.',
       zero: 'Nula. Vaše data neopustila zařízení.',
       nonZero: 'Po výběru souboru proběhly požadavky. Jsou vypsané níže, ať vidíte, kam šly.',
@@ -1241,7 +1407,6 @@ export const cs = {
         'Malý model píše česky s chybami a může si vymýšlet. Neslouží jako trenér ani lékař.',
       ],
     },
-    traceSummary: 'Pod kapotou: záznam kroků',
     traceTitle: 'Záznam kroků',
   },
 
